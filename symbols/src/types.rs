@@ -1,3 +1,5 @@
+
+#[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -31,7 +33,8 @@ impl ScopeIdTraits for u64 {}
 impl SymIdTraits for u64 {}
 
 ////////////////////////////////////////////////////////////////////////////////
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Hash, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Hash, Copy)]
+#[cfg_attr(feature = "serde_support", derive(Serialize, Deserialize))] 
 pub struct SymbolScopeId<SCOPEID, SYMID>
 where
     SCOPEID: ScopeIdTraits,
@@ -57,7 +60,8 @@ where
 ////////////////////////////////////////////////////////////////////////////////
 /// Holds information about a symbol
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
+#[cfg_attr(feature = "serde_support", derive(Serialize, Deserialize))] 
 pub struct SymbolInfo<SCOPEID, SYMID, SYMVALUE>
 where
     SCOPEID: ScopeIdTraits,

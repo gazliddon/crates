@@ -5,9 +5,12 @@ use std::{
 };
 
 ////////////////////////////////////////////////////////////////////////////////
+
+#[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Default, Copy, PartialOrd)]
+#[derive(Debug, PartialEq, Eq, Clone, Default, Copy, PartialOrd)]
+#[cfg_attr(feature = "serde_support", derive(Serialize, Deserialize))]
 pub enum SymbolResolutionBarrier {
     Local = 0,
     Module = 1,
@@ -22,7 +25,8 @@ impl SymbolResolutionBarrier {
 }
 
 /// Holds information about symbols
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Default)]
+#[derive(Debug, PartialEq, Eq, Clone, Default)]
+#[cfg_attr(feature = "serde_support", derive(Serialize, Deserialize))]
 pub struct SymbolTable<SCOPEID, SYMID>
 where
     SCOPEID: ScopeIdTraits,
