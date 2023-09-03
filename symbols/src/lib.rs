@@ -5,6 +5,9 @@ mod symboltable;
 mod symboltree;
 mod types;
 
+#[cfg(feature="serde_support")]
+mod serialize;
+
 pub mod symbolnav;
 pub mod symboltreereader;
 pub mod symboltreewriter;
