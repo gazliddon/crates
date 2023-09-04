@@ -14,5 +14,4 @@ regex="*"
 thin-vec="*"
 
 [features]
-default=["serde_support"]
 serde_support =["dep:serde", "dep:serde_json"]

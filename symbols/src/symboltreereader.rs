@@ -1,12 +1,12 @@
 
-use super::symboltree::SymbolTree;
+use super::symboltree::{ SymbolTree, ValueTrait };
 use super::prelude::*;
 
 pub struct SymbolTreeReader<'a, SCOPEID, SYMID, SYMVALUE>
 where
     SCOPEID: ScopeIdTraits,
     SYMID: SymIdTraits,
-    SYMVALUE: Clone,
+    SYMVALUE: ValueTrait,
 {
     current_scope: SCOPEID,
     syms: &'a SymbolTree<SCOPEID, SYMID, SYMVALUE>,
@@ -16,7 +16,7 @@ impl<'a, SCOPEID, SYMID, SYMVALUE> SymbolTreeReader<'a, SCOPEID, SYMID, SYMVALUE
 where
     SCOPEID: ScopeIdTraits,
     SYMID: SymIdTraits,
-    SYMVALUE: Clone,
+    SYMVALUE: ValueTrait,
 {
     pub fn new(syms: &'a SymbolTree<SCOPEID, SYMID, SYMVALUE>, current_scope: SCOPEID) -> Self {
         Self {

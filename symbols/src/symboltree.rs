@@ -3,6 +3,9 @@ use thin_vec::ThinVec;
 
 use super::prelude::*;
 
+#[cfg(feature = "serde_support")]
+use serde::Serialize;
+
 use super::{
     symboltable::SymbolTable, symboltreereader::SymbolTreeReader,
     symboltreewriter::SymbolTreeWriter,
@@ -53,17 +56,31 @@ type ESymbolNodeRef<'a, SCOPEID, SYMID> = ego_tree::NodeRef<'a, SymbolTable<SCOP
 type ESymbolNodeId = ego_tree::NodeId;
 type ESymbolNodeMut<'a, SCOPEID, SYMID> = ego_tree::NodeMut<'a, SymbolTable<SCOPEID, SYMID>>;
 
+#[cfg(feature = "serde_support")]
+pub trait ValueTrait: Clone + Serialize {}
+
+#[cfg(not(feature = "serde_support"))]
+pub trait ValueTrait: Clone {}
+
+impl ValueTrait for i64 {}
+impl ValueTrait for u64 {}
+
 #[derive(Debug, PartialEq, Eq, Clone)]
+#[cfg_attr(feature = "serde_support", derive(Serialize))]
 pub struct SymbolTree<SCOPEID, SYMID, SYMVALUE>
 where
     SCOPEID: ScopeIdTraits,
     SYMID: SymIdTraits,
-    SYMVALUE: Clone,
+    SYMVALUE: ValueTrait,
 {
+    #[cfg_attr(feature = "serde_support", serde(skip_serializing))]
     pub(crate) tree: ego_tree::Tree<SymbolTable<SCOPEID, SYMID>>,
+    #[cfg_attr(feature = "serde_support", serde(skip_serializing))]
+    pub(crate) scope_id_to_node_id: HashMap<SCOPEID, ESymbolNodeId>,
+
     pub(crate) root_scope_id: SCOPEID,
     pub(crate) next_scope_id: SCOPEID,
-    pub(crate) scope_id_to_node_id: HashMap<SCOPEID, ESymbolNodeId>,
+
     pub(crate) scope_id_to_symbol_info:
         HashMap<SymbolScopeId<SCOPEID, SYMID>, SymbolInfo<SCOPEID, SYMID, SYMVALUE>>,
 }
@@ -74,7 +91,7 @@ impl<SCOPEID, SYMID, SYMVALUE> Default for SymbolTree<SCOPEID, SYMID, SYMVALUE>
 where
     SCOPEID: ScopeIdTraits,
     SYMID: SymIdTraits,
-    SYMVALUE: Clone,
+    SYMVALUE: ValueTrait,
 {
     fn default() -> Self {
         let root: SymbolTable<SCOPEID, SYMID> =
@@ -100,7 +117,7 @@ impl<SCOPEID, SYMID, V> SymbolTree<SCOPEID, SYMID, V>
 where
     SCOPEID: ScopeIdTraits,
     SYMID: SymIdTraits,
-    V: Clone,
+    V: ValueTrait,
 {
     fn get_node_id_from_scope_id(&self, scope_id: SCOPEID) -> Result<ESymbolNodeId, SymbolError> {
         self.scope_id_to_node_id
@@ -174,7 +191,7 @@ impl<SCOPEID, SYMID, V> SymbolTree<SCOPEID, SYMID, V>
 where
     SCOPEID: ScopeIdTraits,
     SYMID: SymIdTraits,
-    V: Clone,
+    V: ValueTrait,
 {
     pub fn set_symbol_for_id(
         &mut self,
@@ -321,7 +338,7 @@ impl<SCOPEID, SYMID, V> SymbolTree<SCOPEID, SYMID, V>
 where
     SCOPEID: ScopeIdTraits,
     SYMID: SymIdTraits,
-    V: Clone,
+    V: ValueTrait,
 {
     pub fn get_sub_scope_id(&self, name: &str, scope_id: SCOPEID) -> Result<SCOPEID, SymbolError> {
         let name = ScopedName::new(name);
@@ -450,7 +467,7 @@ impl<SCOPEID, SYMID, V> SymbolTree<SCOPEID, SYMID, V>
 where
     SCOPEID: ScopeIdTraits,
     SYMID: SymIdTraits,
-    V: Clone,
+    V: ValueTrait,
 {
     pub fn get_and_inc_next_scope_id(&mut self) -> SCOPEID {
         let ret = self.next_scope_id;

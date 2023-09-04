@@ -1,5 +1,5 @@
 /// Trait for navigating around a symbol tree
-use super::symboltree::SymbolTree;
+use super::symboltree::{ SymbolTree,ValueTrait };
 use super::prelude::*;
 
 pub enum NavError {}
@@ -20,7 +20,7 @@ pub struct Naver<'a, SCOPEID, SYMID, SYMVALUE>
 where
     SCOPEID: ScopeIdTraits,
     SYMID: SymIdTraits,
-        SYMVALUE: Clone,
+        SYMVALUE: ValueTrait,
 {
     tree: &'a SymbolTree<SCOPEID, SYMID, SYMVALUE>,
     current_scope: SCOPEID,
@@ -30,7 +30,7 @@ impl<'a, SCOPEID, SYMID, SYMVALUE> Naver<'a, SCOPEID, SYMID,SYMVALUE>
 where
     SCOPEID: ScopeIdTraits,
     SYMID: SymIdTraits,
-    SYMVALUE: Clone,
+    SYMVALUE: ValueTrait,
 {
     pub fn new(tree: &'a SymbolTree<SCOPEID, SYMID, SYMVALUE>) -> Self {
         Self {
@@ -44,7 +44,7 @@ impl<'a, SCOPEID, SYMID, SYMVALUE> SymbolNav<SCOPEID> for Naver<'a, SCOPEID, SYM
 where
     SCOPEID: ScopeIdTraits,
     SYMID: SymIdTraits,
-    SYMVALUE: Clone,
+    SYMVALUE: ValueTrait,
 {
     fn up(&mut self) -> NResult<()> {
         todo!()

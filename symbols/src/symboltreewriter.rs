@@ -1,4 +1,5 @@
 use super::symboltree::SymbolTree;
+use super::symboltree::ValueTrait;
 
 use super::prelude::*;
 
@@ -7,7 +8,7 @@ pub struct SymbolTreeWriter<'a, SCOPEID, SYMID,SYMVALUE>
 where
     SCOPEID: ScopeIdTraits,
     SYMID: SymIdTraits,
-        SYMVALUE: Clone,
+        SYMVALUE: ValueTrait,
 {
     current_scope_id: SCOPEID,
     sym_tree: &'a mut SymbolTree<SCOPEID, SYMID, SYMVALUE>,
@@ -17,7 +18,7 @@ impl<'a, SCOPEID, SYMID,V> SymbolTreeWriter<'a,SCOPEID,SYMID,V>
 where
     SCOPEID: ScopeIdTraits,
     SYMID: SymIdTraits,
-    V: Clone,
+    V: ValueTrait,
 {
     pub fn new(sym_tree: &'a mut SymbolTree<SCOPEID,SYMID,V>, current_scope_id: SCOPEID) -> Self {
         Self {
@@ -97,7 +98,7 @@ impl<'a, SCOPEID, SYMID,SYMVALUE> SymbolTreeWriter<'a,SCOPEID,SYMID,SYMVALUE>
 where
     SCOPEID: ScopeIdTraits + std::fmt::Debug,
     SYMID: SymIdTraits + std::fmt::Debug, 
-    SYMVALUE: Clone,
+    SYMVALUE: ValueTrait,
 {
     pub fn dump_scope(&self) {
         let x = self
