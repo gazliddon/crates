@@ -1,5 +1,6 @@
-use super::{GenericEvalErrorKind, GetPriority, OperationError};
-use crate::Stack;
+use std::collections::VecDeque;
+
+use super::{GenericEvalErrorKind, GetPriority, OperationError, pop_pair};
 
 /// Traits a value in an expression must support
 pub trait OperatorTraits:
@@ -183,18 +184,19 @@ where
     use GenericEvalErrorKind::*;
     use Operation::*;
 
-    let mut s: Stack<StackItem<'a, I>> = Stack::new();
+    let mut s: VecDeque<StackItem<'a, I>> = VecDeque::new();
 
     let to_err = |_e| panic!("{_e:#?}");
 
     for i in items.map(StackItem::from) {
+
         let ret = match i.item_type() {
             ExprItemKind::Expression => StackItem::Value(_evaluator.eval_expr(i.item().unwrap())?),
 
             ExprItemKind::Operator => {
                 let op = i.op().ok_or_else(|| to_err(ExpectedOperator))?;
 
-                let (rhs, lhs) = s.pop_pair().expect("Can't pop pair?");
+                let (rhs, lhs) = pop_pair(&mut s).expect("Can't pop pair?");
                 let lhs = lhs.value().ok_or_else(|| to_err(ExpectedValue))?;
                 let rhs = rhs.value().ok_or_else(|| to_err(ExpectedValue))?;
 
@@ -217,18 +219,23 @@ where
             ExprItemKind::Value => i,
         };
 
-        s.push(ret)
+        s.push_front(ret)
     }
     match s.len() {
         // Nothing on top of stack
         0 => Err(StackEmpty),
         // Something, try and extract the value
-        1 => s.pop().expect("Can't pop!").value().ok_or(ExpectedValue),
+        1 => s
+            .pop_front()
+            .expect("Can't pop!")
+            .value()
+            .ok_or(ExpectedValue),
         // Too many things on stack
         _ => Err(UnevaluatedTerms),
     }
     .map_err(|e| e.into())
 }
+
 
 pub fn evaluate_postfix_expr<I, E, ERR>(
     items: impl Iterator<Item = I>,
@@ -245,7 +252,7 @@ where
     // todo
     // check that we have enough items in the iterator?
 
-    let mut s: Stack<I> = Stack::new();
+    let mut s: VecDeque<I> = VecDeque::new();
     let idx_err = |idx, e| -> (usize, ERR) { (idx, ERR::from(e)) };
 
     for (idx, i) in items.enumerate() {
@@ -257,7 +264,7 @@ where
             ExprItemKind::Operator => {
                 let op = i.op().ok_or(to_err(ExpectedOperator))?;
 
-                let (rhs, lhs) = s.pop_pair().expect("Can't pop pair!");
+                let (rhs, lhs) = pop_pair(&mut s).expect("Can't pop pair!");
                 let lhs = lhs.value().ok_or(to_err(ExpectedValue))?;
                 let rhs = rhs.value().ok_or(to_err(ExpectedValue))?;
 
@@ -280,14 +287,14 @@ where
             ExprItemKind::Value => i.clone(),
         };
 
-        s.push(i)
+        s.push_front(i)
     }
 
     match s.len() {
         // Nothing on top of stack
         0 => Err(StackEmpty),
         // Something, try and extract the value
-        1 => s.pop().expect("Can't pop!").value().ok_or(ExpectedValue),
+        1 => s.pop_front().expect("Can't pop!").value().ok_or(ExpectedValue),
         // Too many things on stack
         _ => Err(UnevaluatedTerms),
     }

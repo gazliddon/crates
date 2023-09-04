@@ -1,5 +1,4 @@
-use super::PostfixerErrorKind;
-use crate::Stack;
+use super::{ PostfixerErrorKind, pop_pair };
 
 pub trait GetPriority {
     fn priority(&self) -> Option<usize> {
@@ -9,17 +8,18 @@ pub trait GetPriority {
         self.priority().is_some()
     }
 }
+use std::collections::VecDeque;
 
 #[derive(Debug, Clone)]
 pub struct PostFixer<I: Clone + GetPriority> {
-    opstack: Stack<I>,
+    opstack: VecDeque<I>,
     ret: Vec<I>,
 }
 
 impl<I: Clone + GetPriority + std::fmt::Debug> Default for PostFixer<I> {
     fn default() -> Self {
         Self {
-            opstack: Stack::new(),
+            opstack: VecDeque::new(),
             ret: vec![],
         }
     }
@@ -36,7 +36,7 @@ impl<I: Clone + GetPriority + std::fmt::Debug> PostFixer<I> {
 
     fn push(&mut self, op: &I) -> Result<(), PostfixerErrorKind> {
         if op.is_op() {
-            self.opstack.push(op.clone());
+            self.opstack.push_front(op.clone());
             Ok(())
         } else {
             Err(PostfixerErrorKind::ExpectedOperator(format!("{op:?}")))
@@ -44,7 +44,8 @@ impl<I: Clone + GetPriority + std::fmt::Debug> PostFixer<I> {
     }
 
     fn flush(&mut self) {
-        let mut v = self.opstack.flush();
+        let mut v = self.opstack.iter().cloned().collect();
+        self.opstack = VecDeque::new();
         self.ret.append(&mut v);
     }
 
@@ -149,13 +150,14 @@ mod test {
     }
 
     pub fn eval(e: &[char]) -> i64 {
-        let mut s: Stack<i64> = Stack::new();
+        let mut s: VecDeque<i64> = VecDeque::new();
 
         let to_i64 = |c: char| (c as i64) - '0' as i64;
 
+
         for i in e.iter() {
             if i.is_op() {
-                let (rhs, lhs) = s.pop_pair().expect("Can't pop pair!");
+                let (rhs, lhs) = pop_pair(&mut s).expect("Can't pop pair!");
                 let res = match i {
                     '*' => lhs * rhs,
                     '<' => lhs << rhs,
@@ -165,13 +167,13 @@ mod test {
                     '-' => lhs - rhs,
                     _ => panic!(),
                 };
-                s.push(res);
+                s.push_front(res);
             } else {
-                s.push(to_i64(*i));
+                s.push_front(to_i64(*i));
             }
         }
 
-        s.pop().expect("Can't pop!")
+        s.pop_front().expect("Can't pop!")
     }
 
     #[test]
