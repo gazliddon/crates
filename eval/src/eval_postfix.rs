@@ -2,6 +2,7 @@ use std::collections::VecDeque;
 
 use super::{GenericEvalErrorKind, GetPriority, OperationError, pop_pair};
 
+
 /// Traits a value in an expression must support
 pub trait OperatorTraits:
     std::ops::Add<Output = OperationError<Self>>

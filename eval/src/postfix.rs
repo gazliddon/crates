@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 use super::{ PostfixerErrorKind, pop_pair };
 
 pub trait GetPriority {
@@ -8,7 +10,6 @@ pub trait GetPriority {
         self.priority().is_some()
     }
 }
-use std::collections::VecDeque;
 
 #[derive(Debug, Clone)]
 pub struct PostFixer<I: Clone + GetPriority> {

@@ -1,5 +1,4 @@
 #![allow(unused)]
-
 pub use error::*;
 pub use eval_postfix::*;
 pub use postfix::*;
@@ -7,9 +6,8 @@ pub use postfix::*;
 mod error;
 mod eval_postfix;
 mod postfix;
-use std::fmt::Debug;
+use std::{collections::VecDeque, fmt::Debug};
 
-use std::collections::VecDeque;
 
 pub fn infix_expr_to_value<I, E, ERR>(i: &[I], evaluator: &E) -> Result<I::ExprValue, ERR>
 where
@@ -23,10 +21,7 @@ where
     Ok(res)
 }
 
-
-pub fn pop_pair<T>(s : &mut VecDeque<T>) -> Option<(T,T)> {
-            s.pop_front()
-                .and_then(|rhs| s.pop_front().map(|lhs| (rhs, lhs)))
+pub fn pop_pair<T>(s: &mut VecDeque<T>) -> Option<(T, T)> {
+    s.pop_front()
+        .and_then(|rhs| s.pop_front().map(|lhs| (rhs, lhs)))
 }
-
-
