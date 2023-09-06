@@ -1,5 +1,5 @@
 [package]
-name = "emu"
+name = "emu6809"
 version = "0.1.0"
 authors = ["Gaz Liddon MBP19 <gaz@gazaxian.com>"]
 edition = "2021"
