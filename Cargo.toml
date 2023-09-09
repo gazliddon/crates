@@ -1,0 +1,11 @@
+[workspace]
+members = ["emu6809","eval","sources","unraveler","utils"]
+resolver = "2"
+
+[workspace.dependencies]
+pretty_assertions="1.4.0"
+anyhow="1.0.75"
+lazy_static="1.4.0"
+thin-vec="0.2.12"
+thiserror="1.0.48"
+regex="1.9.5"
