@@ -101,7 +101,6 @@ fn test_tuple() -> Result<(),NewError> {
     assert_eq!(to_kinds(b),[B]);
     let c : Vec<_> = c.into_iter().map(|x| to_kinds(x)).flatten().collect();
     println!("VEC: {:?}",c);
-    assert!(false);
 
     Ok(())
 }
