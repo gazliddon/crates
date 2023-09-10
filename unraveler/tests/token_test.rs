@@ -18,11 +18,11 @@ impl ParseError<Span<'_>> for NewError {
     }
 
     fn change_kind(self, kind: ParseErrorKind) -> Self {
-        todo!()
+        self
     }
 
     fn set_severity(self, sev: Severity)-> Self {
-        todo!()
+        self
     }
 
     fn severity(&self) -> Severity {
@@ -134,7 +134,6 @@ fn test_many() -> Result<(),NewError>{
     let (rest,(open,v)) = res?;
 
     let v : Vec<_> = v.iter().map(|i| to_kinds(*i)).flatten().collect();
-
 
     println!("o: {:?}", to_kinds(open));
     println!("v: {:?}", v);
