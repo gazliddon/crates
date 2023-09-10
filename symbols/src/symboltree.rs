@@ -495,22 +495,39 @@ where
 #[allow(unused_imports)]
 mod test {
     use super::*;
+    use crate::symboltreewriter::SymbolTreeWriter;
+
+    type ScopeId = u64;
+    type SymId = u64;
+    type SymTree = SymbolTree<ScopeId,SymId,u64>;
+
 
     #[test]
     fn test_sym_tree() {
-        // let mut st = SymbolTree::default();
+        let mut st = SymTree::default();
 
-        // let _ = st.add_symbol_with_value("root_gaz", 100);
+        let mut w = st.get_root_writer();
 
-        // st.set_current_scope("scope_a");
-        // let _ = st.add_symbol_with_value("gaz", 100);
-        // let _ = st.add_symbol_with_value("root_gaz", 100);
 
-        // let scope_fqn = st.get_current_scope_fqn();
-        // println!("SCOPE is {scope_fqn}");
-        // st.pop_scope();
+        let _ = w.create_and_set_symbol("root_gaz", 10);
 
-        // let scope_fqn = st.get_current_scope_fqn();
-        // println!("SCOPE is {scope_fqn}");
+        w.create_or_set_scope("scope_a");
+
+        let _ = w.create_and_set_symbol("gaz", 20);
+
+        let scope_fqn = w.get_scope_fqn();
+        println!("SCOPE is {scope_fqn}");
+        w.pop();
+
+        let scope_fqn = w.get_scope_fqn();
+        println!("SCOPE is {scope_fqn}");
+
+        let gaz = st.get_symbol_info_from_name("::scope_a::gaz").unwrap();
+        println!("{:#?}", gaz);
+        assert_eq!(gaz.value, Some(20));
+
+        let root_gaz = st.get_symbol_info_from_name("::root_gaz").unwrap();
+        println!("{:#?}", root_gaz);
+        assert_eq!(root_gaz.value, Some(10));
     }
 }
