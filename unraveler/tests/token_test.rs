@@ -1,6 +1,6 @@
 #![allow(unused)]
 
-use unraveler::{Item, ParseError,ParseErrorKind, tag,pair, many0, alt, tuple, any, Severity};
+use unraveler::{Item, ParseError,ParseErrorKind, tag,pair, many0, many1, alt, tuple, any, Severity};
 
 type Span<'a> = unraveler::Span<'a, Token>;
 
@@ -8,13 +8,25 @@ type Span<'a> = unraveler::Span<'a, Token>;
 struct NewError {}
 
 impl ParseError<Span<'_>> for NewError {
-    fn from_error_kind(input: &Span, kind: ParseErrorKind, sev: Severity) -> Self {
+    fn from_error_kind(input: Span, kind: ParseErrorKind, sev: Severity) -> Self {
         println!("AN ERROR: {:?}", kind);
         NewError {  }
     }
 
-    fn append(input: &Span, kind: ParseErrorKind, other: Self) -> Self {
+    fn append(input: Span, kind: ParseErrorKind, other: Self) -> Self {
         todo!()
+    }
+
+    fn change_kind(self, kind: ParseErrorKind) -> Self {
+        todo!()
+    }
+
+    fn set_severity(self, sev: Severity)-> Self {
+        todo!()
+    }
+
+    fn severity(&self) -> Severity {
+        Severity::Error
     }
 }
 
@@ -74,7 +86,7 @@ fn test_norm() {
     println!("1: {:?} {:?}", to_kinds(left), left.get_range());
     println!("2: {:?} {:?}", to_kinds(right), right.get_range());
     println!("r: {:?} {:?}", to_kinds(rest), rest.get_range());
-    assert!(false)
+    // assert!(false)
 }
 
 
@@ -105,7 +117,7 @@ fn test_alt() -> Result<(),NewError>{
     )(input)?;
 
     println!("ret: {:?}", to_kinds(matched));
-    assert!(false);
+    // assert!(false);
 
     Ok(())
 }
@@ -113,17 +125,27 @@ fn test_alt() -> Result<(),NewError>{
 #[test]
 fn test_many() -> Result<(),NewError>{
     use TokenKind::*;
+
     let doc = to_tokens(&[B,A,A,A,A,A,B]);
+
     let input = Span::from_slice(&doc);
-    let (rest,(open,v)) = pair(tag([B]), many0(tag([A])))(input)?;
+
+    let res = pair(tag([B]), many0(tag([A])))(input);
+
+    let (rest,(open,v)) = res?;
 
     let v : Vec<_> = v.iter().map(|i| to_kinds(*i)).flatten().collect();
+
 
     println!("o: {:?}", to_kinds(open));
     println!("v: {:?}", v);
     println!("r: {:?} {:?}", to_kinds(rest), rest.get_range());
 
-    assert!(false);
+
+    assert_eq!(to_kinds(open), [B]);
+    assert_eq!(v, [A,A,A,A,A]);
+    assert_eq!(to_kinds(rest),[B]);
+
     Ok(())
 
 }
