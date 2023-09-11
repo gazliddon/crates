@@ -4,6 +4,7 @@ mod scopedname;
 mod symboltable;
 mod symboltree;
 mod types;
+mod tree;
 
 #[cfg(feature="serde_support")]
 mod serialize;

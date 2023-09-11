@@ -11,43 +11,6 @@ use super::{
     symboltreewriter::SymbolTreeWriter,
 };
 
-////////////////////////////////////////////////////////////////////////////////
-#[derive(Default)]
-struct TreeNode {
-    id: usize,
-    parent: Option<usize>,
-    children: Vec<usize>,
-}
-
-struct Tree<T> {
-    root_node: usize,
-    id_to_node: HashMap<usize, TreeNode>,
-    data: Vec<T>,
-    free_list: Vec<usize>,
-}
-
-impl<T> Default for Tree<T> {
-    fn default() -> Self {
-        Self {
-            root_node: 0,
-            id_to_node: Default::default(),
-            data: Default::default(),
-            free_list: Default::default(),
-        }
-    }
-}
-
-impl<T> Tree<T> {
-    pub fn new() -> Self {
-        Default::default()
-    }
-}
-
-#[derive(Debug, PartialEq, Clone)]
-pub struct ScopeInfo {
-    pub name: String,
-    pub fqn: String,
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 // SymbolTree
@@ -58,6 +21,11 @@ type ESymbolNodeMut<'a, SCOPEID, SYMID> = ego_tree::NodeMut<'a, SymbolTable<SCOP
 
 #[cfg(feature = "serde_support")]
 pub trait ValueTrait: Clone + Serialize {}
+#[derive(Debug, PartialEq, Clone)]
+pub struct ScopeInfo {
+    pub name: String,
+    pub fqn: String,
+}
 
 #[cfg(not(feature = "serde_support"))]
 pub trait ValueTrait: Clone {}
@@ -66,16 +34,16 @@ impl ValueTrait for i64 {}
 impl ValueTrait for u64 {}
 
 #[derive(Debug, PartialEq, Eq, Clone)]
-#[cfg_attr(feature = "serde_support", derive(Serialize))]
 pub struct SymbolTree<SCOPEID, SYMID, SYMVALUE>
 where
     SCOPEID: ScopeIdTraits,
     SYMID: SymIdTraits,
     SYMVALUE: ValueTrait,
 {
-    #[cfg_attr(feature = "serde_support", serde(skip_serializing))]
+    // #[cfg_attr(feature = "serde_support", serde(skip_serializing))]
     pub(crate) tree: ego_tree::Tree<SymbolTable<SCOPEID, SYMID>>,
-    #[cfg_attr(feature = "serde_support", serde(skip_serializing))]
+
+    // #[cfg_attr(feature = "serde_support", serde(skip_serializing))]
     pub(crate) scope_id_to_node_id: HashMap<SCOPEID, ESymbolNodeId>,
 
     pub(crate) root_scope_id: SCOPEID,
@@ -499,15 +467,13 @@ mod test {
 
     type ScopeId = u64;
     type SymId = u64;
-    type SymTree = SymbolTree<ScopeId,SymId,u64>;
-
+    type SymTree = SymbolTree<ScopeId, SymId, u64>;
 
     #[test]
     fn test_sym_tree() {
         let mut st = SymTree::default();
 
         let mut w = st.get_root_writer();
-
 
         let _ = w.create_and_set_symbol("root_gaz", 10);
 
