@@ -13,16 +13,16 @@ where
     SCOPEID: ScopeIdTraits,
     SYMID: SymIdTraits,
 {
-    pub(crate) tree: ego_tree::Tree<SymbolTable<SCOPEID, SYMID>>,
-    pub(crate) scope_id_to_node_id: HashMap<SCOPEID, ESymbolNodeId>,
+    tree: ego_tree::Tree<SymbolTable<SCOPEID, SYMID>>,
+    scope_id_to_node_id: HashMap<SCOPEID, ESymbolNodeId>,
 }
 
-
+// Internal
 impl<SCOPEID, SYMID> Tree<SCOPEID, SYMID>
 where
     SCOPEID: ScopeIdTraits,
     SYMID: SymIdTraits,
-{ 
+{
     fn get_node_id_from_scope_id(&self, scope_id: SCOPEID) -> Result<ESymbolNodeId, SymbolError> {
         self.scope_id_to_node_id
             .get(&scope_id)
@@ -37,15 +37,34 @@ where
         let node_id = self.get_node_id_from_scope_id(scope_id)?;
         self.tree.get(node_id).ok_or(SymbolError::InvalidScope)
     }
+}
 
-    pub (crate) fn get_parent_scope_id(&self, scope_id: SCOPEID) -> Option<SCOPEID> {
+// Public functions
+impl<SCOPEID, SYMID> Tree<SCOPEID, SYMID>
+where
+    SCOPEID: ScopeIdTraits,
+    SYMID: SymIdTraits,
+{
+    pub fn get_parent_scope_id(&self, scope_id: SCOPEID) -> Option<SCOPEID> {
         self.get_node_from_id(scope_id)
             .expect("Illegal scope id")
             .parent()
             .map(|n| n.value().get_scope_id())
     }
 
-    pub (crate) fn children(
+    pub fn new(root: SymbolTable<SCOPEID, SYMID>) -> Self {
+        let scope_id = root.get_scope_id();
+        let tree: ESymbolTreeTree<SCOPEID, SYMID> = ESymbolTreeTree::new(root);
+        let mut scope_id_to_node_id: HashMap<SCOPEID, ESymbolNodeId> = Default::default();
+        scope_id_to_node_id.insert(scope_id, tree.root().id());
+
+        Self {
+            tree,
+            scope_id_to_node_id,
+        }
+    }
+
+    pub fn children(
         &self,
         scope_id: SCOPEID,
     ) -> impl Iterator<Item = &SymbolTable<SCOPEID, SYMID>> + '_ {
@@ -53,7 +72,7 @@ where
         node.children().map(|n| n.value())
     }
 
-    pub (crate) fn get_scope(
+    pub fn get_scope(
         &self,
         scope_id: SCOPEID,
     ) -> Result<&SymbolTable<SCOPEID, SYMID>, SymbolError> {
@@ -73,7 +92,7 @@ where
         }
     }
 
-    pub(crate) fn insert_new_table(
+    pub fn insert_new_table(
         &mut self,
         parent_id: SCOPEID,
         tab: SymbolTable<SCOPEID, SYMID>,
