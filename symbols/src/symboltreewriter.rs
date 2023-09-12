@@ -32,7 +32,7 @@ where
     }
 
     pub fn pop(&mut self) {
-        if let Some(id) = self.sym_tree.get_parent_scope_id(self.current_scope_id) {
+        if let Some(id) = self.sym_tree.etree.get_parent_scope_id(self.current_scope_id) {
             self.current_scope_id = id
         }
     }
@@ -101,10 +101,11 @@ where
     SYMVALUE: ValueTrait,
 {
     pub fn dump_scope(&self) {
-        let x = self
-            .sym_tree
-            .get_scope(self.current_scope_id);
-        println!("{:#?}", x)
+        todo!("put this back in")
+        // let x = self
+        //     .sym_tree
+        //     .get_scope(self.current_scope_id);
+        // println!("{:#?}", x)
     }
 }
 

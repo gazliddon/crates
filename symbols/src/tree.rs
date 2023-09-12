@@ -8,7 +8,8 @@ type ESymbolNodeMut<'a, SCOPEID, SYMID> = ego_tree::NodeMut<'a, SymbolTable<SCOP
 use super::prelude::*;
 use std::collections::HashMap;
 
-struct Tree<SCOPEID, SYMID>
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub (crate) struct Tree<SCOPEID, SYMID>
 where
     SCOPEID: ScopeIdTraits,
     SYMID: SymIdTraits,
@@ -16,6 +17,7 @@ where
     tree: ego_tree::Tree<SymbolTable<SCOPEID, SYMID>>,
     scope_id_to_node_id: HashMap<SCOPEID, ESymbolNodeId>,
 }
+
 
 // Internal
 impl<SCOPEID, SYMID> Tree<SCOPEID, SYMID>
@@ -63,6 +65,13 @@ where
             scope_id_to_node_id,
         }
     }
+    // @TODO implement this
+    // pub fn walk(
+    //     &self,
+    //     scope_id: SCOPEID,
+    // ) -> impl Iterator<Item = &SymbolTable<SCOPEID, SYMID>> + '_ {
+    //     panic!()
+    // }
 
     pub fn children(
         &self,
@@ -79,7 +88,7 @@ where
         self.get_node_from_id(scope_id).map(|n| n.value())
     }
 
-    fn on_value_mut<F, R>(&mut self, scope_id: SCOPEID, mut f: F) -> Result<R, SymbolError>
+    pub fn on_value_mut<F, R>(&mut self, scope_id: SCOPEID, mut f: F) -> Result<R, SymbolError>
     where
         F: FnMut(&mut SymbolTable<SCOPEID, SYMID>) -> Result<R, SymbolError>,
     {
@@ -91,6 +100,20 @@ where
             Err(SymbolError::InvalidId)
         }
     }
+//     pub(crate) fn insert_new_table(
+//         &mut self,
+//         name: &str,
+//         parent_id: SCOPEID,
+//         barrier: SymbolResolutionBarrier,
+//     ) -> SCOPEID {
+//         let tab = self.create_new_table(name, parent_id, barrier);
+//         let tab_id = tab.get_scope_id();
+//         let parent_id = self.scope_id_to_node_id.get(&parent_id).unwrap();
+//         let mut parent_mut = self.tree.get_mut(*parent_id).unwrap();
+//         let mut n = parent_mut.append(tab);
+//         self.scope_id_to_node_id.insert(tab_id, n.id());
+//         n.value().get_scope_id()
+//     }
 
     pub fn insert_new_table(
         &mut self,
