@@ -32,6 +32,7 @@ where
     SCOPEID: ScopeIdTraits,
     SYMID: SymIdTraits,
 {
+    parent_id: Option<SCOPEID>,
     scope: String,
     fqn_scope: String,
     pub(crate) name_to_id: HashMap<String, SYMID>,
@@ -127,13 +128,20 @@ where
         &self.fqn_scope
     }
 
+    pub(crate) fn get_parent_id(&self) -> Option<SCOPEID> {
+        self.parent_id
+    }
+
     pub(crate) fn new(
         name: &str,
         fqn_scope: &str,
         scope_id: SCOPEID,
+        parent_id: Option<SCOPEID>,
         symbol_resolution_barrier: SymbolResolutionBarrier,
+
     ) -> Self {
         Self {
+            parent_id,
             scope: name.to_string(),
             highest_id: 1.into(),
             fqn_scope: fqn_scope.to_string(),

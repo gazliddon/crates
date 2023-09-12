@@ -18,7 +18,6 @@ where
     scope_id_to_node_id: HashMap<SCOPEID, ESymbolNodeId>,
 }
 
-
 // Internal
 impl<SCOPEID, SYMID> Tree<SCOPEID, SYMID>
 where
@@ -100,29 +99,15 @@ where
             Err(SymbolError::InvalidId)
         }
     }
-//     pub(crate) fn insert_new_table(
-//         &mut self,
-//         name: &str,
-//         parent_id: SCOPEID,
-//         barrier: SymbolResolutionBarrier,
-//     ) -> SCOPEID {
-//         let tab = self.create_new_table(name, parent_id, barrier);
-//         let tab_id = tab.get_scope_id();
-//         let parent_id = self.scope_id_to_node_id.get(&parent_id).unwrap();
-//         let mut parent_mut = self.tree.get_mut(*parent_id).unwrap();
-//         let mut n = parent_mut.append(tab);
-//         self.scope_id_to_node_id.insert(tab_id, n.id());
-//         n.value().get_scope_id()
-//     }
 
     pub fn insert_new_table(
         &mut self,
-        parent_id: SCOPEID,
         tab: SymbolTable<SCOPEID, SYMID>,
     ) -> SCOPEID {
+        let parent_id = tab.get_parent_id().expect("Must have a parent");
         let tab_id = tab.get_scope_id();
-        let parent_id = self.scope_id_to_node_id.get(&parent_id).unwrap();
-        let mut parent_mut = self.tree.get_mut(*parent_id).unwrap();
+        let parent_node_id = self.scope_id_to_node_id.get(&parent_id).unwrap();
+        let mut parent_mut = self.tree.get_mut(*parent_node_id).unwrap();
         let mut n = parent_mut.append(tab);
         self.scope_id_to_node_id.insert(tab_id, n.id());
         n.value().get_scope_id()

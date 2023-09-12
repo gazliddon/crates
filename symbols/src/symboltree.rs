@@ -70,7 +70,7 @@ where
         let root_scope = 0;
 
         let root_table: SymbolTable<SCOPEID, SYMID> =
-            SymbolTable::new("", "", root_scope.into(), SymbolResolutionBarrier::default());
+            SymbolTable::new("", "", root_scope.into(), None,SymbolResolutionBarrier::default());
         let etree= Tree::new(root_table);
 
         Self {
@@ -186,6 +186,7 @@ where
 
         Err(SymbolError::NotFound)
     }
+
     pub fn get_symbol_info_from_scoped_name(
         &self,
         name: &ScopedName,
@@ -227,9 +228,8 @@ where
             }
         }
 
-        let tab = self.create_new_table(name, id, SymbolResolutionBarrier::default());
-
-        self.etree.insert_new_table(id, tab)
+        let new_table = self.create_new_table(name, id, SymbolResolutionBarrier::default());
+        self.etree.insert_new_table(new_table)
     }
 }
 
@@ -389,7 +389,7 @@ where
         let parent_fqn = self.get_fqn_from_id(parent_id);
         let fqn = format!("{parent_fqn}::{name}");
         let scope_id = self.get_and_inc_next_scope_id();
-        SymbolTable::new(name, &fqn, scope_id, barrier)
+        SymbolTable::new(name, &fqn, scope_id, Some(parent_id), barrier)
     }
 }
 
