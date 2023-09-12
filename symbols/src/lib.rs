@@ -9,7 +9,7 @@ mod tree;
 #[cfg(feature="serde_support")]
 mod serialize;
 
-pub mod symbolnav;
+pub mod scopenav;
 pub mod symboltreereader;
 pub mod symboltreewriter;
 
@@ -19,7 +19,7 @@ pub mod prelude {
     pub use super::symboltree::*;
     pub use super::symboltreereader;
     pub use super::symboltreewriter;
-    pub use super::symbolnav;
+    pub use super::scopenav;
     pub use super::types::*;
 }
 
