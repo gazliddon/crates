@@ -5,7 +5,7 @@ use thin_vec::ThinVec;
 pub struct ScopedName<'a> {
     input: &'a str,
     symbol: &'a str,
-    path: ThinVec<&'a str>,
+    pub path: ThinVec<&'a str>,
     absolute: bool,
 }
 
@@ -41,6 +41,15 @@ impl<'a> ScopedName<'a> {
         }
     }
 
+    pub fn as_relative(mut self) -> Self {
+        if self.is_abs() {
+            self.absolute = false;
+            self
+        } else {
+            self
+        }
+    }
+
     pub fn new(input: &'a str) -> Self {
         let splits : ThinVec<_> = input.split("::").collect();
         let len = splits.len();
@@ -62,6 +71,70 @@ impl<'a> ScopedName<'a> {
             input,
             symbol,
             path,
+            absolute
+        }
+    }
+}
+
+#[derive(Debug,Clone)]
+pub struct ScopePath<'a> {
+    input: &'a str,
+    pub path_parts: ThinVec<&'a str>,
+    absolute: bool,
+}
+
+impl<'a> std::fmt::Display for ScopePath<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f,"{}",self.input) 
+    }
+}
+
+impl<'a> ScopePath<'a> {
+    pub fn is_abs(&self) -> bool {
+        self.absolute
+    }
+
+    pub fn is_relative(&self) -> bool {
+        !self.is_abs()
+    }
+
+    pub fn path(&self) -> &[&str] {
+        &self.path_parts
+    }
+
+    pub fn path_as_string(&self) -> String {
+        let path = self.path_parts.join("::");
+        if self.is_abs() {
+            format!("::{path}")
+
+        } else {
+            path
+        }
+    }
+
+    pub fn as_relative(mut self) -> Self {
+        if self.is_abs() {
+            self.absolute = false;
+            self
+        } else {
+            self
+        }
+    }
+
+    pub fn new(input: &'a str) -> Self {
+        let splits : ThinVec<_> = input.split("::").collect();
+
+        let absolute = !splits.is_empty() && splits[0].is_empty();
+
+        let path : ThinVec<_> = if absolute {
+            splits[1..].into_iter().map(|p| *p).collect()
+        } else {
+            splits.into_iter().map(|p| p).collect()
+        };
+
+        Self {
+            input,
+            path_parts: path,
             absolute
         }
     }

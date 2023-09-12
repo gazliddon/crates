@@ -33,9 +33,14 @@ where
 #[cfg(feature = "serde_support")]
 pub trait ValueTrait: Clone + Serialize {}
 #[derive(Debug, PartialEq, Clone)]
-pub struct ScopeInfo {
+pub struct ScopeInfo<SCOPEID> 
+where
+    SCOPEID: ScopeIdTraits,
+    {
     pub name: String,
     pub fqn: String,
+    pub scope_id: SCOPEID,
+    pub parent_id: Option<SCOPEID>
 }
 
 #[cfg(not(feature = "serde_support"))]
@@ -156,10 +161,10 @@ where
         Ok(symbol_id)
     }
 
-    pub fn dump_syms(&self, _scope_id: SCOPEID) {
-        todo!("put this back in")
-        // let x = self.get_node_from_id(scope_id).unwrap();
-        // println!("{:#?}", x.value().name_to_id.keys());
+    // TODO this is bad
+    pub fn dump_syms(&self, scope_id: SCOPEID) {
+        let syms = self.etree.get_scope(scope_id).unwrap();
+        println!("{:#?}", syms.name_to_id.keys());
     }
 
     pub fn resolve_label(
@@ -216,6 +221,7 @@ where
 
         self.get_symbol_info(name, current_node)
     }
+
     pub fn get_root_scope_id(&self) -> SCOPEID {
         self.root_scope_id
     }
@@ -350,12 +356,14 @@ where
             .ok_or(SymbolError::NotFound)
     }
 
-    pub fn get_scope_info_from_id(&self, scope_id: SCOPEID) -> Option<ScopeInfo> {
+    pub fn get_scope_info_from_id(&self, scope_id: SCOPEID) -> Option<ScopeInfo<SCOPEID>> {
         let x = self.etree.get_scope(scope_id).ok()?;
 
         let ret = ScopeInfo {
             name: x.get_scope_name().to_owned(),
             fqn: x.get_scope_fqn_name().to_owned(),
+            scope_id,
+            parent_id: x.get_parent_id(),
         };
 
         Some(ret)
@@ -370,13 +378,13 @@ where
     SYMID: SymIdTraits,
     V: ValueTrait,
 {
-    pub fn get_and_inc_next_scope_id(&mut self) -> SCOPEID {
+    fn get_and_inc_next_scope_id(&mut self) -> SCOPEID {
         let ret = self.next_scope_id;
         self.next_scope_id += 1;
         ret.into()
     }
 
-    pub fn get_next_scope_id(&self) -> SCOPEID {
+    fn get_next_scope_id(&self) -> SCOPEID {
         self.next_scope_id
     }
 
@@ -404,7 +412,20 @@ mod test {
 
     #[test]
     fn test_sym_tree() {
+
+        let syms = [
+            ("::scope_a::gaz",10),
+            ("::scope_b::gaz",20),
+            ("::gaz",30),
+        ];
+
         let mut st = SymTree::default();
+
+        let mut w = st.get_root_writer();
+
+        for (name,val) in syms {
+            w.create_and_set_symbol(name, val);
+        }
 
         let mut w = st.get_root_writer();
 
