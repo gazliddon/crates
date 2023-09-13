@@ -4,22 +4,18 @@ use super::symboltree::{SymbolTree, ValueTrait};
 
 pub enum NavError {
     PathNotFound,
-    AtRoot,
+    NoParent,
 }
 
 type NResult<T> = Result<T, NavError>;
-
 trait ScopeNav<SCOPEID>
 where
     SCOPEID: std::ops::AddAssign<u64> + std::clone::Clone,
 {
     fn up(&mut self) -> NResult<SCOPEID> {
-        if let Some(id) = self.get_parent() {
-            self.set_scope(id.clone());
-            Ok(id)
-        } else {
-            Err(NavError::AtRoot)
-        }
+        let id = self.get_parent()?;
+        self.set_scope(id.clone());
+        Ok(id)
     }
 
     fn cd(&mut self, dir: &str) -> NResult<SCOPEID> {
@@ -42,19 +38,19 @@ where
 
         Ok(self.get_current_scope())
     }
-    
+
     fn set_root(&mut self) {
         let root_id = self.get_root();
         self.set_scope(root_id)
     }
 
-    fn set_scope(&mut self, id : SCOPEID);
+    fn set_scope(&mut self, id: SCOPEID);
     fn get_root(&self) -> SCOPEID;
     fn get_current_scope(&self) -> SCOPEID;
-    fn get_parent(&self) -> Option<SCOPEID>;
+    fn get_parent(&self) -> NResult<SCOPEID>;
 }
 
-#[derive(Clone,Debug)]
+#[derive(Clone, Debug)]
 pub struct Naver<'a, SCOPEID, SYMID, SYMVALUE>
 where
     SCOPEID: ScopeIdTraits,
@@ -85,8 +81,12 @@ where
     SYMID: SymIdTraits,
     SYMVALUE: ValueTrait,
 {
-    fn get_parent(&self) -> Option<SCOPEID> {
-        self.tree.etree.get_scope(self.get_current_scope()).ok().and_then(|scope| scope.get_parent_id())
+    fn get_parent(&self) -> NResult<SCOPEID> {
+        self.tree
+            .etree
+            .get_scope(self.get_current_scope())
+            .and_then(|scope| scope.get_parent_id().ok_or(SymbolError::NoValue))
+            .map_err(|_| NavError::NoParent)
     }
 
     fn get_root(&self) -> SCOPEID {
@@ -97,7 +97,7 @@ where
         self.current_scope
     }
 
-    fn set_scope(&mut self, id : SCOPEID) {
+    fn set_scope(&mut self, id: SCOPEID) {
         self.current_scope = id;
     }
 }
