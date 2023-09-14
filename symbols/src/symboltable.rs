@@ -47,6 +47,7 @@ where
     SCOPEID: ScopeIdTraits + Debug,
     SYMID: SymIdTraits + Debug,
 {
+
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "Scope: {}", self.scope)?;
 

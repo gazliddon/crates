@@ -7,8 +7,10 @@ pub enum NavError {
     NoParent,
 }
 
-type NResult<T> = Result<T, NavError>;
-trait ScopeNav<SCOPEID>
+pub type NResult<T> = Result<T, NavError>;
+
+// @TODO Remove this trait and incorporate methods into ScopeNav
+trait ScopeNavTrait<SCOPEID>
 where
     SCOPEID: std::ops::AddAssign<u64> + std::clone::Clone,
 {
@@ -51,7 +53,7 @@ where
 }
 
 #[derive(Clone, Debug)]
-pub struct Naver<'a, SCOPEID, SYMID, SYMVALUE>
+pub struct ScopeNav<'a, SCOPEID, SYMID, SYMVALUE>
 where
     SCOPEID: ScopeIdTraits,
     SYMID: SymIdTraits,
@@ -61,7 +63,7 @@ where
     current_scope: SCOPEID,
 }
 
-impl<'a, SCOPEID, SYMID, SYMVALUE> Naver<'a, SCOPEID, SYMID, SYMVALUE>
+impl<'a, SCOPEID, SYMID, SYMVALUE> ScopeNav<'a, SCOPEID, SYMID, SYMVALUE>
 where
     SCOPEID: ScopeIdTraits,
     SYMID: SymIdTraits,
@@ -75,7 +77,7 @@ where
     }
 }
 
-impl<'a, SCOPEID, SYMID, SYMVALUE> ScopeNav<SCOPEID> for Naver<'a, SCOPEID, SYMID, SYMVALUE>
+impl<'a, SCOPEID, SYMID, SYMVALUE> ScopeNavTrait<SCOPEID> for ScopeNav<'a, SCOPEID, SYMID, SYMVALUE>
 where
     SCOPEID: ScopeIdTraits,
     SYMID: SymIdTraits,

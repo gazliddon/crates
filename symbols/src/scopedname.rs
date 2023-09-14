@@ -14,6 +14,7 @@ impl<'a> std::fmt::Display for ScopedName<'a> {
         write!(f,"{}",self.input) 
     }
 }
+// @TODO compose scope name with scope path and remove dupe code
 impl<'a> ScopedName<'a> {
     pub fn is_abs(&self) -> bool {
         self.absolute
@@ -51,6 +52,7 @@ impl<'a> ScopedName<'a> {
     }
 
     pub fn new(input: &'a str) -> Self {
+
         let splits : ThinVec<_> = input.split("::").collect();
         let len = splits.len();
 

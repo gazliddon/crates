@@ -9,7 +9,7 @@ use super::prelude::*;
 use std::collections::HashMap;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
-pub (crate) struct Tree<SCOPEID, SYMID>
+pub(crate) struct Tree<SCOPEID, SYMID>
 where
     SCOPEID: ScopeIdTraits,
     SYMID: SymIdTraits,
@@ -100,10 +100,21 @@ where
         }
     }
 
-    pub fn insert_new_table(
-        &mut self,
-        tab: SymbolTable<SCOPEID, SYMID>,
-    ) -> SCOPEID {
+    /// Return a vector with ids of all scopes
+    pub(crate) fn get_scopes(&self) -> Vec<SCOPEID> {
+        let ret: Vec<_> = self.scope_id_to_node_id.keys().cloned().collect();
+        ret
+    }
+    /// Return a vector with ids of all scopes
+    pub(crate) fn get_scopes_info(&self) -> Vec<&SymbolTable<SCOPEID, SYMID>> {
+        self.scope_id_to_node_id
+            .keys()
+            .cloned()
+            .map(|id| self.get_scope(id).unwrap())
+            .collect()
+    }
+
+    pub fn insert_new_table(&mut self, tab: SymbolTable<SCOPEID, SYMID>) -> SCOPEID {
         let parent_id = tab.get_parent_id().expect("Must have a parent");
         let tab_id = tab.get_scope_id();
         let parent_node_id = self.scope_id_to_node_id.get(&parent_id).unwrap();

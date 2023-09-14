@@ -1,44 +1,28 @@
-use serde::ser::SerializeStruct;
+use serde::ser::SerializeSeq;
 use serde::{Serialize, Serializer};
 
 use crate::prelude::*;
-use crate::symboltable::SymbolTable;
 
-fn tree_symbolize<S, SCOPEID, SYMID>(
-    _tree: &ego_tree::Tree<SymbolTable<SCOPEID, SYMID>>,
-    _s: S,
-) -> Result<S::Ok, S::Error>
-where
-    S: Serializer,
-    SCOPEID: ScopeIdTraits,
-    SYMID: SymIdTraits,
-{
-    panic!()
-}
+use crate::tree::Tree;
 
-
-struct Edges<SCOPEID> {
-    edges: Vec<(SCOPEID, Vec<SCOPEID>)>,
-}
-
-impl <SCOPEID> Edges<SCOPEID> {
-}
-
-impl<SCOPEID, SYMID, SYMVALUE> Serialize for SymbolTree<SCOPEID, SYMID, SYMVALUE>
+impl<SCOPEID, SYMID> Serialize for Tree<SCOPEID, SYMID>
 where
     SCOPEID: ScopeIdTraits + Serialize,
     SYMID: SymIdTraits + Serialize,
-    SYMVALUE: ValueTrait,
 {
-    fn serialize<S>(&self, _serializer: S) -> Result<S::Ok, S::Error>
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-   let mut state = _serializer.serialize_struct("SymbolTree", 3)?;
-        state.serialize_field("root_scope_id", &self.root_scope_id)?;
-        state.serialize_field("next_scope_id", &self.next_scope_id)?;
-        state.serialize_field("scope_id_to_symbol_info", &self.scope_id_to_symbol_info)?;
-        state.end()
+        let scopes = self.get_scopes_info();
+
+        let mut seq = serializer.serialize_seq(Some(scopes.len()))?;
+
+        for e in scopes.iter() {
+            seq.serialize_element(e)?;
+        }
+
+        seq.end()
     }
 }
 

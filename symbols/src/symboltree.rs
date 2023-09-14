@@ -161,7 +161,7 @@ where
         Ok(symbol_id)
     }
 
-    // TODO this is bad
+    // @TODO this is bad, get rid of it
     pub fn dump_syms(&self, scope_id: SCOPEID) {
         let syms = self.etree.get_scope(scope_id).unwrap();
         println!("{:#?}", syms.name_to_id.keys());
