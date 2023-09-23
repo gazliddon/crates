@@ -7,7 +7,9 @@ mod types;
 mod tree;
 
 #[cfg(feature="serde_support")]
-mod serialize;
+pub mod serialize;
+#[cfg(feature="serde_support")]
+pub mod deserialize;
 
 pub mod scopenav;
 pub mod symboltreereader;

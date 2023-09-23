@@ -12,12 +12,16 @@ regex={workspace=true}
 
 serde = { version = "*", features = ["derive"], optional=true}
 serde_json = {version = "*", optional=true}
+serde_json_any_key= {version="*", optional=true}
 ego-tree="*"
+
+
 
 [dev-dependencies]
 utils={path="../utils"}
 pretty_assertions={workspace=true}
 
 [features]
-serde_support =["dep:serde", "dep:serde_json"]
+default=["serde_support"]
+serde_support =["dep:serde", "dep:serde_json", "dep:serde_json_any_key"]
 

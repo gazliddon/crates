@@ -632,6 +632,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "serde_json_any_key"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b2c409ca1209f6c4741028b9e1e56d973c868ffaef25ffbaf2471e486c2a74b3"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "serde_yaml"
 version = "0.9.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -678,6 +688,7 @@ dependencies = [
  "regex",
  "serde",
  "serde_json",
+ "serde_json_any_key",
  "serde_yaml",
  "sha1 0.10.5",
  "symbols",
@@ -696,6 +707,7 @@ dependencies = [
  "regex",
  "serde",
  "serde_json",
+ "serde_json_any_key",
  "thin-vec",
  "utils",
 ]

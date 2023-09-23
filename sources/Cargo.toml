@@ -26,4 +26,5 @@ serde_yaml = "*"
 sha1="*"
 symbols = {path = "../symbols", features=["serde_support"]}
 utils = {path = "../utils"}
+serde_json_any_key = "2.0.0"
 

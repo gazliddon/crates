@@ -1,12 +1,12 @@
+use super::prelude::*;
 use super::symboltable::SymbolTable;
+use std::collections::HashMap;
 
 type ESymbolTreeTree<SCOPEID, SYMID> = ego_tree::Tree<SymbolTable<SCOPEID, SYMID>>;
 type ESymbolNodeRef<'a, SCOPEID, SYMID> = ego_tree::NodeRef<'a, SymbolTable<SCOPEID, SYMID>>;
 type ESymbolNodeId = ego_tree::NodeId;
 type ESymbolNodeMut<'a, SCOPEID, SYMID> = ego_tree::NodeMut<'a, SymbolTable<SCOPEID, SYMID>>;
 
-use super::prelude::*;
-use std::collections::HashMap;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub(crate) struct Tree<SCOPEID, SYMID>
@@ -17,6 +17,15 @@ where
     tree: ego_tree::Tree<SymbolTable<SCOPEID, SYMID>>,
     scope_id_to_node_id: HashMap<SCOPEID, ESymbolNodeId>,
 }
+
+impl<SCOPEID,SYMID> Default for Tree<SCOPEID,SYMID> 
+where
+    SCOPEID: ScopeIdTraits,
+    SYMID: SymIdTraits {
+        fn default() -> Self {
+        panic!()
+    }
+    }
 
 // Internal
 impl<SCOPEID, SYMID> Tree<SCOPEID, SYMID>

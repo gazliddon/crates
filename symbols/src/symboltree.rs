@@ -19,47 +19,45 @@ where
     SCOPEID: ScopeIdTraits,
     SYMID: SymIdTraits,
 {
-    parent: Option<&'a SymbolTable<SCOPEID,SYMID>>,
-    table: &'a SymbolTable<SCOPEID,SYMID>
+    parent: Option<&'a SymbolTable<SCOPEID, SYMID>>,
+    table: &'a SymbolTable<SCOPEID, SYMID>,
 }
-
-////////////////////////////////////////////////////////////////////////////////
-// SymbolTree
-// type ESymbolTreeTree<SCOPEID, SYMID> = ego_tree::Tree<SymbolTable<SCOPEID, SYMID>>;
-// type ESymbolNodeRef<'a, SCOPEID, SYMID> = ego_tree::NodeRef<'a, SymbolTable<SCOPEID, SYMID>>;
-// type ESymbolNodeId = ego_tree::NodeId;
-// type ESymbolNodeMut<'a, SCOPEID, SYMID> = ego_tree::NodeMut<'a, SymbolTable<SCOPEID, SYMID>>;
 
 #[cfg(feature = "serde_support")]
 pub trait ValueTrait: Clone + Serialize {}
-#[derive(Debug, PartialEq, Clone)]
-pub struct ScopeInfo<SCOPEID> 
-where
-    SCOPEID: ScopeIdTraits,
-    {
-    pub name: String,
-    pub fqn: String,
-    pub scope_id: SCOPEID,
-    pub parent_id: Option<SCOPEID>
-}
 
 #[cfg(not(feature = "serde_support"))]
 pub trait ValueTrait: Clone {}
 
+#[derive(Debug, PartialEq, Clone)]
+pub struct ScopeInfo<SCOPEID>
+where
+    SCOPEID: ScopeIdTraits,
+{
+    pub name: String,
+    pub fqn: String,
+    pub scope_id: SCOPEID,
+    pub parent_id: Option<SCOPEID>,
+}
+
 impl ValueTrait for i64 {}
 impl ValueTrait for u64 {}
 
+
 #[derive(Debug, PartialEq, Eq, Clone)]
+// #[cfg_attr(feature = "serde_support", derive(Serialize,Deserialize))]
 pub struct SymbolTree<SCOPEID, SYMID, SYMVALUE>
 where
     SCOPEID: ScopeIdTraits,
     SYMID: SymIdTraits,
-    SYMVALUE: ValueTrait,
+    SYMVALUE: ValueTrait ,
 {
-    pub (crate) etree: Tree<SCOPEID,SYMID>,
+    // #[cfg_attr(feature = "serde_support", serde(skip))]
+    pub(crate) etree: Tree<SCOPEID, SYMID>,
     pub(crate) root_scope_id: SCOPEID,
     pub(crate) next_scope_id: SCOPEID,
 
+    // #[cfg_attr(feature = "serde_support", serde(serialize_with = "serialize_vals"))]
     pub(crate) scope_id_to_symbol_info:
         HashMap<SymbolScopeId<SCOPEID, SYMID>, SymbolInfo<SCOPEID, SYMID, SYMVALUE>>,
 }
@@ -74,14 +72,19 @@ where
     fn default() -> Self {
         let root_scope = 0;
 
-        let root_table: SymbolTable<SCOPEID, SYMID> =
-            SymbolTable::new("", "", root_scope.into(), None,SymbolResolutionBarrier::default());
-        let etree= Tree::new(root_table);
+        let root_table: SymbolTable<SCOPEID, SYMID> = SymbolTable::new(
+            "",
+            "",
+            root_scope.into(),
+            None,
+            SymbolResolutionBarrier::default(),
+        );
+        let etree = Tree::new(root_table);
 
         Self {
             etree,
             root_scope_id: root_scope.into(),
-            next_scope_id: (root_scope+1).into(),
+            next_scope_id: (root_scope + 1).into(),
             scope_id_to_symbol_info: Default::default(),
         }
     }
@@ -111,7 +114,8 @@ where
         name: &str,
         scope_id: SCOPEID,
     ) -> Result<(), SymbolError> {
-        self.etree.on_value_mut(scope_id, |syms| syms.remove_symbol(name))
+        self.etree
+            .on_value_mut(scope_id, |syms| syms.remove_symbol(name))
     }
 
     fn on_symbol_mut<F, R>(
@@ -144,7 +148,8 @@ where
         scope_id: SCOPEID,
         symbol_id: SymbolScopeId<SCOPEID, SYMID>,
     ) -> Result<(), SymbolError> {
-        self.etree.on_value_mut(scope_id, |syms| syms.add_reference_symbol(name, symbol_id))
+        self.etree
+            .on_value_mut(scope_id, |syms| syms.add_reference_symbol(name, symbol_id))
     }
     pub fn create_symbol_in_scope(
         &mut self,
@@ -412,19 +417,18 @@ mod test {
 
     #[test]
     fn test_sym_tree() {
-
         let syms = [
-            ("::scope_a::gaz",10),
-            ("::scope_b::gaz",20),
-            ("::gaz",30),
+            ("::scope_a::gaz", 10),
+            ("::scope_b::gaz", 20),
+            ("::gaz", 30),
         ];
 
         let mut st = SymTree::default();
 
         let mut w = st.get_root_writer();
 
-        for (name,val) in syms {
-            w.create_and_set_symbol(name, val);
+        for (name, val) in syms {
+            w.create_and_set_symbol(name, val).expect("Can't create symbols");
         }
 
         let mut w = st.get_root_writer();

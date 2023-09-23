@@ -1,10 +1,29 @@
-
 #[cfg(feature = "serde_support")]
 use serde::{Deserialize, Serialize};
+
+#[cfg(feature = "serde_support")]
+pub trait DoSerialize: Serialize {}
+
+#[cfg(not(feature = "serde_support"))]
+pub trait DoSerialize {}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Traits
 
+#[cfg(feature = "serde_support")]
+pub trait ScopeIdTraits:
+    std::hash::Hash
+    + std::ops::AddAssign<u64>
+    + std::clone::Clone
+    + std::cmp::Eq
+    + From<u64>
+    + Copy
+    + Serialize
+    + Default
+{
+}
+
+#[cfg(not( feature = "serde_support" ))]
 pub trait ScopeIdTraits:
     std::hash::Hash
     + std::ops::AddAssign<u64>
@@ -16,6 +35,20 @@ pub trait ScopeIdTraits:
 {
 }
 
+#[cfg(feature = "serde_support")]
+pub trait SymIdTraits:
+    std::hash::Hash
+    + std::ops::AddAssign<u64>
+    + Clone
+    + Eq
+    + From<u64>
+    + Copy
+    + Serialize
+    + Default
+{
+}
+
+#[cfg(not( feature = "serde_support" ))]
 pub trait SymIdTraits:
     std::hash::Hash
     + std::ops::AddAssign<u64>
@@ -27,14 +60,15 @@ pub trait SymIdTraits:
 {
 }
 
-pub trait SymValueTraits: Clone {}
+pub trait SymValueTraits: Clone + DoSerialize {}
 
+impl DoSerialize for u64 {}
 impl ScopeIdTraits for u64 {}
 impl SymIdTraits for u64 {}
 
 ////////////////////////////////////////////////////////////////////////////////
 #[derive(Debug, PartialEq, Eq, Clone, Hash, Copy)]
-#[cfg_attr(feature = "serde_support", derive(Serialize, Deserialize))] 
+#[cfg_attr(feature = "serde_support", derive(Serialize, Deserialize))]
 pub struct SymbolScopeId<SCOPEID, SYMID>
 where
     SCOPEID: ScopeIdTraits,
@@ -61,7 +95,7 @@ where
 /// Holds information about a symbol
 
 #[derive(Debug, PartialEq, Eq, Clone)]
-#[cfg_attr(feature = "serde_support", derive(Serialize, Deserialize))] 
+#[cfg_attr(feature = "serde_support", derive(Serialize, Deserialize))]
 pub struct SymbolInfo<SCOPEID, SYMID, SYMVALUE>
 where
     SCOPEID: ScopeIdTraits,
@@ -102,9 +136,8 @@ where
     }
 }
 
-#[derive(PartialEq, Eq, Clone,Debug)]
-pub enum SymbolError
-{
+#[derive(PartialEq, Eq, Clone, Debug)]
+pub enum SymbolError {
     AlreadyDefined,
     InvalidScope,
     Mismatch,
@@ -113,4 +146,3 @@ pub enum SymbolError
     InvalidId,
     HitScopeBarrier,
 }
-

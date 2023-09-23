@@ -168,14 +168,14 @@ impl BinToWrite {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SourceDatabase {
+
     id_to_source_file: HashMap<u64, PathBuf>,
     mappings: SourceMapping,
+
     pub bin_written: Vec<BinWriteDesc>,
     pub exec_addr: Option<usize>,
     pub file_name: PathBuf,
 
-    #[serde(skip)]
-    pub symbols: SymbolTree<u64,u64,i64>,
     #[serde(skip)]
     range_to_mapping: HashMap<std::ops::Range<usize>, Mapping>,
     #[serde(skip)]
@@ -197,7 +197,6 @@ impl Default for SourceDatabase {
             source_file_to_id: Default::default(),
             mappings: Default::default(),
             id_to_source_file: Default::default(),
-            symbols: Default::default(),
             range_to_mapping: Default::default(),
             addr_to_mapping: Default::default(),
             phys_addr_to_mapping: Default::default(),
@@ -232,11 +231,12 @@ fn rel_path<P1: AsRef<Path>, P2: AsRef<Path>>(path: P1, base: P2) -> Option<Path
 }
 
 impl SourceDatabase {
-    pub fn write_json<P: AsRef<Path>>(&self, file: P) -> std::io::Result<()> {
+    pub fn write_json<P: AsRef<Path>>(&self, file: P) -> std::io::Result<String> {
         let mut copy: SourceDatabase = self.clone();
         copy.file_name = utils::fileutils::abs_path_from_cwd(&file);
         let j = serde_json::to_string_pretty(&copy).expect("Unable to serialize to json");
-        fs::write(file, j)
+        fs::write(file, j)?;
+        Ok( copy.file_name.to_string_lossy().to_string())
     }
 
     pub fn new(
@@ -256,7 +256,7 @@ impl SourceDatabase {
             id_to_source_file,
             exec_addr,
             mappings: mappings.clone(),
-            symbols: symbols.clone(),
+            // symbols: symbols.clone(),
             bin_written: written.to_vec(),
 
             ..Default::default()

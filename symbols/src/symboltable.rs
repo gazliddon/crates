@@ -38,7 +38,7 @@ where
     pub(crate) name_to_id: HashMap<String, SYMID>,
     ref_name_to_symbol_id: HashMap<String, SymbolScopeId<SCOPEID, SYMID>>,
     highest_id: SYMID,
-    scope_id: SCOPEID,
+    pub (crate) scope_id: SCOPEID,
     symbol_resolution_barrier: SymbolResolutionBarrier,
 }
 
