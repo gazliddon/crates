@@ -3,15 +3,16 @@ members = ["emu6809","grl-eval","grl-sources","unraveler","grl-utils", "grl-symb
 resolver = "2"
 
 [workspace.dependencies]
+bitflags="1.3.2"
 pretty_assertions="1.4.0"
 anyhow="1.0.75"
 lazy_static="1.4.0"
 thin-vec="0.2.12"
 thiserror="1.0.48"
 regex="1.9.5"
+sha1 = "0.5.0"
 
 [patch.crates-io]
 grl-symbols = {path = "grl-symbols"}
 grl-utils = {path = "grl-utils"}
 grl-eval = {path="grl-eval"}
-
