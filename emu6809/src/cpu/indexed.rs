@@ -45,8 +45,12 @@ impl IndexModes {
     }
 }
 
+#[derive(Default, Clone,Copy,PartialEq,Debug)]
+#[repr(transparent)]
+pub struct IndexedFlags(u8);
+
 bitflags::bitflags! {
-    pub struct IndexedFlags: u8 {
+    impl IndexedFlags: u8 {
         const NOT_IMM     = 0b_1000_0000;
         const R           = 0b_0110_0000;
         const D           = 0b_0011_1111;
@@ -60,7 +64,7 @@ bitflags::bitflags! {
 
 impl IndexedFlags {
     fn get_offset(self) -> u16 {
-        let mut v = u16::from(self.bits & IndexedFlags::OFFSET.bits());
+        let mut v = u16::from(self.bits() & IndexedFlags::OFFSET.bits());
 
         if self.contains(Self::OFFSET_SIGN) {
             v |= 0xfff0
@@ -69,11 +73,11 @@ impl IndexedFlags {
     }
 
     pub fn new(val: u8) -> Self {
-        IndexedFlags { bits: val }
+        IndexedFlags(val)
     }
 
     pub fn is_ea(self) -> bool {
-        self.bits == IndexedFlags::IS_EA.bits()
+        self.bits() == IndexedFlags::IS_EA.bits()
     }
 
     pub fn is_indirect(self) -> bool {
@@ -85,7 +89,7 @@ impl IndexedFlags {
     }
 
     fn get_reg(self) -> RegEnum {
-        match (self.bits & (IndexedFlags::R.bits())) >> 5 {
+        match (self.bits() & (IndexedFlags::R.bits())) >> 5 {
             0 => RegEnum::X,
             1 => RegEnum::Y,
             2 => RegEnum::U,
@@ -101,7 +105,7 @@ impl IndexedFlags {
         }
 
         if self.not_imm() {
-            let index_type = self.bits & IndexedFlags::TYPE.bits();
+            let index_type = self.bits() & IndexedFlags::TYPE.bits();
 
             match index_type {
                 0b0000 => IndexModes::RPlus(r), //               ,R+              2 0 |

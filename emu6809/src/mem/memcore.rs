@@ -68,9 +68,11 @@ pub trait MemoryIO {
     }
 
     fn get_sha1_string(&self) -> String {
+        use sha1::*;
         let mut m = Sha1::new();
         self.update_sha1(&mut m);
-        m.digest().to_string()
+        let m = m.finalize();
+        format!("{:?}",m)
     }
 
     fn is_in_range(&self, addr: usize) -> bool {

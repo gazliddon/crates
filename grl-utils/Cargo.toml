@@ -11,6 +11,7 @@ thiserror = {workspace=true}
 lazy_static = {workspace=true}
 anyhow = {workspace=true}
 pretty_assertions={workspace=true}
+sha1 = "0.10.6"
 
 base16ct="*"
 base64ct="*"
@@ -23,5 +24,4 @@ regex = "*"
 serde = { version = "*", features = ["derive"] }
 serde_json = "*"
 serde_yaml = "*"
-sha1="*"
 

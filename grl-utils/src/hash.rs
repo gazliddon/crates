@@ -1,10 +1,13 @@
 
 pub fn get_hash(text : &[u8]) -> String {
     let mut dest= [0u8; 128];
-    use sha1::{Digest, Sha1};
+
+    use sha1::{Sha1, Digest};
+
     let mut hasher = Sha1::new();
     hasher.update(text);
-    let ret = hasher.clone().finalize();
+    let ret = hasher.finalize();
+
     let ret = base16ct::lower::encode_str(&ret, &mut dest).unwrap();
     ret.to_string()
 }

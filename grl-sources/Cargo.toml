@@ -6,11 +6,12 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
-thin-vec = {workspace=true}
-thiserror = {workspace=true}
-lazy_static = {workspace=true}
-anyhow = {workspace=true}
-pretty_assertions={workspace=true}
+
+thin-vec="0.2.12"
+thiserror="1.0.48"
+lazy_static="1.4.0"
+anyhow="1.0.75"
+pretty_assertions="1.4.0"
 
 base16ct="*"
 base64ct="*"
@@ -23,7 +24,6 @@ regex = "*"
 serde = { version = "*", features = ["derive"] }
 serde_json = "*"
 serde_yaml = "*"
-sha1="*"
 
 symbols = {version = "*", features=["serde_support"], package="grl-symbols"}
 utils = {version = "*", package="grl-utils"}

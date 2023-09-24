@@ -59,6 +59,7 @@ impl<E: ByteOrder> MemoryIO for MemBlock<E> {
     }
 
     fn update_sha1(&self, digest: &mut Sha1) {
+        use sha1::Digest;
         digest.update(&self.data);
     }
 
