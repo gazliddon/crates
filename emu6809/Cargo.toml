@@ -1,16 +1,18 @@
 [package]
 name = "emu6809"
 version = "0.1.0"
-authors = ["Gaz Liddon MBP19 <gaz@gazaxian.com>"]
+authors = ["Gaz Liddon"]
+categories =["emulation", "motorola", "6809"]
 edition = "2021"
 build = "build.rs"
+description = "In development 6809 emulator"
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/gazliddon/crates"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [build-dependencies]
-sha1 = "0.10.1"
-
+sha1 = {workspace=true}
 bitflags={ workspace=true }
-
 serde = { version = "*", features = ["derive"] }
 serde_yaml = "*"
 serde_json = "*"
@@ -18,8 +20,7 @@ serde_json = "*"
 [dependencies]
 num="*"
 byteorder="*"
-sha1 = "0.5.0"
-
+sha1 = {workspace=true}
 bitflags= {workspace=true}
 lazy_static = {workspace=true}
 thiserror={workspace=true}
@@ -29,6 +30,5 @@ serde_yaml = "*"
 serde_json = "*"
 
 log="*"
-notify = "*"
 itertools = "*"
 
