@@ -2,7 +2,7 @@
 name = "emu6809"
 version = "0.1.0"
 authors = ["Gaz Liddon"]
-categories =["emulation", "motorola", "6809"]
+categories =["Emulators"]
 edition = "2021"
 build = "build.rs"
 description = "In development 6809 emulator"
