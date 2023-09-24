@@ -1,5 +1,5 @@
 [package]
-name = "symbols"
+name = "grl-symbols"
 version = "0.1.0"
 edition = "2021"
 
@@ -15,10 +15,8 @@ serde_json = {version = "*", optional=true}
 serde_json_any_key= {version="*", optional=true}
 ego-tree="*"
 
-
-
 [dev-dependencies]
-utils={path="../utils"}
+grl-utils="*"
 pretty_assertions={workspace=true}
 
 [features]

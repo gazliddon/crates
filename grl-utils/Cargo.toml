@@ -1,5 +1,5 @@
 [package]
-name = "utils"
+name = "grl-utils"
 version = "0.2.0"
 authors = ["Gaz Liddon"]
 edition = "2021"

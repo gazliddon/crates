@@ -1,5 +1,5 @@
 [workspace]
-members = ["emu6809","eval","sources","unraveler","utils"]
+members = ["emu6809","grl-eval","grl-sources","unraveler","grl-utils", "grl-symbols"]
 resolver = "2"
 
 [workspace.dependencies]
@@ -9,3 +9,9 @@ lazy_static="1.4.0"
 thin-vec="0.2.12"
 thiserror="1.0.48"
 regex="1.9.5"
+
+[patch.crates-io]
+grl-symbols = {path = "grl-symbols"}
+grl-utils = {path = "grl-utils"}
+grl-eval = {path="grl-eval"}
+

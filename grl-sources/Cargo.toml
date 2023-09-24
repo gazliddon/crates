@@ -1,5 +1,5 @@
 [package]
-name = "sources"
+name = "grl-sources"
 version = "0.2.0"
 authors = ["Gaz Liddon"]
 edition = "2021"
@@ -24,7 +24,7 @@ serde = { version = "*", features = ["derive"] }
 serde_json = "*"
 serde_yaml = "*"
 sha1="*"
-symbols = {path = "../symbols", features=["serde_support"]}
-utils = {path = "../utils"}
-serde_json_any_key = "2.0.0"
+
+symbols = {version = "*", features=["serde_support"], package="grl-symbols"}
+utils = {version = "*", package="grl-utils"}
 

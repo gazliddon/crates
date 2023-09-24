@@ -3,7 +3,6 @@ use super::isa::Dbase;
 use super::mem::MemReader;
 use super::mem::*;
 use super::byteorder;
-// use serde_json::to_string;
 
 pub struct Disassembly {
     pub text: String,
@@ -14,7 +13,6 @@ pub struct Disassembly {
 pub struct DissCtx {
     pub data: MemBlock<byteorder::BigEndian>,
 }
-
 
 impl DissCtx {
     pub fn from_matches() -> Result<Self, Box<dyn std::error::Error>> {
