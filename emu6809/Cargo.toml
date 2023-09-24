@@ -13,22 +13,22 @@ repository = "https://github.com/gazliddon/crates"
 [build-dependencies]
 sha1 = {workspace=true}
 bitflags={ workspace=true }
-serde = { version = "*", features = ["derive"] }
-serde_yaml = "*"
-serde_json = "*"
+serde = { workspace=true, features = ["derive"] }
+serde_yaml = {workspace= true}
+serde_json = {workspace= true}
 
 [dependencies]
-num="*"
-byteorder="*"
+num="0.4.1"
+byteorder="1.4.3"
 sha1 = {workspace=true}
 bitflags= {workspace=true}
 lazy_static = {workspace=true}
 thiserror={workspace=true}
 
-serde = { version = "*", features = ["derive"] }
-serde_yaml = "*"
-serde_json = "*"
+serde = { workspace="true", features = ["derive"] }
+serde_yaml = {workspace= true}
+serde_json = {workspace= true}
 
-log="*"
-itertools = "*"
+log={workspace=true}
+itertools = {workspace=true}
 
