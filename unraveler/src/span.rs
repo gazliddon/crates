@@ -76,7 +76,7 @@ where
 
     pub fn take(&self, n: usize) -> Result<Self, ParseErrorKind> {
         if n > self.len() {
-            Err(ParseErrorKind::TookTooMany.into())
+            Err(ParseErrorKind::TookTooMany)
         } else {
             Ok(Self::new(self.x_span, self.position , n))
         }
@@ -84,7 +84,7 @@ where
 
     pub fn drop(&self, n: usize) -> Result<Self, ParseErrorKind> {
         if n > self.len() {
-            Err(ParseErrorKind::SkippedTooMany.into())
+            Err(ParseErrorKind::SkippedTooMany)
         } else {
             Ok(Self::new(self.x_span, self.position + n, self.len - n))
         }
@@ -92,7 +92,7 @@ where
 
     pub fn split(&self, n: usize) -> Result<(Self, Self), ParseErrorKind> {
         if n > self.len() {
-            Err(ParseErrorKind::IllegalSplitIndex.into())
+            Err(ParseErrorKind::IllegalSplitIndex)
         } else {
             let rest = self.drop(n)?;
             let matched = self.take(n)?;
@@ -142,7 +142,7 @@ where
 {
     type Item = I;
 
-    fn at<'a>(&'a self, index: usize) -> Option<&'a Self::Item> {
+    fn at(&self, index: usize) -> Option<&Self::Item> {
         self.as_slice().get(index)
     }
 

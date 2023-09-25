@@ -29,7 +29,7 @@ where
 
 pub trait Collection {
     type Item;
-    fn at<'a>(&'a self, index: usize) -> Option<&'a Self::Item>;
+    fn at(&self, index: usize) -> Option<&Self::Item>;
     fn length(&self) -> usize;
 }
 
@@ -75,7 +75,7 @@ where
 impl<X, const N: usize> Collection for &[X; N] {
     type Item = X;
 
-    fn at<'a>(&'a self, index: usize) -> Option<&'a Self::Item> {
+    fn at(&self, index: usize) -> Option<&Self::Item> {
         self.get(index)
     }
 
@@ -87,7 +87,7 @@ impl<X, const N: usize> Collection for &[X; N] {
 impl<X, const N: usize> Collection for [X; N] {
     type Item = X;
 
-    fn at<'a>(&'a self, index: usize) -> Option<&'a Self::Item> {
+    fn at(&self, index: usize) -> Option<&Self::Item> {
         self.get(index)
     }
 

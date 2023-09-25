@@ -62,19 +62,19 @@ where
             }
 
             // Have we hit the predicate?
-            let r = pred.parse(i.clone());
+            let r = pred.parse(i);
 
             match r {
                 Ok((rest, _)) => return Ok((i, out)),
                 Err(e) => {
                     if e.is_fatal() {
-                        return Err(e)
+                        return Err(e);
                     }
                 }
                 _ => (),
             }
 
-            let (rest, matched) = p.parse(i.clone())?;
+            let (rest, matched) = p.parse(i)?;
             i = rest;
             out.push(matched)
         }
@@ -327,7 +327,7 @@ where
     <SP as Collection>::Item: PartialEq + Item,
     E: ParseError<SP>,
 {
-    let r = move |input: SP| -> Result<(SP, SP), E> {
+    move |input: SP| -> Result<(SP, SP), E> {
         if input.length() == 0 {
             Ok((input.clone(), input.clone()))
         } else {
@@ -344,9 +344,7 @@ where
                 ParseErrorKind::UntilNotMatched,
             ))
         }
-    };
-
-    r
+    }
 }
 
 pub fn is_a<SP, C, E>(
@@ -360,7 +358,7 @@ where
     <<SP as Collection>::Item as Item>::Kind: PartialEq<<<C as Collection>::Item as Item>::Kind>,
     E: ParseError<SP>,
 {
-    let r = move |input: SP| -> Result<(SP, <<SP as Collection>::Item as Item>::Kind), E> {
+    move |input: SP| -> Result<(SP, <<SP as Collection>::Item as Item>::Kind), E> {
         if input.length() == 0 {
             Err(ParseError::from_error(input, ParseErrorKind::NoMatch))
         } else {
@@ -384,7 +382,5 @@ where
 
             Err(ParseError::from_error(input, ParseErrorKind::NoMatch))
         }
-    };
-
-    r
+    }
 }
