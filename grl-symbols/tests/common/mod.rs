@@ -1,4 +1,4 @@
-use symbols::*;
+use grl_symbols::*;
 mod dummy;
 mod serialize;
 

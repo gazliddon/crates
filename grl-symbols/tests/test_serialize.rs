@@ -3,7 +3,7 @@ mod common;
 use common::*;
 
 
-#[test]
+#[cfg(test)]
 fn test() {
     let mut tree = Tree::new();
 

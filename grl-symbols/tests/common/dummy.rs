@@ -1,4 +1,4 @@
-use symbols::prelude::*;
+use grl_symbols::prelude::*;
 use serde::{ Serialize, Deserialize };
 
 pub type SymbolId = u64;
