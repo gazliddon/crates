@@ -185,7 +185,7 @@ impl TextFile {
     }
 
     fn rehash(&mut self) {
-        self.hash = utils::hash::get_hash_from_str(&self.source)
+        self.hash = grl_utils::hash::get_hash_from_str(&self.source)
     }
 
     fn get_line_range(&self, line: usize) -> EditResult<&std::ops::Range<usize>> {

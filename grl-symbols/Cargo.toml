@@ -6,20 +6,18 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = {workspace=true}
-thin-vec = {workspace=true}
-regex={workspace=true}
-
-serde = { version = "*", features = ["derive"], optional=true}
-serde_json = {version = "*", optional=true}
-serde_json_any_key= {version="*", optional=true}
-ego-tree="*"
+anyhow="1.0.75"
+regex = "1.9.5"
+thin-vec="0.2.12"
+ego-tree= "0.6.2"
+serde = { version="1.0.188", features=[ "derive" ], optional=true}
+serde_json ={  version = "1.0.107", optional=true }
 
 [dev-dependencies]
-grl-utils="*"
-pretty_assertions={workspace=true}
+grl-utils={path="../grl-utils"}
+pretty_assertions="1.4.0"
 
 [features]
 default=["serde_support"]
-serde_support =["dep:serde", "dep:serde_json", "dep:serde_json_any_key"]
+serde_support =["dep:serde", "dep:serde_json"]
 

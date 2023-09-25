@@ -1,10 +1,15 @@
 use super::{SourceFile, SourceFiles, AsmSource, Position, TextEditTrait, error::*, };
-use path_clean::PathClean;
-use std::collections::HashMap;
-use std::fs;
-use std::path::{Path, PathBuf};
 
-use symbols::SymbolTree;
+use path_clean::PathClean;
+
+use std::{
+    collections::HashMap,
+    fs,
+    path::{Path, PathBuf},
+};
+
+use grl_symbols::SymbolTree;
+use grl_utils::fileutils;
 
 pub trait LocationTrait: Clone {
     fn get_line_number(&self) -> usize;
@@ -78,7 +83,7 @@ impl Mapping {
 
 }
 
-use utils::Stack;
+use grl_utils::Stack;
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct SourceMapping {
@@ -233,7 +238,7 @@ fn rel_path<P1: AsRef<Path>, P2: AsRef<Path>>(path: P1, base: P2) -> Option<Path
 impl SourceDatabase {
     pub fn write_json<P: AsRef<Path>>(&self, file: P) -> std::io::Result<String> {
         let mut copy: SourceDatabase = self.clone();
-        copy.file_name = utils::fileutils::abs_path_from_cwd(&file);
+        copy.file_name = fileutils::abs_path_from_cwd(&file);
         let j = serde_json::to_string_pretty(&copy).expect("Unable to serialize to json");
         fs::write(file, j)?;
         Ok( copy.file_name.to_string_lossy().to_string())

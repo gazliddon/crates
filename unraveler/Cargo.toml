@@ -11,4 +11,4 @@ repository = "https://github.com/gazliddon/crates"
 
 [dependencies]
 paste="1.0.14"
-thiserror = {workspace=true}
+thiserror="1.0.48"

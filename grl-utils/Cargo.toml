@@ -6,22 +6,21 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
-thin-vec = {workspace=true}
-thiserror = {workspace=true}
-lazy_static = {workspace=true}
-anyhow = {workspace=true}
-pretty_assertions={workspace=true}
-sha1 = "0.10.6"
-
+anyhow="1.0.75"
 base16ct="*"
 base64ct="*"
-ego-tree="*"
-env_logger="*"
-log="*"
-path-clean="*"
-pathdiff="*"
-regex = "*"
-serde = { version = "*", features = ["derive"] }
-serde_json = "*"
-serde_yaml = "*"
+ego-tree="0.6.2"
+env_logger="0.10.0"
+lazy_static="1.4.0"
+log="0.4.20"
+path-clean="1.0.1"
+pathdiff="0.2.1"
+pretty_assertions="1.4.0"
+regex = "1.9.5"
+serde = { version="1.0.188", features=[ "derive" ]}
+serde_json = "1.0.107"
+serde_yaml = "0.9.25"
+sha1 = "0.10.6"
+thin-vec="0.2.12"
+thiserror="1.0.48"
 
