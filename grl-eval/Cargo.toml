@@ -7,5 +7,7 @@ edition = "2021"
 
 [dependencies]
 thiserror="1.0.48"
+
+[dev-dependencies]
 pretty_assertions="1.4.0"
 

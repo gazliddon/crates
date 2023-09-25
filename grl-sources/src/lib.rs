@@ -20,3 +20,7 @@ pub use sourcefiles::*;
 pub use sourceinfo::*;
 pub use sourcestore::*;
 pub use textedit::*;
+
+// Re-exports
+pub use grl_utils;
+pub use grl_symbols;
