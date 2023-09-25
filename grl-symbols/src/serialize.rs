@@ -29,8 +29,7 @@ where
 {
     pub fn to_json(&self) -> String {
         let x: Seriablizable<SCOPEID, SYMID, SYMVALUE> = self.into();
-        let y = serde_json::to_string_pretty(&x).expect("Error!");
-        y
+        serde_json::to_string_pretty(&x).expect("Error!")
     }
 }
 
@@ -42,7 +41,7 @@ where
 {
     pub fn from_json(json_as_string: &'a str) -> Self {
         let y: Seriablizable<SCOPEID, SYMID, SYMVALUE> =
-            serde_json::from_str(&json_as_string).expect("Error!");
+            serde_json::from_str(json_as_string).expect("Error!");
         y.into()
     }
 }

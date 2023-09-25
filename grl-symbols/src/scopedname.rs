@@ -64,9 +64,9 @@ impl<'a> ScopedName<'a> {
         let absolute = !path.is_empty() && path[0].is_empty();
 
         let path : ThinVec<_> = if absolute {
-            path[1..].into_iter().map(|p| *p).collect()
+            path[1..].iter().copied().collect()
         } else {
-            path.into_iter().map(|p| *p).collect()
+            path.iter().copied().collect()
         };
 
         Self {
@@ -129,9 +129,9 @@ impl<'a> ScopePath<'a> {
         let absolute = !splits.is_empty() && splits[0].is_empty();
 
         let path : ThinVec<_> = if absolute {
-            splits[1..].into_iter().map(|p| *p).collect()
+            splits[1..].iter().copied().collect()
         } else {
-            splits.into_iter().map(|p| p).collect()
+            splits.iter().copied().collect()
         };
 
         Self {

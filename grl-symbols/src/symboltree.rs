@@ -219,7 +219,7 @@ where
                 }
             }
 
-            if found == false {
+            if !found {
                 return Err(SymbolError::NotFound);
             }
         }
@@ -386,7 +386,7 @@ where
     fn get_and_inc_next_scope_id(&mut self) -> SCOPEID {
         let ret = self.next_scope_id;
         self.next_scope_id += 1;
-        ret.into()
+        ret
     }
 
     fn get_next_scope_id(&self) -> SCOPEID {

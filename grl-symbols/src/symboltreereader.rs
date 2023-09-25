@@ -1,6 +1,5 @@
-
-use super::symboltree::{ SymbolTree, ValueTrait };
 use super::prelude::*;
+use super::symboltree::{SymbolTree, ValueTrait};
 
 pub struct SymbolTreeReader<'a, SCOPEID, SYMID, SYMVALUE>
 where
@@ -29,15 +28,15 @@ where
         self.syms
     }
 
-
     pub fn get_symbol_info(
         &self,
         name: &str,
     ) -> Result<&SymbolInfo<SCOPEID, SYMID, SYMVALUE>, SymbolError> {
-        let scope = self.current_scope.clone();
-        let id = self
-            .syms
-            .resolve_label(name, scope, SymbolResolutionBarrier::default())?;
+        let id = self.syms.resolve_label(
+            name,
+            self.current_scope,
+            SymbolResolutionBarrier::default(),
+        )?;
 
         self.get_symbol_info_from_id(id)
     }

@@ -97,7 +97,7 @@ where
         &mut self,
         name: &str,
     ) -> Result<SymbolScopeId<SCOPEID, SYMID>, SymbolError> {
-        if let Ok(_) = self.get_symbol_id(name) {
+        if self.get_symbol_id(name).is_ok() {
             Err(SymbolError::AlreadyDefined)
         } else {
             let symbol_id = self.get_next_id();
@@ -161,7 +161,7 @@ where
         name: &str,
         symbol_id: SymbolScopeId<SCOPEID, SYMID>,
     ) -> Result<(), SymbolError> {
-        if let Some(_) = self.ref_name_to_symbol_id.get(name) {
+        if self.ref_name_to_symbol_id.get(name).is_some() {
             Err(SymbolError::AlreadyDefined)
         } else {
             self.ref_name_to_symbol_id
@@ -173,6 +173,6 @@ where
     fn get_next_id(&mut self) -> SYMID {
         let ret = self.highest_id;
         self.highest_id += 1;
-        ret.into()
+        ret
     }
 }
