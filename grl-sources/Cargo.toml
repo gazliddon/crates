@@ -16,7 +16,6 @@ thiserror="1.0.48"
 grl-symbols = {path="../grl-symbols", features=["serde_support"]}
 grl-utils = {path="../grl-utils"}
 
-
 [dev-dependencies]
 pretty_assertions="1.4.0"
 
