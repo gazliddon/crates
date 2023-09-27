@@ -227,6 +227,25 @@ impl TextFile {
         assert!(start_index <= end_index);
         Ok(start_index..end_index)
     }
+
+    /// Take an offset into the file and return a line / character position
+    pub fn offset_to_text_pos(&self, offset: usize) -> EditResult<TextPos> {
+        let source_len = self.source.len();
+
+        if offset >= source_len {
+            Err(EditErrorKind::IndexOutOfRange(offset, source_len))
+        } else {
+            for (line, l) in self.line_offsets.iter().enumerate() {
+                if l.contains(&offset) {
+                    let character = offset - l.start;
+                    let line = line;
+                    return Ok(TextPos { line, character });
+                }
+            }
+
+            panic!("This shouldn't happen")
+        }
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

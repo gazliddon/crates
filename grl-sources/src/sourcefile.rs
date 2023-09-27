@@ -10,7 +10,6 @@ pub struct SourceFile {
     pub source: TextFile,
 }
 
-
 impl SourceFile {
     pub fn new<P: AsRef<Path>>(file: P, source: &str, file_id : u64) -> Self {
         Self {
