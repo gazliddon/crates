@@ -136,13 +136,3 @@ where
     }
 }
 
-#[derive(PartialEq, Eq, Clone, Debug)]
-pub enum SymbolError {
-    AlreadyDefined,
-    InvalidScope,
-    Mismatch,
-    NotFound,
-    NoValue,
-    InvalidId,
-    HitScopeBarrier,
-}

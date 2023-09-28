@@ -5,6 +5,7 @@ mod symboltable;
 mod symboltree;
 mod types;
 mod tree;
+mod error;
 
 #[cfg(feature="serde_support")]
 pub mod serialize;
@@ -23,6 +24,7 @@ pub mod prelude {
     pub use super::symboltreewriter;
     pub use super::scopenav;
     pub use super::types::*;
+    pub use super::error::*;
 }
 
 pub use prelude::*;
