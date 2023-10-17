@@ -6,9 +6,6 @@ use crate::isa::AddrModeEnum;
 use log::warn;
 
 pub trait AddressLines {
-    // fn diss<M: MemoryIO>(_mem: &M, _ins: &mut InstructionDecoder) -> String {
-    //     panic!("NOT IMP {:?}", Self::name())
-    // }
 
     fn get_addr_mode() -> AddrModeEnum;
 

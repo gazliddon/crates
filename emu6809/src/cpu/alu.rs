@@ -9,56 +9,67 @@ fn a_or_b<T>(f: bool, a: T, b: T) -> T {
         b
     }
 }
-
+#[inline(always)]
 fn one_zero<T: num::One + num::Zero>(f: bool) -> T {
     a_or_b(f, T::one(), T::zero())
 }
 
+#[inline(always)]
 fn true_false<T: num::Zero + std::cmp::PartialEq>(v: &T) -> bool {
     *v != T::zero()
 }
 
+#[inline(always)]
 pub fn test_negative<T: GazAlu>(v: u32) -> bool {
     (v & T::hi_bit_mask()) != 0
 }
 
-pub fn test_zero<T: GazAlu>(v: u32) -> bool {
+#[inline(always)]
+fn test_zero<T: GazAlu>(v: u32) -> bool {
     T::from_u32(v) == T::zero()
 }
 
-pub fn test_overflow<T: GazAlu>(a: u32, b: u32, r: u32) -> bool {
+#[inline(always)]
+fn test_overflow<T: GazAlu>(a: u32, b: u32, r: u32) -> bool {
     ((a ^ b ^ r ^ (r >> 1)) & T::hi_bit_mask()) != 0
 }
 
-pub fn test_carry<T: GazAlu>(_a: u32, _b: u32, r: u32) -> bool {
+#[inline(always)]
+fn test_carry<T: GazAlu>(_a: u32, _b: u32, r: u32) -> bool {
     (r & (T::hi_bit_mask() << 1)) != 0
 }
 
-pub fn test_half<T: GazAlu>(a: u32, b: u32, r: u32) -> bool {
+#[inline(always)]
+fn test_half<T: GazAlu>(a: u32, b: u32, r: u32) -> bool {
     (a ^ b ^ r) & (T::half_bit_mask() << 1) != 0
 }
 
-pub fn get_negative<T: GazAlu>(v: u32) -> u8 {
+#[inline(always)]
+fn get_negative<T: GazAlu>(v: u32) -> u8 {
     a_or_b(test_negative::<T>(v), Flags::N.bits(), 0)
 }
 
-pub fn get_zero<T: GazAlu>(v: u32) -> u8 {
+#[inline(always)]
+fn get_zero<T: GazAlu>(v: u32) -> u8 {
     a_or_b(test_zero::<T>(v), Flags::Z.bits(), 0)
 }
 
-pub fn get_overflow<T: GazAlu>(a: u32, b: u32, r: u32) -> u8 {
+#[inline(always)]
+fn get_overflow<T: GazAlu>(a: u32, b: u32, r: u32) -> u8 {
     a_or_b(test_overflow::<T>(a, b, r), Flags::V.bits(), 0)
 }
 
-pub fn get_carry<T: GazAlu>(a: u32, b: u32, r: u32) -> u8 {
+#[inline(always)]
+fn get_carry<T: GazAlu>(a: u32, b: u32, r: u32) -> u8 {
     a_or_b(test_carry::<T>(a, b, r), Flags::C.bits(), 0)
 }
 
-pub fn get_half<T: GazAlu>(a: u32, b: u32, r: u32) -> u8 {
+#[inline(always)]
+fn get_half<T: GazAlu>(a: u32, b: u32, r: u32) -> u8 {
     a_or_b(test_half::<T>(a, b, r), Flags::H.bits(), 0)
 }
 
-pub fn nzvch<T: GazAlu>(f: &mut Flags, write_mask: u8, a: u32, b: u32, r: u32) -> T {
+fn nzvch<T: GazAlu>(f: &mut Flags, write_mask: u8, a: u32, b: u32, r: u32) -> T {
     let my_mask = (Flags::N | Flags::Z | Flags::V | Flags::C | Flags::H).bits();
 
     let new_bits = get_negative::<T>(r)
@@ -72,15 +83,15 @@ pub fn nzvch<T: GazAlu>(f: &mut Flags, write_mask: u8, a: u32, b: u32, r: u32) -
     T::from_u32(r)
 }
 
-pub fn nzv<T: GazAlu>(f: &mut Flags, write_mask: u8, a: u32, b: u32, r: u32) -> T {
-    let my_mask = (Flags::N | Flags::Z | Flags::V).bits();
+// pub fn nzv<T: GazAlu>(f: &mut Flags, write_mask: u8, a: u32, b: u32, r: u32) -> T {
+//     let my_mask = (Flags::N | Flags::Z | Flags::V).bits();
 
-    let new_bits = get_negative::<T>(r) | get_zero::<T>(r) | get_overflow::<T>(a, b, r);
+//     let new_bits = get_negative::<T>(r) | get_zero::<T>(r) | get_overflow::<T>(a, b, r);
 
-    f.write_with_mask(write_mask & my_mask, new_bits);
+//     f.write_with_mask(write_mask & my_mask, new_bits);
 
-    T::from_u32(r)
-}
+//     T::from_u32(r)
+// }
 
 pub fn nz<T: GazAlu>(f: &mut Flags, write_mask: u8, r: u32) -> T {
     let write_mask = (Flags::N | Flags::Z).bits() & write_mask;
@@ -281,32 +292,40 @@ pub trait GazAlu:
 }
 
 impl GazAlu for u8 {
+    #[inline(always)]
     fn mask() -> u32 {
         0xff
     }
+    #[inline(always)]
     fn hi_bit_mask() -> u32 {
         0x80u32
     }
+    #[inline(always)]
     fn from_u32(v: u32) -> u8 {
         v as u8
     }
+    #[inline(always)]
     fn half_bit_mask() -> u32 {
         0x08
     }
 }
 
 impl GazAlu for u16 {
+    #[inline(always)]
     fn mask() -> u32 {
         0xffff
     }
 
+    #[inline(always)]
     fn hi_bit_mask() -> u32 {
         0x8000u32
     }
+    #[inline(always)]
     fn from_u32(v: u32) -> u16 {
         v as u16
     }
 
+    #[inline(always)]
     fn half_bit_mask() -> u32 {
         0x0800
     }
