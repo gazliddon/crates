@@ -7,10 +7,10 @@ use crate::traits::*;
 
 // use thin_vec::{thin_vec, ThinVec};
 
-pub fn many0<I, O, E, P>(mut p: P) -> impl FnMut(I) -> Result<(I, Vec<O>), E>
+pub fn many0<I, O, E, P>(mut p: P) -> impl FnMut(I) -> Result<(I, Vec<O>), E> + Copy
 where
+    I: Clone + Copy,
     P: Parser<I, O, E>,
-    I: Clone,
     E: ParseError<I>,
 {
     move |mut i: I| {
@@ -62,7 +62,7 @@ where
             }
 
             // Have we hit the predicate?
-            let r = pred.parse(i);
+            let r = pred.parse(i.clone());
 
             match r {
                 Ok((rest, _)) => return Ok((i, out)),
@@ -85,8 +85,8 @@ where
 
 pub fn many1<I, O, E, P>(mut p: P) -> impl FnMut(I) -> Result<(I, Vec<O>), E>
 where
-    P: Parser<I, O, E> + Clone,
-    I: Clone,
+    P: Parser<I, O, E> + Copy,
+    I: Clone + Copy,
     E: ParseError<I>,
 {
     move |mut i: I| {
@@ -101,11 +101,11 @@ where
 pub fn preceded<I, O1, O2, P1, P2, E>(
     mut first: P1,
     mut second: P2,
-) -> impl FnMut(I) -> Result<(I, O2), E>
+) -> impl FnMut(I) -> Result<(I, O2), E> + Copy
 where
-    I: Clone,
-    P1: Parser<I, O1, E>,
-    P2: Parser<I, O2, E>,
+    I: Clone + Copy,
+    P1: Parser<I, O1, E> ,
+    P2: Parser<I, O2, E> ,
     E: ParseError<I>,
 {
     move |rest: I| {
@@ -117,9 +117,9 @@ where
 pub fn succeeded<I, O1, O2, P1, P2, E>(
     mut first: P1,
     mut second: P2,
-) -> impl FnMut(I) -> Result<(I, O1), E>
+) -> impl FnMut(I) -> Result<(I, O1), E> + Copy
 where
-    I: Clone,
+    I: Clone + Copy,
     P1: Parser<I, O1, E>,
     P2: Parser<I, O2, E>,
     E: ParseError<I>,
@@ -134,9 +134,9 @@ where
 pub fn pair<I, O1, O2, P1, P2, E>(
     mut first: P1,
     mut second: P2,
-) -> impl FnMut(I) -> Result<(I, (O1, O2)), E>
+) -> impl FnMut(I) -> Result<(I, (O1, O2)), E> + Copy 
 where
-    I: Clone,
+    I: Clone + Copy,
     P1: Parser<I, O1, E>,
     P2: Parser<I, O2, E>,
     E: ParseError<I>,
@@ -148,11 +148,11 @@ where
     }
 }
 
-pub fn opt<I, O, E, P>(mut first: P) -> impl FnMut(I) -> Result<(I, Option<O>), E>
+pub fn opt<I, O, E, P>(mut first: P) -> impl FnMut(I) -> Result<(I, Option<O>), E> + Copy
 where
     P: Parser<I, O, E>,
     E: ParseError<I>,
-    I: Clone,
+    I: Clone + Copy,
 {
     move |input: I| {
         let ret = first.parse(input.clone());
@@ -166,7 +166,7 @@ where
 
 pub fn not<I, O, E, P>(mut first: P) -> impl FnMut(I) -> Result<(I, I), E>
 where
-    I: Clone,
+    I: Clone + Copy,
     P: Parser<I, O, E>,
     E: ParseError<I> + std::fmt::Debug,
 {
@@ -185,7 +185,7 @@ where
 }
 pub fn all<I, O, E, P>(mut first: P) -> impl FnMut(I) -> Result<(I, O), E>
 where
-    I: Clone + Collection + Clone,
+    I: Clone + Collection + Copy,
     P: Parser<I, O, E>,
     E: ParseError<I> + std::fmt::Debug,
 {
@@ -210,7 +210,7 @@ where
 
 pub fn cut<I, O, E, P>(mut first: P) -> impl FnMut(I) -> Result<(I, O), E>
 where
-    I: Clone,
+    I: Clone + Copy,
     P: Parser<I, O, E>,
     E: ParseError<I> + std::fmt::Debug,
 {
@@ -223,13 +223,32 @@ where
     }
 }
 
+pub fn sep_list<I, O1, OS, P1, PS, E>(
+    mut first: P1,
+    mut sep: PS,
+) -> impl FnMut(I) -> Result<(I, Vec<O1>), E> + Copy
+where
+    I: Clone + Copy,
+    P1: Parser<I, O1, E>,
+    PS: Parser<I, OS, E>,
+    E: ParseError<I>,
+{
+    move |input: I| {
+        let (rest, x) = first.parse(input)?;
+        let (rest, xs) = many0(preceded(sep, first))(rest)?;
+        let mut ret = vec![x];
+        ret.extend(xs.into_iter());
+        Ok((rest, ret))
+    }
+}
+
 pub fn sep_pair<I, O1, O2, OS, P1, P2, PS, E>(
     mut first: P1,
     mut sep: PS,
     mut second: P2,
-) -> impl FnMut(I) -> Result<(I, (O1, O2)), E>
+) -> impl FnMut(I) -> Result<(I, (O1, O2)), E> + Copy
 where
-    I: Clone,
+    I: Clone + Copy,
     P1: Parser<I, O1, E>,
     P2: Parser<I, O2, E>,
     PS: Parser<I, OS, E>,
@@ -249,7 +268,7 @@ pub fn wrapped<SP, OTHER, E, P, O>(
     close: OTHER,
 ) -> impl FnMut(SP) -> Result<(SP, O), E>
 where
-    SP: Collection + Splitter<E> + Clone,
+    SP: Collection + Splitter<E> + Clone + Copy,
     <SP as Collection>::Item: Item,
     <<SP as Collection>::Item as Item>::Kind:
         PartialEq<<<OTHER as Collection>::Item as Item>::Kind>,
@@ -272,9 +291,9 @@ pub fn wrapped_cut<SP, OTHER, E, P, O>(
     open: OTHER,
     mut p: P,
     close: OTHER,
-) -> impl FnMut(SP) -> Result<(SP, O), E>
+) -> impl FnMut(SP) -> Result<(SP, O), E> + Copy
 where
-    SP: Collection + Splitter<E> + Clone,
+    SP: Collection + Splitter<E> + Clone + Copy,
     <SP as Collection>::Item: Item,
     <<SP as Collection>::Item as Item>::Kind:
         PartialEq<<<OTHER as Collection>::Item as Item>::Kind>,
@@ -294,9 +313,9 @@ where
     }
 }
 
-pub fn tag<SP, OTHER, E>(tag: OTHER) -> impl FnMut(SP) -> Result<(SP, SP), E> + Clone
+pub fn tag<SP, OTHER, E>(tag: OTHER) -> impl FnMut(SP) -> Result<(SP, SP), E> + Copy
 where
-    SP: Collection + Splitter<E>,
+    SP: Collection + Splitter<E> + Clone + Copy,
     <SP as Collection>::Item: Item,
     <<SP as Collection>::Item as Item>::Kind:
         PartialEq<<<OTHER as Collection>::Item as Item>::Kind>,
@@ -317,6 +336,27 @@ where
     E: ParseError<SP>,
 {
     move |input: SP| input.split_at(1)
+}
+
+pub fn match_item<SP, E>(
+    pred: impl Fn(&SP::Item) -> bool + Copy,
+) -> impl FnMut(SP) -> Result<(SP, SP::Item), E> + Copy
+where
+    <SP as Collection>::Item: PartialEq + Item,
+    SP: Collection + Splitter<E> + Clone + Copy, 
+    E: ParseError<SP>,
+{
+    move |input: SP| {
+        let (rest, matched) = input.split_at(1)?;
+
+        let i = matched.at(0).unwrap();
+
+        if pred(&i) {
+            Ok((rest, i.clone()))
+        } else {
+            Err(ParseError::from_error(input, ParseErrorKind::NoMatch))
+        }
+    }
 }
 
 pub fn until<SP, E>(

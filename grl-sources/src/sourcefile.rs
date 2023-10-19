@@ -3,7 +3,7 @@ use super::{ TextEditTrait, TextFile };
 use std::fmt::Debug;
 use std::path::{Path, PathBuf};
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq )]
 pub struct SourceFile {
     pub file_id: u64,
     pub file: PathBuf,

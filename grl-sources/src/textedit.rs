@@ -110,7 +110,7 @@ fn get_range(whole_buffer: &str, part: &str) -> std::ops::Range<usize> {
     start..end
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub struct TextFile {
     pub source: String,
     pub line_offsets: Vec<std::ops::Range<usize>>,

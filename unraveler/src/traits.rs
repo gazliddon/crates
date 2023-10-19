@@ -2,17 +2,22 @@ use crate::error::{ParseError, ParseErrorKind, Severity};
 use crate::Item;
 use paste::paste;
 
-pub trait Parser<I, O, E> {
+pub trait Parser<I, O, E> : Clone + Copy
+where
+    I: Clone + Copy,
+{
     fn parse(&mut self, i: I) -> Result<(I, O), E>;
 }
 
 impl<'a, I, O, E, F> Parser<I, O, E> for F
 where
-  F: FnMut(I) -> Result<(I, O), E> + 'a,
+    I: Clone + Copy,
+    F: FnMut(I) -> Result<(I, O), E> + 'a,
+    F: Clone + Copy,
 {
-  fn parse(&mut self, i: I) -> Result<( I, O ), E> {
-    self(i)
-  }
+    fn parse(&mut self, i: I) -> Result<(I, O), E> {
+        self(i)
+    }
 }
 
 pub trait Splitter<E>: Sized + Clone
@@ -22,7 +27,7 @@ where
     fn split_at(&self, pos: usize) -> Result<(Self, Self), E>;
 
     fn drop(&self, pos: usize) -> Result<Self, E> {
-        let (rest,matched) = self.split_at(pos)?;
+        let (rest, matched) = self.split_at(pos)?;
         Ok(rest)
     }
 }
@@ -31,6 +36,18 @@ pub trait Collection {
     type Item;
     fn at(&self, index: usize) -> Option<&Self::Item>;
     fn length(&self) -> usize;
+
+    fn first(&self) -> Option<&Self::Item> {
+        self.at(0)
+    }
+
+    fn last(&self) -> Option<&Self::Item> {
+        if self.length() > 0 {
+            self.at(self.length() - 1)
+        } else {
+            None
+        }
+    }
 }
 
 pub trait Tag<OTHER, E>: Sized {
@@ -51,7 +68,7 @@ where
 {
     fn tag(&self, other: OTHER) -> Result<(Self, Self), E> {
         if other.length() > self.length() {
-            return Err(E::from_error(self.clone(), ParseErrorKind::NoMatch, ));
+            return Err(E::from_error(self.clone(), ParseErrorKind::NoMatch));
         }
 
         let mut index = 0;
@@ -61,7 +78,7 @@ where
             let b = other.at(i).unwrap().get_kind();
 
             if a != b {
-                let err_pos = self.drop(i).unwrap_or_else(|_|panic!());
+                let err_pos = self.drop(i).unwrap_or_else(|_| panic!());
                 return Err(E::from_error(err_pos, ParseErrorKind::NoMatch));
             } else {
                 index += 1
@@ -95,6 +112,3 @@ impl<X, const N: usize> Collection for [X; N] {
         self.len()
     }
 }
-
-
-

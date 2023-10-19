@@ -1,13 +1,19 @@
+use std::process::ChildStdout;
+
 use crate::{ParseError, ParseErrorKind, Parser, Severity};
 use paste::paste;
 
-pub trait Alt<I, O, E> {
+pub trait Alt<I, O, E>  : Copy
+where I : Clone + Copy
+{
     fn choose(&mut self, input: I) -> Result<(I, O), E>;
 }
 
-pub fn alt<I: Clone, O, E: ParseError<I>, ALT: Alt<I, O, E>>(
-    mut l: ALT,
-) -> impl FnMut(I) -> Result<(I, O), E> {
+pub fn alt<I, O, E, ALT: Alt<I, O, E>>(mut l: ALT) -> impl FnMut(I) -> Result<(I, O), E> + Copy
+where
+    I: Clone + Copy,
+    E: ParseError<I>,
+{
     move |i: I| l.choose(i)
 }
 
@@ -20,7 +26,7 @@ macro_rules! impl_alt_tuple {
             where
                 $($T : Parser<IX,OX,EX>,)*
                 EX : ParseError<IX>,
-                IX : Clone,
+                IX : Clone + Copy,
             {
     fn choose(&mut self, i: IX) -> Result<(IX, OX), EX> {
                 let ($(ref mut [<$T:lower 1>],)*) = self;
@@ -58,4 +64,8 @@ impl_alt_tuple!(A B C D E F G H I J K L);
 impl_alt_tuple!(A B C D E F G H I J K L M);
 impl_alt_tuple!(A B C D E F G H I J K L M N);
 impl_alt_tuple!(A B C D E F G H I J K L M N O);
-
+impl_alt_tuple!(A B C D E F G H I J K L M N O P);
+impl_alt_tuple!(A B C D E F G H I J K L M N O P Q);
+impl_alt_tuple!(A B C D E F G H I J K L M N O P Q R);
+impl_alt_tuple!(A B C D E F G H I J K L M N O P Q R S);
+impl_alt_tuple!(A B C D E F G H I J K L M N O P Q R S T);
