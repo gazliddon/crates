@@ -4,12 +4,7 @@ use serde::{Deserialize, Deserializer};
 use std::collections::HashMap;
 use std::fmt;
 
-// use serde::de::Deserializer;
-// use serde_derive::Deserialize;
-
-// use std::collections::HashMap;
-
-// Custome deserializers
+// Custom deserializers
 fn hex_str_to_num<'de, D>(deserializer: D) -> Result<usize, D::Error>
 where
     D: Deserializer<'de>,
@@ -19,7 +14,7 @@ where
     Ok(z)
 }
 
-// Custome deserializers
+// Custom deserializers
 fn fixup_action<'de, D>(deserializer: D) -> Result<String, D::Error>
 where
     D: Deserializer<'de>,
@@ -49,6 +44,7 @@ pub struct Instruction {
     #[serde(default)]
     pub operand_size: usize,
     pub subroutine: Option<bool>,
+    pub info : Option<String>,
 }
 
 impl Instruction {
