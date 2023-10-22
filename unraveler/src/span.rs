@@ -45,15 +45,16 @@ where
         }
     }
 
-    pub fn with_extra(self, extra : E) -> Self {
-        Self {
-            extra,
-            ..self
-        }
+    pub fn with_extra(self, extra: E) -> Self {
+        Self { extra, ..self }
+    }
+
+    pub fn extra(&self) -> &E {
+        &self.extra
     }
 }
 
-impl<'a, I,E> Span<'a, I,E>
+impl<'a, I, E> Span<'a, I, E>
 where
     I: Item,
     E: Copy + Clone + std::default::Default,
@@ -73,6 +74,10 @@ where
     I: Item,
     XTRA: Copy + Clone,
 {
+    pub fn get_document(&self) -> &[I] {
+        self.x_span
+    }
+
     pub fn get(&self, idx: usize) -> Option<&I> {
         self.as_slice().get(idx)
     }
@@ -86,25 +91,27 @@ where
     }
 
     pub fn get_range(&self) -> std::ops::Range<usize> {
-        self.position..self.position + self.len()
-    }
-    pub fn get_item_at_abs_position_sat(&self, pos: usize) -> Option<&I> {
-        assert!(!self.x_span.is_empty());
-        let pos = std::cmp::min(pos, self.x_span.len() - 1);
-        self.x_span.get(pos)
+        let r = self.position..(self.position + self.len());
+        r
     }
 
     pub fn from_slice(x_span: &'a [I], extra: XTRA) -> Self {
         Self {
             position: 0,
             len: x_span.len(),
-            x_span, 
-            extra
+            x_span,
+            extra,
         }
     }
 
     pub fn as_slice(&self) -> &[I] {
-        &self.x_span[self.position..self.position + self.len]
+        // NOCHECKIN
+        if self.position + self.len > self.x_span.len() {
+            println!("position {}", self.position);
+            println!("len {}", self.len);
+        }
+
+        &self.x_span[self.get_range()]
     }
 
     pub fn len(&self) -> usize {
@@ -112,7 +119,7 @@ where
     }
 
     pub fn is_empty(&self) -> bool {
-        self.as_slice().is_empty()
+        self.len == 0
     }
 
     pub fn iter(&self) -> impl Iterator<Item = &I> + '_ {
@@ -127,11 +134,10 @@ where
         if len > self.len() {
             Err(ParseErrorKind::TookTooMany)
         } else {
-            let r = Self {
+            Ok(Self {
                 len,
                 ..self.clone()
-            };
-            Ok(r)
+            })
         }
     }
 
@@ -139,12 +145,11 @@ where
         if n > self.len() {
             Err(ParseErrorKind::SkippedTooMany)
         } else {
-            let r = Self {
+            Ok(Self {
                 position: self.position + n,
-                len : self.len -1,
+                len: self.len - n,
                 ..self.clone()
-            };
-            Ok(r)
+            })
         }
     }
 
@@ -158,7 +163,7 @@ where
         }
     }
 
-    fn match_token(&'a self, other: &'a [<I as Item>::Kind]) -> PResult<'a, I,XTRA> {
+    fn match_token(&'a self, other: &'a [<I as Item>::Kind]) -> PResult<'a, I, XTRA> {
         if self.len() < other.len() {
             Err(ParseErrorKind::NoMatch)
         } else {
@@ -182,7 +187,7 @@ where
     }
 }
 
-impl<'a, I, E,XTRA> Splitter<E> for Span<'a, I, XTRA>
+impl<'a, I, E, XTRA> Splitter<E> for Span<'a, I, XTRA>
 where
     I: Item,
     E: ParseError<Span<'a, I, XTRA>>,
@@ -194,7 +199,7 @@ where
     }
 }
 
-impl<I,XTRA> Collection for Span<'_, I,XTRA>
+impl<I, XTRA> Collection for Span<'_, I, XTRA>
 where
     I: Item,
     XTRA: Copy + Clone,
