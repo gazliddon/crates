@@ -19,7 +19,7 @@ impl SourceFile {
         }
     }
 
-    pub fn as_text_edit(&mut self) -> &TextFile {
+    pub fn as_text_edit(&self) -> &TextFile {
         &self.source
     }
 

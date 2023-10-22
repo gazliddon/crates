@@ -98,6 +98,8 @@ pub trait TextEditTrait {
         let text_edit = TextEdit::new(line_number, 0, line_number, 0, txt);
         self.edit(&text_edit)
     }
+
+    fn is_empty(&self) -> bool;
 }
 
 fn mk_offsets(source: &str) -> Vec<std::ops::Range<usize>> {
@@ -129,6 +131,10 @@ impl std::fmt::Display for TextFile {
 }
 
 impl TextEditTrait for TextFile {
+    fn is_empty(&self) -> bool {
+       self.source.is_empty()
+    }
+
     fn edit(&mut self, edit: &TextEdit) -> EditResult<()> {
         let r = self.get_range(edit)?;
         let last = &self.source[r.end..];
