@@ -17,7 +17,7 @@ where
         let mut out = vec![];
 
         loop {
-            let r = p.parse(i.clone());
+            let r = p.parse(i);
 
             match r {
                 Ok((rest, matched)) => {
@@ -104,8 +104,8 @@ pub fn preceded<I, O1, O2, P1, P2, E>(
 ) -> impl FnMut(I) -> Result<(I, O2), E> + Copy
 where
     I: Clone + Copy,
-    P1: Parser<I, O1, E> ,
-    P2: Parser<I, O2, E> ,
+    P1: Parser<I, O1, E>,
+    P2: Parser<I, O2, E>,
     E: ParseError<I>,
 {
     move |rest: I| {
@@ -134,7 +134,7 @@ where
 pub fn pair<I, O1, O2, P1, P2, E>(
     mut first: P1,
     mut second: P2,
-) -> impl FnMut(I) -> Result<(I, (O1, O2)), E> + Copy 
+) -> impl FnMut(I) -> Result<(I, (O1, O2)), E> + Copy
 where
     I: Clone + Copy,
     P1: Parser<I, O1, E>,
@@ -193,7 +193,7 @@ where
         let ret = first.parse(input.clone());
         match ret {
             Ok((rest, matched)) => {
-                if rest.length() > 0 {
+                if !rest.is_empty() {
                     Err(E::from_error_kind(
                         input.clone(),
                         ParseErrorKind::UnconsumedInput,
@@ -222,6 +222,30 @@ where
         }
     }
 }
+pub fn sep_list0<I, O1, OS, P1, PS, E>(
+    mut first: P1,
+    mut sep: PS,
+) -> impl FnMut(I) -> Result<(I, Vec<O1>), E> + Copy
+where
+    I: Clone + Copy,
+    P1: Parser<I, O1, E>,
+    PS: Parser<I, OS, E>,
+    E: ParseError<I>,
+{
+    move |input: I| {
+        let res = first.parse(input);
+
+        match res {
+            Err(..) => Ok((input, vec![])),
+            Ok((rest, x)) => {
+                let (rest, xs) = many0(preceded(sep, first))(rest)?;
+                let mut ret = vec![x];
+                ret.extend(xs.into_iter());
+                Ok((rest, ret))
+            }
+        }
+    }
+}
 
 pub fn sep_list<I, O1, OS, P1, PS, E>(
     mut first: P1,
@@ -235,8 +259,8 @@ where
 {
     move |input: I| {
         let (rest, x) = first.parse(input)?;
-        let (rest, xs) = many0(preceded(sep, first))(rest)?;
         let mut ret = vec![x];
+        let (rest, xs) = many0(preceded(sep, first))(rest)?;
         ret.extend(xs.into_iter());
         Ok((rest, ret))
     }
@@ -297,7 +321,6 @@ where
     <SP as Collection>::Item: Item,
     <<SP as Collection>::Item as Item>::Kind:
         PartialEq<<<OTHER as Collection>::Item as Item>::Kind>,
-
     OTHER: Collection + Copy,
     <OTHER as Collection>::Item: Item + Copy,
 
@@ -343,7 +366,7 @@ pub fn match_item<SP, E>(
 ) -> impl FnMut(SP) -> Result<(SP, SP::Item), E> + Copy
 where
     <SP as Collection>::Item: PartialEq + Item,
-    SP: Collection + Splitter<E> + Clone + Copy, 
+    SP: Collection + Splitter<E> + Clone + Copy,
     E: ParseError<SP>,
 {
     move |input: SP| {
@@ -368,7 +391,7 @@ where
     E: ParseError<SP>,
 {
     move |input: SP| -> Result<(SP, SP), E> {
-        if input.length() == 0 {
+        if input.is_empty() {
             Ok((input.clone(), input.clone()))
         } else {
             for index in 0..input.length() {
@@ -399,7 +422,7 @@ where
     E: ParseError<SP>,
 {
     move |input: SP| -> Result<(SP, <<SP as Collection>::Item as Item>::Kind), E> {
-        if input.length() == 0 {
+        if input.is_empty() {
             Err(ParseError::from_error(input, ParseErrorKind::NoMatch))
         } else {
             let k = input.at(0).map(|x| x.get_kind()).clone();

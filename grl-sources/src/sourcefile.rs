@@ -1,9 +1,9 @@
 use super::Position;
-use super::{ TextEditTrait, TextFile };
+use super::{TextEditTrait, TextFile};
 use std::fmt::Debug;
 use std::path::{Path, PathBuf};
 
-#[derive(Clone, PartialEq )]
+#[derive(Clone, PartialEq)]
 pub struct SourceFile {
     pub file_id: u64,
     pub file: PathBuf,
@@ -11,11 +11,11 @@ pub struct SourceFile {
 }
 
 impl SourceFile {
-    pub fn new<P: AsRef<Path>>(file: P, source: &str, file_id : u64) -> Self {
+    pub fn new<P: AsRef<Path>>(file: P, source: &str, file_id: u64) -> Self {
         Self {
             file: file.as_ref().to_path_buf(),
             source: TextFile::new(source),
-            file_id
+            file_id,
         }
     }
 
@@ -29,13 +29,26 @@ impl SourceFile {
         self.source.get_line(line).ok()
     }
 
+    pub fn get_position(&self, r: std::ops::Range<usize>) -> Position {
+        let tp = self.source.offset_to_text_pos(r.start).unwrap();
+        Position {
+            line: tp.line(),
+            col: tp.col(),
+            offset: r.start,
+            len: r.len(),
+            src: crate::AsmSource::FileId(self.file_id)
+        }
+    }
+
     pub fn get_span(&self, p: &Position) -> &str {
+        let p_range = p.range();
         // If the span is zero in length then return the single char at that position
-        let range = if p.range.is_empty() {
-            p.range.start..p.range.start + 1
+        let range = if p_range.is_empty() {
+            p_range.start..p_range.start + 1
         } else {
-            p.range.clone()
+            p_range
         };
+
         &self.source.source[range]
     }
 }

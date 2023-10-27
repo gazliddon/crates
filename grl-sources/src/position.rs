@@ -12,11 +12,12 @@ pub enum AsmSource {
     FileId(u64),
 }
 
-#[derive(Debug, PartialEq, Eq, Clone, Hash)]
+#[derive(Debug, PartialEq, Eq, Clone, Hash, Copy)]
 pub struct Position {
     pub line: usize,
     pub col: usize,
-    pub range: std::ops::Range<usize>,
+    pub offset : usize,
+    pub len: usize,
     pub src: AsmSource,
 }
 
@@ -33,14 +34,28 @@ impl Position {
         Self {
             line,
             col,
-            range,
+            offset: range.start,
+            len: range.len(),
             src,
         }
     }
 
+    pub fn line(&self) -> usize {
+        self.line
+    }
+    pub fn col(&self) -> usize {
+        self.col
+    }
+
+    pub fn range(&self) -> std::ops::Range<usize> {
+        self.offset .. self.offset+self.len
+    }
+
     pub fn overlaps(&self, p: &Position) -> bool {
+        let range = self.range();
+        let p_range = p.range();
         if self.src == p.src {
-            self.range.end >= p.range.start && self.range.start < p.range.end
+            range.end >= p_range.start && range.start < p_range.end
         } else {
             false
         }
@@ -52,7 +67,8 @@ impl Default for Position {
         Self {
             line: 0,
             col: 0,
-            range: 0..0,
+            offset: 0,
+            len: 0,
             src: AsmSource::FromStr,
         }
     }

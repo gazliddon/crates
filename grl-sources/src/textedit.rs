@@ -2,18 +2,18 @@ use thiserror::Error;
 
 /// cartesian position in a text file
 /// line and character are both zero based
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Copy)]
 pub struct TextPos {
     line: usize,
-    character: usize,
+    col: usize,
 }
 
 impl TextPos {
     pub fn new(line: usize, character: usize) -> Self {
-        Self { line, character }
+        Self { line, col: character }
     }
-    pub fn char(&self) -> usize {
-        self.character
+    pub fn col(&self) -> usize {
+        self.col
     }
     pub fn line(&self) -> usize {
         self.line
@@ -202,10 +202,10 @@ impl TextFile {
 
     pub fn start_pos_to_index(&self, pos: &TextPos) -> EditResult<usize> {
         let line_r = self.get_line_range(pos.line())?;
-        let ret = line_r.start + pos.char();
+        let ret = line_r.start + pos.col();
 
         if !line_r.contains(&ret) {
-            Err(EditErrorKind::CharacterOutOfRange(pos.char(), line_r.len()))
+            Err(EditErrorKind::CharacterOutOfRange(pos.col(), line_r.len()))
         } else if ret >= self.source.len() {
             Err(EditErrorKind::IndexOutOfRange(ret, self.source.len()))
         } else {
@@ -214,15 +214,15 @@ impl TextFile {
     }
 
     fn end_pos_to_index(&self, pos: &TextPos) -> EditResult<usize> {
-        if pos.line() == self.num_of_lines() && pos.char() == 0 {
+        if pos.line() == self.num_of_lines() && pos.col() == 0 {
             Ok(self.source.len())
         } else {
             let line_r = self.get_line_range(pos.line)?;
 
-            if pos.character > line_r.len() {
-                Err(EditErrorKind::CharacterOutOfRange(pos.char(), line_r.len()))
+            if pos.col > line_r.len() {
+                Err(EditErrorKind::CharacterOutOfRange(pos.col(), line_r.len()))
             } else {
-                Ok(line_r.start + pos.char())
+                Ok(line_r.start + pos.col())
             }
         }
     }
@@ -245,7 +245,7 @@ impl TextFile {
                 if l.contains(&offset) {
                     let character = offset - l.start;
                     let line = line;
-                    return Ok(TextPos { line, character });
+                    return Ok(TextPos { line, col: character });
                 }
             }
 
@@ -259,7 +259,7 @@ impl TextFile {
 // Implement these traits so I can use TextPos in std::ops::Range
 impl PartialEq for TextPos {
     fn eq(&self, other: &Self) -> bool {
-        self.line == other.line && self.character == other.character
+        self.line == other.line && self.col == other.col
     }
 }
 
@@ -269,7 +269,7 @@ impl PartialOrd for TextPos {
             Some(core::cmp::Ordering::Equal) => {}
             ord => return ord,
         }
-        self.character.partial_cmp(&other.character)
+        self.col.partial_cmp(&other.col)
     }
 }
 

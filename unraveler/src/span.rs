@@ -31,30 +31,7 @@ where
     extra: E,
 }
 
-impl<'a, I, E> Span<'a, I, E>
-where
-    I: Item,
-    E: Copy + Clone,
-{
-    pub fn new_extra(x_span: &'a [I], position: usize, len: usize, extra: E) -> Self {
-        Self {
-            position,
-            len,
-            x_span,
-            extra,
-        }
-    }
-
-    pub fn with_extra(self, extra: E) -> Self {
-        Self { extra, ..self }
-    }
-
-    pub fn extra(&self) -> &E {
-        &self.extra
-    }
-}
-
-impl<'a, I, E> Span<'a, I, E>
+impl<'a, I, E> Span<'a, I, E> 
 where
     I: Item,
     E: Copy + Clone + std::default::Default,
@@ -74,25 +51,22 @@ where
     I: Item,
     XTRA: Copy + Clone,
 {
-    pub fn get_document(&self) -> &[I] {
-        self.x_span
+
+    pub fn new_extra(x_span: &'a [I], position: usize, len: usize, extra: XTRA) -> Self {
+        Self {
+            position,
+            len,
+            x_span,
+            extra,
+        }
     }
 
-    pub fn get(&self, idx: usize) -> Option<&I> {
-        self.as_slice().get(idx)
+    pub fn with_extra(self, extra: XTRA) -> Self {
+        Self { extra, ..self }
     }
 
-    pub fn first(&self) -> Option<&I> {
-        self.as_slice().first()
-    }
-
-    pub fn last(&self) -> Option<&I> {
-        self.as_slice().last()
-    }
-
-    pub fn get_range(&self) -> std::ops::Range<usize> {
-        let r = self.position..(self.position + self.len());
-        r
+    pub fn extra(&self) -> &XTRA {
+        &self.extra
     }
 
     pub fn from_slice(x_span: &'a [I], extra: XTRA) -> Self {
@@ -104,34 +78,24 @@ where
         }
     }
 
-    pub fn as_slice(&self) -> &[I] {
-        // NOCHECKIN
-        if self.position + self.len > self.x_span.len() {
-            println!("position {}", self.position);
-            println!("len {}", self.len);
-        }
+    //////////////////////////////////////////////////////////////////////////////// 
+    // Needed in trait
+    pub fn get_document(&self) -> &[I] {
+        self.x_span
+    }
 
+    pub fn get_range(&self) -> std::ops::Range<usize> {
+        let r = self.position..(self.position + self.length());
+        r
+    }
+
+    pub fn as_slice(&self) -> &[I] {
         &self.x_span[self.get_range()]
     }
 
-    pub fn len(&self) -> usize {
-        self.len
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.len == 0
-    }
-
-    pub fn iter(&self) -> impl Iterator<Item = &I> + '_ {
-        self.as_slice().iter()
-    }
-
-    pub fn kinds_iter(&self) -> impl Iterator<Item = I::Kind> + '_ {
-        self.iter().map(|i| i.get_kind())
-    }
 
     pub fn take(&self, len: usize) -> Result<Self, ParseErrorKind> {
-        if len > self.len() {
+        if len > self.length() {
             Err(ParseErrorKind::TookTooMany)
         } else {
             Ok(Self {
@@ -142,7 +106,7 @@ where
     }
 
     pub fn drop(&self, n: usize) -> Result<Self, ParseErrorKind> {
-        if n > self.len() {
+        if n > self.length() {
             Err(ParseErrorKind::SkippedTooMany)
         } else {
             Ok(Self {
@@ -153,8 +117,15 @@ where
         }
     }
 
+    ////////////////////////////////////////////////////////////////////////////////
+    // Kinds?
+    pub fn kinds_iter(&self) -> impl Iterator<Item = I::Kind> + '_ {
+        self.iter().map(|i| i.get_kind())
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
     pub fn split(&self, n: usize) -> Result<(Self, Self), ParseErrorKind> {
-        if n > self.len() {
+        if n > self.length() {
             Err(ParseErrorKind::IllegalSplitIndex)
         } else {
             let rest = self.drop(n)?;
@@ -164,7 +135,7 @@ where
     }
 
     fn match_token(&'a self, other: &'a [<I as Item>::Kind]) -> PResult<'a, I, XTRA> {
-        if self.len() < other.len() {
+        if self.length() < other.len() {
             Err(ParseErrorKind::NoMatch)
         } else {
             let it = self.iter().zip(other.iter());
@@ -184,6 +155,14 @@ where
             .get(0)
             .map(|i| i.is_kind(i.get_kind()))
             .unwrap_or(false)
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = &I> + '_ {
+        self.as_slice().iter()
+    }
+
+    pub fn offset(&self) -> usize {
+        self.get_range().start
     }
 }
 
@@ -211,6 +190,6 @@ where
     }
 
     fn length(&self) -> usize {
-        self.len()
+        self.len
     }
 }

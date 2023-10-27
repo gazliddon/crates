@@ -2,7 +2,61 @@ use crate::error::{ParseError, ParseErrorKind, Severity};
 use crate::Item;
 use paste::paste;
 
-pub trait Parser<I, O, E> : Clone + Copy
+mod new {
+    use super::*;
+
+    pub trait SpanTrait: Sized + Copy {
+        type Item;
+
+        fn length(&self) -> usize;
+
+        fn get_document(&self) -> &[Self::Item];
+
+        fn get_range(&self) -> std::ops::Range<usize>;
+
+        fn take(&self, len: usize) -> Result<Self, ParseErrorKind>;
+        fn drop(&self, n: usize) -> Result<Self, ParseErrorKind>;
+
+        fn as_slice(&self) -> &[Self::Item] {
+            &self.get_document()[self.get_range()]
+        }
+
+        fn at(&self, index: usize) -> Option<&Self::Item> {
+            self.as_slice().get(index)
+        }
+
+        fn first(&self) -> Option<&Self::Item> {
+            self.at(0)
+        }
+
+        fn last(&self) -> Option<&Self::Item> {
+            if self.length() > 0 {
+                self.at(self.length() - 1)
+            } else {
+                None
+            }
+        }
+        fn is_empty(&self) -> bool {
+            self.length() == 0
+        }
+
+        fn split(&self, n: usize) -> Result<(Self, Self), ParseErrorKind> {
+            if n > self.length() {
+                Err(ParseErrorKind::IllegalSplitIndex)
+            } else {
+                let rest = self.drop(n)?;
+                let matched = self.take(n)?;
+                Ok((rest, matched))
+            }
+        }
+
+        fn offset(&self) -> usize {
+            self.get_range().start
+        }
+    }
+}
+
+pub trait Parser<I, O, E>: Clone + Copy
 where
     I: Clone + Copy,
 {
@@ -30,10 +84,16 @@ where
         let (rest, matched) = self.split_at(pos)?;
         Ok(rest)
     }
+
+    fn take(&self, pos: usize) -> Result<Self, E> {
+        let (rest, matched) = self.split_at(pos)?;
+        Ok(matched)
+    }
 }
 
 pub trait Collection {
     type Item;
+
     fn at(&self, index: usize) -> Option<&Self::Item>;
     fn length(&self) -> usize;
 
@@ -47,6 +107,9 @@ pub trait Collection {
         } else {
             None
         }
+    }
+    fn is_empty(&self) -> bool {
+        self.length() == 0
     }
 }
 

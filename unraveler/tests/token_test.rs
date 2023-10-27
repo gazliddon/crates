@@ -1,5 +1,7 @@
 #![allow(unused)]
 
+use std::default;
+
 use unraveler::{Item, ParseError,ParseErrorKind, tag,pair, many0, many1, alt, tuple, any, Severity};
 
 type Span<'a> = unraveler::Span<'a, Token>;
@@ -78,7 +80,7 @@ fn to_tokens(kinds : &[TokenKind]) -> Vec<Token> {
 fn test_norm() {
     use TokenKind::*;
     let doc = to_tokens(&[A,B,B,A,C,A,B]);
-    let input = Span::from_slice(&doc);
+    let input = Span::from_slice(&doc, Default::default());
 
     let (rest,(left,right)) = test_fn(input).unwrap();
 
@@ -94,7 +96,7 @@ fn test_norm() {
 fn test_tuple() -> Result<(),NewError> {
     use TokenKind::*;
     let doc = to_tokens(&[A,B,B,A,A,A,B]);
-    let input = Span::from_slice(&doc);
+    let input = Span::from_slice(&doc, Default::default());
 
     let (rest,(a,b,c)) = tuple((tag([A,B]),tag([B]),many0(tag([A]))))(input)?;
     assert_eq!(to_kinds(a),[A,B]);
@@ -109,7 +111,7 @@ fn test_tuple() -> Result<(),NewError> {
 fn test_alt() -> Result<(),NewError>{
     use TokenKind::*;
     let doc = to_tokens(&[B,A,A,A,A,A,B]);
-    let input = Span::from_slice(&doc);
+    let input = Span::from_slice(&doc, Default::default());
 
     let (rest, matched) = alt(
         (tag([B,A]), tag([A,A]))
@@ -127,7 +129,7 @@ fn test_many() -> Result<(),NewError>{
 
     let doc = to_tokens(&[B,A,A,A,A,A,B]);
 
-    let input = Span::from_slice(&doc);
+    let input = Span::from_slice(&doc, Default::default());
 
     let res = pair(tag([B]), many0(tag([A])))(input);
 
