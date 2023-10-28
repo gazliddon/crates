@@ -3,27 +3,106 @@ use crate::Item;
 use paste::paste;
 
 mod new {
+    use std::slice::SliceIndex;
+
     use super::*;
 
-    pub trait SpanTrait: Sized + Copy {
-        type Item;
+    struct SliceSpan<'a, I, E=()> {
+        span: &'a [I],
+        offset: usize,
+        len: usize,
+        extra : E,
+    }
 
-        fn length(&self) -> usize;
+    impl<'a, I> SliceSpan<'a, I> {
+        pub fn new(span: &'a [I]) -> Self {
+            Self {
+                span,
+                offset: 0,
+                len: span.len(),
+                extra: (),
+            }
+        }
+    }
 
-        fn get_document(&self) -> &[Self::Item];
+    impl<'a, I,E> SliceSpan<'a, I, E> {
+        pub fn new_extra(span: &'a [I], extra: E) -> Self {
+            Self {
+                span,
+                offset: 0,
+                len: span.len(),
+                extra
+            }
+        }
+        fn get_range(&self) -> std::ops::Range<usize> {
+            self.offset..self.offset + self.len
+        }
+    }
 
-        fn get_range(&self) -> std::ops::Range<usize>;
+    // Do we have a span of spans?
+    // impl<'a, I,X,E > SliceSpan<'a, I, E> 
+    //     where
+    //         I : SpanTrait<Item=Xkk>
+    // {
+    //     fn underlying_span(&self) -> I {
+    //         let first = self.span.first();
+    //         let last = self.span.last();
+    //         panic!()
+    //     }
 
-        fn take(&self, len: usize) -> Result<Self, ParseErrorKind>;
-        fn drop(&self, n: usize) -> Result<Self, ParseErrorKind>;
+    // }
 
-        fn as_slice(&self) -> &[Self::Item] {
-            &self.get_document()[self.get_range()]
+    impl<'a, I> SpanTrait for SliceSpan<'a, I> {
+        type Item = I;
+
+
+        fn length(&self) -> usize {
+            self.len
+        }
+
+        fn take(&self, n: usize) -> Result<Self, ParseErrorKind> {
+            if n > self.length() {
+                Err(ParseErrorKind::TookTooMany)
+            } else {
+                Ok(Self {
+                    offset: self.offset + n,
+                    len: self.len - n,
+                    ..*self
+                })
+            }
+        }
+
+        fn drop(&self, n: usize) -> Result<Self, ParseErrorKind> {
+            if n > self.length() {
+                Err(ParseErrorKind::TookTooMany)
+            } else {
+                Ok(Self { len: n, ..*self })
+            }
         }
 
         fn at(&self, index: usize) -> Option<&Self::Item> {
-            self.as_slice().get(index)
+            self.span[self.get_range()].get(index)
         }
+
+        fn original(&self) -> Self {
+            Self {
+                offset: 0,
+                len: self.span.len(),
+                ..*self
+            }
+        }
+
+    }
+
+    pub trait SpanTrait: Sized {
+        type Item;
+
+        fn length(&self) -> usize;
+        fn take(&self, len: usize) -> Result<Self, ParseErrorKind>;
+        fn drop(&self, n: usize) -> Result<Self, ParseErrorKind>;
+        fn at(&self, index: usize) -> Option<&Self::Item>;
+
+        fn original(&self) -> Self;
 
         fn first(&self) -> Option<&Self::Item> {
             self.at(0)
@@ -50,9 +129,6 @@ mod new {
             }
         }
 
-        fn offset(&self) -> usize {
-            self.get_range().start
-        }
     }
 }
 
