@@ -17,25 +17,28 @@ where
         let mut out = vec![];
 
         loop {
+            // parse the first one
             let r = p.parse(i);
 
             match r {
+                // All good, add matched to the vec and carry on parsing
                 Ok((rest, matched)) => {
                     i = rest;
                     out.push(matched)
                 }
 
+                // if we errored check to see if it's fatal
                 Err(e) => {
                     if e.is_fatal() {
+                        // Yes! So abort with an error
                         return Err(e);
                     } else {
-                        break;
+                        // No! We've parsed as many as we can
+                        return Ok((i, out));
                     }
                 }
             }
         }
-
-        Ok((i, out))
     }
 }
 
@@ -62,7 +65,7 @@ where
             }
 
             // Have we hit the predicate?
-            let r = pred.parse(i.clone());
+            let r = pred.parse(i);
 
             match r {
                 Ok((rest, _)) => return Ok((i, out)),
@@ -83,16 +86,16 @@ where
     }
 }
 
-pub fn many1<I, O, E, P>(mut p: P) -> impl FnMut(I) -> Result<(I, Vec<O>), E>
+pub fn many1<I, O, E, P>(mut p: P) -> impl FnMut(I) -> Result<(I, Vec<O>), E> + Copy
 where
     P: Parser<I, O, E> + Copy,
     I: Clone + Copy,
     E: ParseError<I>,
 {
     move |mut i: I| {
-        let (rest, x) = p.clone().parse(i.clone())?;
+        let (rest, x) = p.parse(i)?;
         let mut out = vec![x];
-        let (rest, xs) = many0(p.clone())(rest)?;
+        let (rest, xs) = many0(p)(rest)?;
         out.extend(xs);
         Ok((i, out))
     }
@@ -445,5 +448,31 @@ where
 
             Err(ParseError::from_error(input, ParseErrorKind::NoMatch))
         }
+    }
+}
+
+pub fn map<'a, I,E,P, M, O, XO>(mut mapper: M,mut p: P ) -> impl FnMut(I) -> Result<(I,O),E> + Copy
+where
+    P: FnMut(I) -> Result<(I, XO ),E> + Copy,
+    M: FnMut(XO) -> O + Copy,
+    I: Collection + Clone + Copy,
+    E: ParseError<I>,
+{
+    move |i| p.parse(i).map(|(r, m)| (r, mapper(m)))
+}
+
+
+pub fn match_span<P, I, O, E>(mut p: P) -> impl FnMut(I) -> Result<(I, (I, O)), E> + Copy + Clone
+where
+    I: Clone + Copy,
+    P: Parser<I, O, E>,
+    I: Splitter<E> + Collection,
+    E: ParseError<I>,
+{
+    move |i| {
+        let (rest, matched) = p.parse(i)?;
+        let matched_len = i.length() - rest.length();
+        let matched_span = i.take(matched_len)?;
+        Ok((rest, (matched_span, matched)))
     }
 }
