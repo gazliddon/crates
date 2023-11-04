@@ -4,19 +4,19 @@ use thiserror::Error;
 /// line and character are both zero based
 #[derive(Clone, Debug, Copy)]
 pub struct TextPos {
-    line: usize,
-    col: usize,
+    line: u32,
+    col: u32,
 }
 
 impl TextPos {
-    pub fn new(line: usize, character: usize) -> Self {
-        Self { line, col: character }
+    pub fn new(line: usize, col: usize) -> Self {
+        Self { line: line as u32, col: col as u32 }
     }
     pub fn col(&self) -> usize {
-        self.col
+        self.col as usize
     }
     pub fn line(&self) -> usize {
-        self.line
+        self.line as usize
     }
 }
 
@@ -217,9 +217,9 @@ impl TextFile {
         if pos.line() == self.num_of_lines() && pos.col() == 0 {
             Ok(self.source.len())
         } else {
-            let line_r = self.get_line_range(pos.line)?;
+            let line_r = self.get_line_range(pos.line())?;
 
-            if pos.col > line_r.len() {
+            if pos.col() > line_r.len() {
                 Err(EditErrorKind::CharacterOutOfRange(pos.col(), line_r.len()))
             } else {
                 Ok(line_r.start + pos.col())
@@ -243,8 +243,8 @@ impl TextFile {
         } else {
             for (line, l) in self.line_offsets.iter().enumerate() {
                 if l.contains(&offset) {
-                    let character = offset - l.start;
-                    return Ok(TextPos { line, col: character });
+                    let col = offset - l.start;
+                    return Ok(TextPos::new(line,col));
                 }
             }
 
