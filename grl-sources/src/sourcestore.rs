@@ -128,10 +128,10 @@ impl SourceMapping {
     ) {
         let pos = self.get_macro_pos().unwrap_or(pos);
 
-        if let AsmSource::FileId(file_id) = pos.src {
+        if let AsmSource::FileId(file_id) = pos.src() {
             let entry = Mapping {
                 file_id,
-                line: pos.line,
+                line: pos.line(),
                 mem_range,
                 item_type,
                 physical_mem_range,

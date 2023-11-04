@@ -80,10 +80,10 @@ impl SourceFiles {
     }
 
     pub fn get_source_info<'a>(&'a self, pos: &Position) -> SResult<SourceInfo<'a>> {
-        if let AsmSource::FileId(file_id) = pos.src {
+        if let AsmSource::FileId(file_id) = pos.src() {
             let source_file = self.get_source_file_from_id(file_id)?;
             let fragment = source_file.get_span(pos);
-            let line_str = source_file.get_line(pos.line).unwrap();
+            let line_str = source_file.get_line(pos.line()).unwrap();
 
             let ret = SourceInfo {
                 line_str,

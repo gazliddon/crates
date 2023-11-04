@@ -14,41 +14,46 @@ pub enum AsmSource {
 
 #[derive(Debug, PartialEq, Eq, Clone, Hash, Copy)]
 pub struct Position {
-    pub line: usize,
-    pub col: usize,
-    pub offset : usize,
-    pub len: usize,
-    pub src: AsmSource,
+    src: AsmSource,
+    line: u32,
+    col: u32,
+    offset : u32,
+    len: u32,
 }
 
 impl Position {
+    pub fn src(&self) -> AsmSource {
+        self.src
+    }
+
     pub fn line_col_from_one(&self) -> (usize, usize) {
-        (self.line + 1, self.col + 1)
+        let (l,c) = (self.line + 1, self.col + 1);
+        (l as usize, c as usize)
     }
 
     pub fn line_col(&self) -> (usize, usize) {
-        (self.line, self.col)
+        (self.line as usize, self.col as usize)
     }
 
     pub fn new(line: usize, col: usize, range: std::ops::Range<usize>, src: AsmSource) -> Self {
         Self {
-            line,
-            col,
-            offset: range.start,
-            len: range.len(),
+            line: line as u32,
+            col: col as u32,
+            offset: range.start as u32,
+            len: range.len() as u32,
             src,
         }
     }
 
     pub fn line(&self) -> usize {
-        self.line
+        self.line as usize
     }
     pub fn col(&self) -> usize {
-        self.col
+        self.col as usize
     }
 
     pub fn range(&self) -> std::ops::Range<usize> {
-        self.offset .. self.offset+self.len
+        self.offset as usize .. ( self.offset+self.len ) as usize
     }
 
     pub fn overlaps(&self, p: &Position) -> bool {

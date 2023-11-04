@@ -36,13 +36,7 @@ impl SourceFile {
 
     pub fn get_position(&self, r: std::ops::Range<usize>) -> Position {
         let tp = self.source.offset_to_text_pos(r.start).unwrap();
-        Position {
-            line: tp.line(),
-            col: tp.col(),
-            offset: r.start,
-            len: r.len(),
-            src: self.file_id,
-        }
+        Position::new(tp.line(),tp.col(),r, self.file_id)
     }
 
     pub fn get_span(&self, p: &Position) -> &str {
