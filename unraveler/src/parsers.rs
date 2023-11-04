@@ -158,7 +158,7 @@ where
     I: Clone + Copy,
 {
     move |input: I| {
-        let ret = first.parse(input.clone());
+        let ret = first.parse(input);
         if ret.is_ok() {
             ret.map(|(r, m)| (r, Some(m)))
         } else {
@@ -169,36 +169,36 @@ where
 
 pub fn not<I, O, E, P>(mut first: P) -> impl FnMut(I) -> Result<(I, I), E>
 where
-    I: Clone + Copy,
+    I: Copy,
     P: Parser<I, O, E>,
     E: ParseError<I> + std::fmt::Debug,
 {
     move |input: I| {
-        let ret = first.parse(input.clone());
+        let ret = first.parse(input);
 
         match ret {
             Ok(r) => Err(E::from_error_kind(
-                input.clone(),
+                input,
                 ParseErrorKind::NoMatch,
                 Severity::Error,
             )),
-            Err(mut e) => Ok((input.clone(), input.clone())),
+            Err(mut e) => Ok((input, input)),
         }
     }
 }
 pub fn all<I, O, E, P>(mut first: P) -> impl FnMut(I) -> Result<(I, O), E>
 where
-    I: Clone + Collection + Copy,
+    I: Collection + Copy,
     P: Parser<I, O, E>,
     E: ParseError<I> + std::fmt::Debug,
 {
     move |input: I| {
-        let ret = first.parse(input.clone());
+        let ret = first.parse(input);
         match ret {
             Ok((rest, matched)) => {
                 if !rest.is_empty() {
                     Err(E::from_error_kind(
-                        input.clone(),
+                        input,
                         ParseErrorKind::UnconsumedInput,
                         Severity::Error,
                     ))
@@ -213,7 +213,7 @@ where
 
 pub fn cut<I, O, E, P>(mut first: P) -> impl FnMut(I) -> Result<(I, O), E>
 where
-    I: Clone + Copy,
+    I: Copy,
     P: Parser<I, O, E>,
     E: ParseError<I> + std::fmt::Debug,
 {
@@ -243,7 +243,7 @@ where
             Ok((rest, x)) => {
                 let (rest, xs) = many0(preceded(sep, first))(rest)?;
                 let mut ret = vec![x];
-                ret.extend(xs.into_iter());
+                ret.extend(xs);
                 Ok((rest, ret))
             }
         }
@@ -264,7 +264,7 @@ where
         let (rest, x) = first.parse(input)?;
         let mut ret = vec![x];
         let (rest, xs) = many0(preceded(sep, first))(rest)?;
-        ret.extend(xs.into_iter());
+        ret.extend(xs);
         Ok((rest, ret))
     }
 }
@@ -377,7 +377,7 @@ where
 
         let i = matched.at(0).unwrap();
 
-        if pred(&i) {
+        if pred(i) {
             Ok((rest, i.clone()))
         } else {
             Err(ParseError::from_error(input, ParseErrorKind::NoMatch))
@@ -451,16 +451,18 @@ where
     }
 }
 
-pub fn map<'a, I,E,P, M, O, XO>(mut mapper: M,mut p: P ) -> impl FnMut(I) -> Result<(I,O),E> + Copy
+pub fn map<I, E, P, M, O, XO>(
+    mut mapper: M,
+    mut p: P,
+) -> impl FnMut(I) -> Result<(I, O), E> + Copy
 where
-    P: FnMut(I) -> Result<(I, XO ),E> + Copy,
+    P: FnMut(I) -> Result<(I, XO), E> + Copy,
     M: FnMut(XO) -> O + Copy,
     I: Collection + Clone + Copy,
     E: ParseError<I>,
 {
     move |i| p.parse(i).map(|(r, m)| (r, mapper(m)))
 }
-
 
 pub fn match_span<P, I, O, E>(mut p: P) -> impl FnMut(I) -> Result<(I, (I, O)), E> + Copy + Clone
 where

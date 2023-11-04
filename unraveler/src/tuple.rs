@@ -1,16 +1,16 @@
 use super::{ParseError, ParseErrorKind, Parser};
 use paste::paste;
 
-pub trait Tuple<I, O, E> : Copy
-where I : Clone + Copy
-
- {
+pub trait Tuple<I, O, E>: Copy
+where
+    I: Clone + Copy,
+{
     fn tuple(&mut self, input: I) -> Result<(I, O), E>;
 }
 
 pub fn tuple<I: Clone + Copy, O, E: ParseError<I>, TUPLE: Tuple<I, O, E>>(
     mut l: TUPLE,
-) -> impl FnMut(I) -> Result<(I, O), E> + Copy{
+) -> impl FnMut(I) -> Result<(I, O), E> + Copy {
     move |i: I| l.tuple(i)
 }
 
@@ -48,3 +48,7 @@ impl_tuple!(A B C D E);
 impl_tuple!(A B C D E F);
 impl_tuple!(A B C D E F G);
 impl_tuple!(A B C D E F G H);
+impl_tuple!(A B C D E F G H I);
+impl_tuple!(A B C D E F G H I J);
+impl_tuple!(A B C D E F G H I J K);
+impl_tuple!(A B C D E F G H I J K L);

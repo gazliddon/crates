@@ -68,6 +68,18 @@ where
     pub fn extra(&self) -> &XTRA {
         &self.extra
     }
+    
+    pub fn extra_mut(&mut self) -> &mut XTRA {
+        &mut self.extra
+    }
+
+    pub fn lift_extra<F>(self, f : F) -> Self 
+    where
+        F : Fn(XTRA) -> XTRA
+    {
+        let new_extra = f(self.extra);
+        Self::with_extra(self, new_extra)
+    }
 
     pub fn from_slice(x_span: &'a [I], extra: XTRA) -> Self {
         Self {
@@ -85,8 +97,7 @@ where
     }
 
     pub fn get_range(&self) -> std::ops::Range<usize> {
-        let r = self.position..(self.position + self.length());
-        r
+        self.position..(self.position + self.length())
     }
 
     pub fn as_slice(&self) -> &[I] {
