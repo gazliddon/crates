@@ -21,7 +21,7 @@ impl SourceFiles {
     pub fn add_source_file<P: AsRef<Path>>(&mut self, p: P, text: &str) -> u64 {
         let p = p.as_ref().to_path_buf();
         let id = self.get_next_id();
-        let source_file = SourceFile::new(&p, text, id);
+        let source_file = SourceFile::new(&p, text, AsmSource::FileId(id));
         self.id_to_source_file.insert(id, source_file);
         self.path_to_id.insert(p, id);
         id
@@ -90,7 +90,7 @@ impl SourceFiles {
                 fragment,
                 source_file,
                 file: source_file.file.clone(),
-                pos: pos.clone(),
+                pos: *pos,
             };
 
             Ok(ret)

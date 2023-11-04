@@ -1,4 +1,6 @@
-use super::{SourceFile, SourceFiles, AsmSource, Position, TextEditTrait, error::*, };
+use crate::fileloader::{FileIo, SourceFileLoader};
+
+use super::{error::*, AsmSource, Position, SourceFile, SourceFiles, TextEditTrait};
 
 use path_clean::PathClean;
 
@@ -77,10 +79,9 @@ pub struct Mapping {
 }
 
 impl Mapping {
-    pub fn contains(&self, addr : usize) -> bool {
+    pub fn contains(&self, addr: usize) -> bool {
         self.physical_mem_range.contains(&addr)
     }
-
 }
 
 use grl_utils::Stack;
@@ -99,7 +100,7 @@ impl SourceMapping {
     }
 
     pub fn start_macro(&mut self, pos: &Position) {
-        self.macro_stack.push(pos.clone())
+        self.macro_stack.push(*pos)
     }
 
     pub fn stop_macro(&mut self) {
@@ -114,7 +115,7 @@ impl SourceMapping {
         !self.macro_stack.is_empty()
     }
 
-    pub fn get_mapping(&self, addr : usize) -> Option<&Mapping> {
+    pub fn get_mapping(&self, addr: usize) -> Option<&Mapping> {
         self.phys_addr_to_mapping.get(addr)
     }
 
@@ -159,21 +160,27 @@ pub struct BinToWrite {
 }
 
 impl BinToWrite {
-    pub fn new<P: AsRef<Path>>(data: Vec<u8>, p : P, addr: std::ops::Range<usize> ) -> Self {
+    pub fn new<P: AsRef<Path>>(data: Vec<u8>, p: P, addr: std::ops::Range<usize>) -> Self {
         Self {
             data,
-            bin_desc : BinWriteDesc {
+            bin_desc: BinWriteDesc {
                 file: p.as_ref().to_path_buf(),
-                addr
-            }
+                addr,
+            },
         }
+    }
+
+    pub fn write_bin(&self, loader: &mut SourceFileLoader) -> (usize, usize, PathBuf) {
+        let physical_address = self.bin_desc.addr.start;
+        let count = self.bin_desc.addr.len();
+        let p = &self.bin_desc.file;
+        loader.write(p, &self.data);
+        (physical_address, count, self.bin_desc.file.clone())
     }
 }
 
-
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SourceDatabase {
-
     id_to_source_file: HashMap<u64, PathBuf>,
     mappings: SourceMapping,
 
@@ -241,13 +248,13 @@ impl SourceDatabase {
         copy.file_name = fileutils::abs_path_from_cwd(&file);
         let j = serde_json::to_string_pretty(&copy).expect("Unable to serialize to json");
         fs::write(file, j)?;
-        Ok( copy.file_name.to_string_lossy().to_string())
+        Ok(copy.file_name.to_string_lossy().to_string())
     }
 
     pub fn new(
         mappings: &SourceMapping,
         sources: &SourceFiles,
-        symbols: &SymbolTree<u64,u64,i64>,
+        symbols: &SymbolTree<u64, u64, i64>,
         written: &[BinWriteDesc],
         exec_addr: Option<usize>,
     ) -> Self {
@@ -282,7 +289,8 @@ impl SourceDatabase {
             _ => SourceErrorType::Io(e.to_string()),
         })?;
 
-        let mut sd: SourceDatabase = serde_json::from_str(&symstr).map_err(|e| SourceErrorType::Io(e.to_string()))?;
+        let mut sd: SourceDatabase =
+            serde_json::from_str(&symstr).map_err(|e| SourceErrorType::Io(e.to_string()))?;
         sd.post_deserialize();
         Ok(sd)
     }
@@ -312,7 +320,7 @@ impl SourceDatabase {
         if !x {
             let s = std::fs::read_to_string(file_name).expect("Should have read source file");
             let mut x = self.source_files.borrow_mut();
-            x.insert(file_id, SourceFile::new(file_name, &s,file_id));
+            x.insert(file_id, SourceFile::new(file_name, &s, AsmSource::FileId( file_id )));
             x.get(&file_id);
         } else {
             println!("**** Got from cache! {}", file_name.to_string_lossy());

@@ -1,3 +1,5 @@
+use crate::AsmSource;
+
 use super::Position;
 use super::{TextEditTrait, TextFile};
 use std::fmt::Debug;
@@ -5,13 +7,16 @@ use std::path::{Path, PathBuf};
 
 #[derive(Clone, PartialEq)]
 pub struct SourceFile {
-    pub file_id: u64,
+    pub file_id : AsmSource,
     pub file: PathBuf,
     pub source: TextFile,
 }
 
 impl SourceFile {
-    pub fn new<P: AsRef<Path>>(file: P, source: &str, file_id: u64) -> Self {
+    pub fn get_entire_source(&self) -> &str {
+        &self.source.source
+    }
+    pub fn new<P: AsRef<Path>>(file: P, source: &str, file_id: AsmSource) -> Self {
         Self {
             file: file.as_ref().to_path_buf(),
             source: TextFile::new(source),
@@ -36,7 +41,7 @@ impl SourceFile {
             col: tp.col(),
             offset: r.start,
             len: r.len(),
-            src: crate::AsmSource::FileId(self.file_id)
+            src: self.file_id,
         }
     }
 

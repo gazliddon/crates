@@ -32,7 +32,7 @@ pub struct TextEdit<'a> {
 
 impl<'a> TextEdit<'a> {
     pub fn from_pos(start: TextPos, end: TextPos, text: &'a str) -> Self {
-        let range = start.clone()..end.clone();
+        let range = start..end;
         Self {
             start,
             end,
@@ -244,7 +244,6 @@ impl TextFile {
             for (line, l) in self.line_offsets.iter().enumerate() {
                 if l.contains(&offset) {
                     let character = offset - l.start;
-                    let line = line;
                     return Ok(TextPos { line, col: character });
                 }
             }
