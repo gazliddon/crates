@@ -452,8 +452,8 @@ where
 }
 
 pub fn map<I, E, P, M, O, XO>(
-    mut mapper: M,
     mut p: P,
+    mut mapper: M,
 ) -> impl FnMut(I) -> Result<(I, O), E> + Copy
 where
     P: FnMut(I) -> Result<(I, XO), E> + Copy,

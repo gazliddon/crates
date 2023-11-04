@@ -1,6 +1,6 @@
 use std::{collections::VecDeque, ops::{Deref, DerefMut}};
 #[derive(Debug, PartialEq, Eq, Clone)]
-pub struct Stack<OP: Clone> {
+pub struct Stack<OP> {
     stack: VecDeque<OP>,
 }
 
@@ -35,6 +35,10 @@ impl<A: Clone> DerefMut for Stack<A> {
 impl<OP: Clone> Stack<OP> {
     pub fn new() -> Self {
         Self::default()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.stack.is_empty()
     }
 
     pub fn with_capacity(n : usize) -> Self {
