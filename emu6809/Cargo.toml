@@ -2,7 +2,8 @@
 name = "emu6809"
 version = "0.1.2"
 authors = ["Gaz Liddon"]
-categories =["Emulators"]
+categories =["emulators"]
+keywords = ["6809", ]
 edition = "2021"
 build = "build.rs"
 description = "In development 6809 emulator"
