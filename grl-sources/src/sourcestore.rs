@@ -1,4 +1,5 @@
-use crate::fileloader::{FileIo, SourceFileLoader};
+use crate::fileloader::SourceFileLoader;
+use crate::FileIo;
 
 use super::{error::*, AsmSource, Position, SourceFile, SourceFiles, TextEditTrait};
 

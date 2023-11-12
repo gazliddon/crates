@@ -132,6 +132,7 @@ where
             .ok_or(SymbolError::NotFound)?;
         f(x)
     }
+
     pub fn set_value_for_id(
         &mut self,
         id: SymbolScopeId<SCOPEID, SYMID>,
@@ -151,6 +152,7 @@ where
         self.etree
             .on_value_mut(scope_id, |syms| syms.add_reference_symbol(name, symbol_id))
     }
+
     pub fn create_symbol_in_scope(
         &mut self,
         scope_id: SCOPEID,
@@ -164,12 +166,6 @@ where
 
         self.scope_id_to_symbol_info.insert(symbol_id, si);
         Ok(symbol_id)
-    }
-
-    // @TODO this is bad, get rid of it
-    pub fn dump_syms(&self, scope_id: SCOPEID) {
-        let syms = self.etree.get_scope(scope_id).unwrap();
-        println!("{:#?}", syms.name_to_id.keys());
     }
 
     pub fn resolve_label(

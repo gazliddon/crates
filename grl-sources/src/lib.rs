@@ -6,6 +6,7 @@ pub mod fileloader;
 pub mod location;
 
 mod error;
+mod fileio;
 mod position;
 mod sourcefile;
 mod sourcefiles;
@@ -20,6 +21,7 @@ pub use sourcefiles::*;
 pub use sourceinfo::*;
 pub use sourcestore::*;
 pub use textedit::*;
+pub use fileio::*;
 
 // Re-exports
 pub use grl_utils;

@@ -4,35 +4,39 @@ use super::symboltree::ValueTrait;
 use super::prelude::*;
 
 ////////////////////////////////////////////////////////////////////////////////
-pub struct SymbolTreeWriter<'a, SCOPEID, SYMID,SYMVALUE>
+pub struct SymbolTreeWriter<'a, SCOPEID, SYMID, SYMVALUE>
 where
     SCOPEID: ScopeIdTraits,
     SYMID: SymIdTraits,
-        SYMVALUE: ValueTrait,
+    SYMVALUE: ValueTrait,
 {
     current_scope_id: SCOPEID,
     sym_tree: &'a mut SymbolTree<SCOPEID, SYMID, SYMVALUE>,
 }
 
-impl<'a, SCOPEID, SYMID,V> SymbolTreeWriter<'a,SCOPEID,SYMID,V>
+impl<'a, SCOPEID, SYMID, V> SymbolTreeWriter<'a, SCOPEID, SYMID, V>
 where
     SCOPEID: ScopeIdTraits,
     SYMID: SymIdTraits,
     V: ValueTrait,
 {
-    pub fn new(sym_tree: &'a mut SymbolTree<SCOPEID,SYMID,V>, current_scope_id: SCOPEID) -> Self {
+    pub fn new(sym_tree: &'a mut SymbolTree<SCOPEID, SYMID, V>, current_scope_id: SCOPEID) -> Self {
         Self {
             current_scope_id,
             sym_tree,
         }
     }
 
-    pub fn new_root(sym_tree: &'a mut SymbolTree<SCOPEID, SYMID,V>) -> Self {
+    pub fn new_root(sym_tree: &'a mut SymbolTree<SCOPEID, SYMID, V>) -> Self {
         Self::new(sym_tree, sym_tree.get_root_scope_id())
     }
 
     pub fn pop(&mut self) {
-        if let Some(id) = self.sym_tree.etree.get_parent_scope_id(self.current_scope_id) {
+        if let Some(id) = self
+            .sym_tree
+            .etree
+            .get_parent_scope_id(self.current_scope_id)
+        {
             self.current_scope_id = id
         }
     }
@@ -54,8 +58,8 @@ where
         Ok(())
     }
 
-    // enters the child scope below the current_scope
-    // If it doesn't exist then create it
+    /// enters the child scope below the current_scope
+    /// If it doesn't exist then create it
     pub fn create_or_set_scope(&mut self, name: &str) -> SCOPEID {
         let new_scope_node_id = self
             .sym_tree
@@ -64,21 +68,39 @@ where
         new_scope_node_id
     }
 
-
     pub fn add_reference_symbol(
         &mut self,
         name: &str,
-        id: SymbolScopeId<SCOPEID,SYMID>,
+        id: SymbolScopeId<SCOPEID, SYMID>,
     ) -> Result<(), SymbolError> {
         self.sym_tree
             .add_reference_symbol(name, self.current_scope_id, id)
+    }
+
+    fn get_symbol_id(&self, name: &str) -> Result<SymbolScopeId<SCOPEID, SYMID>, SymbolError> {
+        self.sym_tree
+            .get_symbol_info(name, self.current_scope_id)
+            .map(|si| si.symbol_id.clone())
+    }
+
+    pub fn set_or_create_and_set_symbol(
+        &mut self,
+        name: &str,
+        val: V,
+    ) -> Result<SymbolScopeId<SCOPEID, SYMID>, SymbolError> {
+        let symbol_id = self
+            .get_symbol_id(name)
+            .or_else(|_| self.create_symbol(name))?;
+
+        self.sym_tree.set_symbol_for_id(symbol_id, val)?;
+        Ok(symbol_id)
     }
 
     pub fn create_and_set_symbol(
         &mut self,
         name: &str,
         val: V,
-    ) -> Result<SymbolScopeId<SCOPEID,SYMID>, SymbolError> {
+    ) -> Result<SymbolScopeId<SCOPEID, SYMID>, SymbolError> {
         let symbol_id = self.create_symbol(name)?;
         self.sym_tree.set_symbol_for_id(symbol_id, val)?;
         Ok(symbol_id)
@@ -89,23 +111,11 @@ where
             .remove_symbol_for_id(name, self.current_scope_id)
     }
 
-    pub fn create_symbol(&mut self, name: &str) -> Result<SymbolScopeId<SCOPEID,SYMID>, SymbolError> {
+    pub fn create_symbol(
+        &mut self,
+        name: &str,
+    ) -> Result<SymbolScopeId<SCOPEID, SYMID>, SymbolError> {
         self.sym_tree
             .create_symbol_in_scope(self.current_scope_id, name)
     }
 }
-impl<'a, SCOPEID, SYMID,SYMVALUE> SymbolTreeWriter<'a,SCOPEID,SYMID,SYMVALUE>
-where
-    SCOPEID: ScopeIdTraits + std::fmt::Debug,
-    SYMID: SymIdTraits + std::fmt::Debug, 
-    SYMVALUE: ValueTrait,
-{
-    pub fn dump_scope(&self) {
-        todo!("put this back in")
-        // let x = self
-        //     .sym_tree
-        //     .get_scope(self.current_scope_id);
-        // println!("{:#?}", x)
-    }
-}
-
