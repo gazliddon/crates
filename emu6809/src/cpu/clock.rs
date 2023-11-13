@@ -1,3 +1,4 @@
+#![deny(unused_imports)]
 #[derive(Debug, Clone, Default)]
 pub struct StandardClock {
     cycles: u64,

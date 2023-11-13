@@ -1,3 +1,4 @@
+#![deny(unused_imports)]
 use super::{mem, CpuErr, IndexModes, IndexedFlags, InstructionDecoder, Regs};
 use mem::MemoryIO;
 

@@ -1,3 +1,4 @@
+#![deny(unused_imports)]
 #[derive(thiserror::Error, Debug, Clone)]
 pub enum SourceErrorType {
     #[error("Sort this out gaz")]
@@ -9,12 +10,6 @@ pub enum SourceErrorType {
 
     #[error("IO Error : {0}")]
     Io(String)
-
-    // #[error(transparent)]
-    // Json {
-    //     #[from]
-    //     source: serde_json::Error,
-    // },
 }
 
 pub type SResult<T> = Result<T,SourceErrorType>;

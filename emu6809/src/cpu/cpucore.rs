@@ -1,3 +1,4 @@
+#![deny(unused_imports)]
 use bitflags::bitflags;
 use alu::GazAlu;
 
@@ -98,16 +99,13 @@ pub struct Context<'a> {
     pub regs: &'a mut Regs,
     pub pins: &'a mut Pins,
     pub ins: InstructionDecoder,
-    /// Cycles executed
     pub cycles: usize,
-    /// Instructions executed
     pub instructions: usize,
-
+    // TODO This should generic with compile time dispatch
     pub mem: &'a mut dyn MemoryIO,
 }
 
 // use serde::Deserializer;
-#[allow(unused_variables, unused_mut)]
 impl<'a> Context<'a> {
     fn set_next_pc(&mut self, v: usize) {
         self.ins.next_addr = v & 0xffff;

@@ -1,7 +1,7 @@
+#![deny(unused_imports)]
 // memory trait
-pub use sha1::Sha1;
+use sha1::Sha1;
 use std::ops::Range;
-use std::vec::Vec;
 use thiserror::Error;
 
 #[derive(Error,Debug, Clone, Copy, PartialEq)]

@@ -1,3 +1,4 @@
+#![deny(unused_imports)]
 use thiserror::Error;
 
 /// cartesian position in a text file

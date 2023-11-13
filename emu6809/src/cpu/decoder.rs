@@ -1,3 +1,4 @@
+#![deny(unused_imports)]
 use super::mem::MemoryIO;
 use super::{CpuErr, CpuResult};
 use crate::isa::{Dbase, Instruction};

@@ -1,3 +1,4 @@
+#![deny(unused_imports)]
 use std::collections::VecDeque;
 
 use super::{GenericEvalErrorKind, GetPriority, OperationError, pop_pair};

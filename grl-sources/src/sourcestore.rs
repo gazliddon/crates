@@ -1,7 +1,9 @@
-use crate::fileloader::SourceFileLoader;
-use crate::FileIo;
+#![deny(unused_imports)]
 
-use super::{error::*, AsmSource, Position, SourceFile, SourceFiles, TextEditTrait};
+use super::{
+    error::*, fileloader::SourceFileLoader, AsmSource, FileIo, Position, SourceFile, SourceFiles,
+    TextEditTrait,
+};
 
 use path_clean::PathClean;
 
@@ -321,7 +323,10 @@ impl SourceDatabase {
         if !x {
             let s = std::fs::read_to_string(file_name).expect("Should have read source file");
             let mut x = self.source_files.borrow_mut();
-            x.insert(file_id, SourceFile::new(file_name, &s, AsmSource::FileId( file_id )));
+            x.insert(
+                file_id,
+                SourceFile::new(file_name, &s, AsmSource::FileId(file_id)),
+            );
             x.get(&file_id);
         } else {
             println!("**** Got from cache! {}", file_name.to_string_lossy());

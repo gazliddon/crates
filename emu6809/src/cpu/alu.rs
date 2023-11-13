@@ -83,16 +83,6 @@ fn nzvch<T: GazAlu>(f: &mut Flags, write_mask: u8, a: u32, b: u32, r: u32) -> T 
     T::from_u32(r)
 }
 
-// pub fn nzv<T: GazAlu>(f: &mut Flags, write_mask: u8, a: u32, b: u32, r: u32) -> T {
-//     let my_mask = (Flags::N | Flags::Z | Flags::V).bits();
-
-//     let new_bits = get_negative::<T>(r) | get_zero::<T>(r) | get_overflow::<T>(a, b, r);
-
-//     f.write_with_mask(write_mask & my_mask, new_bits);
-
-//     T::from_u32(r)
-// }
-
 pub fn nz<T: GazAlu>(f: &mut Flags, write_mask: u8, r: u32) -> T {
     let write_mask = (Flags::N | Flags::Z).bits() & write_mask;
 

@@ -1,6 +1,7 @@
+#![deny(unused_imports)]
 use std::collections::VecDeque;
 
-use super::{ PostfixerErrorKind, pop_pair };
+use super::PostfixerErrorKind;
 
 pub trait GetPriority {
     fn priority(&self) -> Option<usize> {

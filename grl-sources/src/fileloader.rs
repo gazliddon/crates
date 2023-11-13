@@ -1,11 +1,18 @@
-use super::{SourceFiles, SourceFile, FileIo};
-use grl_utils::{PathSearcher, Paths, SearchError, fileutils};
+#![deny(unused_imports)]
 
-use std::collections::{HashSet, HashMap};
-use std::fmt::Debug;
-use std::fs;
-use std::path::{Path, PathBuf};
-use anyhow::{anyhow, Result};
+use super::{FileIo, SourceFile, SourceFiles};
+use grl_utils::{PathSearcher, Paths, SearchError};
+
+
+use anyhow::Result;
+
+use std::{
+    collections::{HashMap, HashSet},
+    fmt::Debug,
+    fs::File,
+    io::Read,
+    path::{Path, PathBuf},
+};
 
 #[derive(Debug, Clone)]
 pub struct SourceFileLoader {
@@ -14,7 +21,7 @@ pub struct SourceFileLoader {
     id: u64,
     pub files_loaded: HashSet<PathBuf>,
     pub files_written: HashSet<PathBuf>,
-    bin_file_cache: HashMap<PathBuf,Vec<u8>>
+    bin_file_cache: HashMap<PathBuf, Vec<u8>>,
 }
 
 impl Default for SourceFileLoader {
@@ -24,17 +31,16 @@ impl Default for SourceFileLoader {
     }
 }
 
-
 impl PathSearcher for SourceFileLoader {
     fn get_full_path<P: AsRef<Path>>(&self, file: P) -> Result<PathBuf, SearchError> {
         self.source_search_paths.get_full_path(file)
     }
 
-    fn get_search_paths(&self) -> &[ PathBuf ] {
+    fn get_search_paths(&self) -> &[PathBuf] {
         self.source_search_paths.get_search_paths()
     }
 
-    fn add_search_path<P: AsRef<Path>>(&mut self, path : P) {
+    fn add_search_path<P: AsRef<Path>>(&mut self, path: P) {
         self.source_search_paths.add_path(path)
     }
 
@@ -61,15 +67,11 @@ impl FileIo for SourceFileLoader {
     }
 
     fn read_binary<P: AsRef<Path>>(&mut self, path: P) -> Result<(PathBuf, Vec<u8>)> {
-        let path = self
-            .get_full_path(path)
-            .map_err(|e| self.mk_error(e))?;
+        let path = self.get_full_path(path).map_err(|e| self.mk_error(e))?;
 
         if let Some(cached) = self.bin_file_cache.get(&path) {
-            Ok(( path, cached.clone() ))
+            Ok((path, cached.clone()))
         } else {
-            use std::fs::File;
-            use std::io::Read;
             let mut buffer = vec![];
             let mut file = File::open(path.clone())?;
             file.read_to_end(&mut buffer)?;
@@ -104,7 +106,7 @@ impl SourceFileLoader {
             id: 0,
             files_loaded: Default::default(),
             files_written: Default::default(),
-            bin_file_cache: Default::default()
+            bin_file_cache: Default::default(),
         }
     }
 }

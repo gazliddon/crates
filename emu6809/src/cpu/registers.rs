@@ -1,16 +1,17 @@
-use std::fmt::Display;
+#![deny(unused_imports)]
+use std::{fmt::Display, str::FromStr};
 
 use super::Flags;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Copy, PartialOrd, Ord)]
 pub enum RegEnum {
     A,
     B,
+    D,
     X,
     Y,
     U,
     S,
-    D,
     DP,
     CC,
     PC,
@@ -18,19 +19,42 @@ pub enum RegEnum {
 
 impl Display for RegEnum {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        use RegEnum::*;
         let s = match self {
-            Self::A => "A",
-            Self::B => "B",
-            Self::X => "X",
-            Self::Y => "Y",
-            Self::U => "U",
-            Self::S => "S",
-            Self::D => "D",
-            Self::DP => "DP",
-            Self::CC => "CC",
-            Self::PC => "PC",
+            A => "A",
+            B => "B",
+            D => "D",
+            X => "X",
+            Y => "Y",
+            U => "U",
+            S => "S",
+            DP => "DP",
+            CC => "CC",
+            PC => "PC",
         };
         write!(f, "{s}")
+    }
+}
+
+impl FromStr for RegEnum {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let txt = s.to_lowercase();
+        match txt.as_str() {
+            "a" => Ok( Self::A ),
+            "b" => Ok( Self::B ),
+            "d" => Ok( Self::D ),
+            "x" => Ok( Self::X ),
+            "y" => Ok( Self::Y ),
+            "u" => Ok( Self::U ),
+            "s" => Ok( Self::S ),
+            "dp" => Ok( Self::DP ),
+            "cc" => Ok( Self::CC ),
+            "pc" => Ok( Self::PC),
+            _ => Err(())
+
+        }
     }
 }
 
@@ -59,32 +83,34 @@ pub struct Regs {
 
 impl Regs {
     pub fn set(&mut self, r: &RegEnum, val: u16) {
+        use RegEnum::*;
         match *r {
-            RegEnum::A => self.a = val as u8,
-            RegEnum::B => self.b = val as u8,
-            RegEnum::X => self.x = val,
-            RegEnum::Y => self.y = val,
-            RegEnum::U => self.u = val,
-            RegEnum::S => self.s = val,
-            RegEnum::D => self.set_d(val),
-            RegEnum::DP => self.dp = val as u8,
-            RegEnum::CC => self.flags = Flags::new(val as u8),
-            RegEnum::PC => self.pc = val,
+            A => self.a = val as u8,
+            B => self.b = val as u8,
+            D => self.set_d(val),
+            X => self.x = val,
+            Y => self.y = val,
+            U => self.u = val,
+            S => self.s = val,
+            DP => self.dp = val as u8,
+            CC => self.flags = Flags::new(val as u8),
+            PC => self.pc = val,
         }
     }
 
     pub fn get(&self, r: &RegEnum) -> u16 {
+        use RegEnum::*;
         match *r {
-            RegEnum::A => u16::from(self.a),
-            RegEnum::B => u16::from(self.b),
-            RegEnum::X => self.x,
-            RegEnum::Y => self.y,
-            RegEnum::U => self.u,
-            RegEnum::S => self.s,
-            RegEnum::D => self.get_d(),
-            RegEnum::DP => u16::from(self.dp),
-            RegEnum::CC => u16::from(self.flags.bits()),
-            RegEnum::PC => self.pc,
+            A => u16::from(self.a),
+            B => u16::from(self.b),
+            D => self.get_d(),
+            X => self.x,
+            Y => self.y,
+            U => self.u,
+            S => self.s,
+            DP => u16::from(self.dp),
+            CC => u16::from(self.flags.bits()),
+            PC => self.pc,
         }
     }
 

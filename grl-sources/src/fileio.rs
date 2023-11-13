@@ -1,8 +1,5 @@
-use super::{SourceFiles, SourceFile};
-use grl_utils::{PathSearcher, Paths, SearchError, fileutils};
-use std::collections::{HashSet, HashMap};
-use std::fmt::Debug;
-use std::fs;
+#![deny(unused_imports)]
+use grl_utils::{PathSearcher, SearchError, fileutils};
 use std::path::{Path, PathBuf};
 use anyhow::{anyhow, Result};
 

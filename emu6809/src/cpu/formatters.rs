@@ -1,3 +1,4 @@
+#![deny(unused_imports)]
 use super::{Flags, Regs};
 
 use std::fmt;

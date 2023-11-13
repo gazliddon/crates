@@ -1,13 +1,13 @@
-use crate::AsmSource;
-
-use super::Position;
-use super::{TextEditTrait, TextFile};
-use std::fmt::Debug;
-use std::path::{Path, PathBuf};
+#![deny(unused_imports)]
+use crate::{AsmSource, Position, TextEditTrait, TextFile};
+use std::{
+    fmt::Debug,
+    path::{Path, PathBuf},
+};
 
 #[derive(Clone, PartialEq)]
 pub struct SourceFile {
-    pub file_id : AsmSource,
+    pub file_id: AsmSource,
     pub file: PathBuf,
     pub source: TextFile,
 }
@@ -36,7 +36,7 @@ impl SourceFile {
 
     pub fn get_position(&self, r: std::ops::Range<usize>) -> Position {
         let tp = self.source.offset_to_text_pos(r.start).unwrap();
-        Position::new(tp.line(),tp.col(),r, self.file_id)
+        Position::new(tp.line(), tp.col(), r, self.file_id)
     }
 
     pub fn get_span(&self, p: &Position) -> &str {

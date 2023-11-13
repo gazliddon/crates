@@ -1,3 +1,4 @@
+#![deny(unused_imports)]
 use super::{MemMap, MemResult, MemoryIO};
 use sha1::Sha1;
 use std::cell::RefCell;

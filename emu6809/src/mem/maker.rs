@@ -1,3 +1,4 @@
+#![deny(unused_imports)]
 use mem::memmap::MemMap;
 use serde::Deserialize;
 

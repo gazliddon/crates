@@ -1,3 +1,4 @@
+#![deny(unused_imports)]
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Location {
     pub file: String,

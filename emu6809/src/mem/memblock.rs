@@ -1,3 +1,4 @@
+#![deny(unused_imports)]
 use std::marker::PhantomData;
 
 use crate::mem::MemErrorTypes;

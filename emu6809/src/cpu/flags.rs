@@ -1,3 +1,4 @@
+#![deny(unused_imports)]
 use serde::{Deserialize, Serialize};
 
 #[derive(Default, Serialize, Deserialize,Clone,Copy,PartialEq,Debug)]

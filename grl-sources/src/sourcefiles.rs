@@ -1,6 +1,9 @@
+#![deny(unused_imports)]
 use super::{AsmSource, Position, SResult, SourceErrorType, SourceFile, SourceInfo};
-use std::collections::HashMap;
-use std::path::{Path, PathBuf};
+use std::{
+    collections::HashMap,
+    path::{Path, PathBuf},
+};
 
 #[derive(Debug, Clone, Default)]
 pub struct SourceFiles {

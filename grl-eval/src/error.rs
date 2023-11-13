@@ -1,3 +1,4 @@
+#![deny(unused_imports)]
 use thiserror::Error;
 use super::Operation;
 

@@ -1,3 +1,4 @@
+#![deny(unused_imports)]
 use super::SourceFile;
 use super::Position;
 use std::path::PathBuf;
