@@ -54,12 +54,12 @@ pub trait FileIo: PathSearcher {
     fn write<P: AsRef<Path>, C: AsRef<[u8]>>(&mut self, path: P, data: C) -> PathBuf {
         let path = path.as_ref();
 
-        std::fs::write(&path, data).unwrap_or_else(|_| 
+        std::fs::write(path, data).unwrap_or_else(|_| 
             panic!(
              "Can't write bin file {}", path.to_string_lossy() 
                 ));
 
-        let abs_path = fileutils::abs_path_from_cwd(&path);
+        let abs_path = fileutils::abs_path_from_cwd(path);
 
         self.add_to_files_written(abs_path);
 

@@ -80,7 +80,7 @@ where
     fn get_symbol_id(&self, name: &str) -> Result<SymbolScopeId<SCOPEID, SYMID>, SymbolError> {
         self.sym_tree
             .get_symbol_info(name, self.current_scope_id)
-            .map(|si| si.symbol_id.clone())
+            .map(|si| si.symbol_id)
     }
 
     pub fn set_or_create_and_set_symbol(
