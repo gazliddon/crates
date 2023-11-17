@@ -211,7 +211,7 @@ where
     }
 }
 
-pub fn cut<I, O, E, P>(mut first: P) -> impl FnMut(I) -> Result<(I, O), E>
+pub fn cut<I, O, E, P>(mut first: P) -> impl FnMut(I) -> Result<(I, O), E> + Copy
 where
     I: Copy,
     P: Parser<I, O, E>,
