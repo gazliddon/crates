@@ -66,6 +66,9 @@ impl Position {
             false
         }
     }
+    pub fn offset(&self) -> usize {
+        self.offset as usize
+    }
 }
 
 impl Default for Position {
