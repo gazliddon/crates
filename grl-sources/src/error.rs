@@ -1,6 +1,10 @@
 #![deny(unused_imports)]
-#[derive(thiserror::Error, Debug, Clone)]
+use thiserror::Error;
+
+#[derive(Error, Debug, Clone)]
 pub enum SourceErrorType {
+    #[error(transparent)]
+    FileError(#[from] grl_utils::FileError),
     #[error("Sort this out gaz")]
     Misc,
     #[error("File not found: {0}")]
@@ -13,5 +17,4 @@ pub enum SourceErrorType {
 }
 
 pub type SResult<T> = Result<T,SourceErrorType>;
-
 

@@ -91,8 +91,8 @@ impl InstructionInfo {
     pub fn get_instruction(&self, amode: &AddrModeEnum) -> Option<&Instruction> {
         self.addressing_modes.get(amode)
     }
-    pub fn get_boxed_instruction(&self, amode: &AddrModeEnum) -> Option<Box<Instruction>> {
-        self.addressing_modes.get(amode).cloned().map(Box::new)
+    pub fn get_boxed_instruction(&self, amode: AddrModeEnum) -> Option<Box<Instruction>> {
+        self.addressing_modes.get(&amode).cloned().map(Box::new)
     }
 
     pub fn add(&mut self, ins: &Instruction) {

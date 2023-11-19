@@ -1,3 +1,4 @@
+#![deny(unused_imports)]
 use path_clean::PathClean;
 use std::path::{Path, PathBuf};
 

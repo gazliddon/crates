@@ -1,7 +1,7 @@
 #![deny(unused_imports)]
 
 use super::{
-    error::*, fileloader::SourceFileLoader, AsmSource, FileIo, Position, SourceFile, SourceFiles,
+    error::*, fileloader::SourceFileLoader, AsmSource, Position, SourceFile, SourceFiles,
     TextEditTrait,
 };
 
@@ -14,7 +14,7 @@ use std::{
 };
 
 use grl_symbols::SymbolTree;
-use grl_utils::fileutils;
+use grl_utils::{fileutils, FileIo};
 
 pub trait LocationTrait: Clone {
     fn get_line_number(&self) -> usize;

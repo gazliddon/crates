@@ -1,10 +1,8 @@
 #![deny(unused_imports)]
 
-use super::{FileIo, SourceFile, SourceFiles};
-use grl_utils::{PathSearcher, Paths, SearchError};
+use super::{SourceFile, SourceFiles};
+use grl_utils::{PathSearcher, Paths, FResult,FileIo};
 
-
-use anyhow::Result;
 
 use std::{
     collections::{HashMap, HashSet},
@@ -32,7 +30,7 @@ impl Default for SourceFileLoader {
 }
 
 impl PathSearcher for SourceFileLoader {
-    fn get_full_path<P: AsRef<Path>>(&self, file: P) -> Result<PathBuf, SearchError> {
+    fn get_full_path<P: AsRef<Path>>(&self, file: P) -> FResult<PathBuf> {
         self.source_search_paths.get_full_path(file)
     }
 
@@ -66,8 +64,8 @@ impl FileIo for SourceFileLoader {
         self.files_written.insert(path);
     }
 
-    fn read_binary<P: AsRef<Path>>(&mut self, path: P) -> Result<(PathBuf, Vec<u8>)> {
-        let path = self.get_full_path(path).map_err(|e| self.mk_error(e))?;
+    fn read_binary<P: AsRef<Path>>(&mut self, path: P) -> FResult<(PathBuf, Vec<u8>)> {
+        let path = self.get_full_path(path)?;
 
         if let Some(cached) = self.bin_file_cache.get(&path) {
             Ok((path, cached.clone()))
@@ -87,12 +85,12 @@ impl SourceFileLoader {
         Self::default()
     }
 
-    pub fn read_source<P: AsRef<Path>>(&mut self, path: P) -> Result<&SourceFile> {
+    pub fn read_source<P: AsRef<Path>>(&mut self, path: P) -> FResult<&SourceFile> {
         let (path, text) = self.read_to_string(path)?;
         self.add_source_file(&path, &text)
     }
 
-    pub fn add_source_file<P: AsRef<Path>>(&mut self, path: P, text: &str) -> Result<&SourceFile> {
+    pub fn add_source_file<P: AsRef<Path>>(&mut self, path: P, text: &str) -> FResult<&SourceFile> {
         let id = self.sources.add_source_file(&path, text);
         let sf = self.sources.get_source_file_from_id(id).unwrap();
         Ok(sf)

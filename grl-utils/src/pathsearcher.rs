@@ -1,22 +1,11 @@
+#![forbid(unused_imports)]
 use std::path::{Path, PathBuf};
 use thin_vec::{ ThinVec, thin_vec };
 
-use thiserror::Error;
-
-#[derive(Debug, Clone, Error)]
-pub enum SearchError {
-    FileNotFound(Box<PathBuf>, ThinVec<PathBuf>),
-    Placeholder,
-}
-
-impl std::fmt::Display for SearchError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{self:?}")
-    }
-}
+use super::{ FileError, FResult };
 
 pub trait PathSearcher {
-    fn get_full_path<P: AsRef<Path>>(&self, file: P) -> Result<PathBuf, SearchError>;
+    fn get_full_path<P: AsRef<Path>>(&self, file: P) -> FResult<PathBuf>;
     fn get_search_paths(&self) -> &[PathBuf];
     fn add_search_path<P: AsRef<Path>>(&mut self, path : P);
     fn set_search_paths(&mut self, paths: &[PathBuf]);
@@ -56,7 +45,7 @@ impl PathSearcher for Paths {
         self.paths = paths.into()
     }
 
-    fn get_full_path<P: AsRef<Path>>(&self, file_name: P) -> Result<PathBuf, SearchError> {
+    fn get_full_path<P: AsRef<Path>>(&self, file_name: P) -> FResult<PathBuf> {
         let file_name = file_name.as_ref();
         let mut tried: ThinVec<_> = thin_vec![file_name.to_path_buf()];
 
@@ -74,6 +63,6 @@ impl PathSearcher for Paths {
             return Ok(file_name.to_path_buf());
         }
 
-        Err(SearchError::FileNotFound(file_name.to_path_buf().into(), tried))
+        Err(FileError::FileNotFound(file_name.to_path_buf().into(), tried))
     }
 }
