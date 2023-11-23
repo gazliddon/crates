@@ -346,7 +346,7 @@ impl SourceDatabase {
 
     pub fn get_source_file(&self, file_id: u64) -> Option<SourceFileAccess> {
         self.func_source_file(file_id, |sf| {
-            let num_of_lines = sf.source.num_of_lines();
+            let num_of_lines = sf.get_text().num_of_lines();
             Some(SourceFileAccess::new(self, file_id, num_of_lines))
         })
     }

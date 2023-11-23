@@ -182,7 +182,10 @@ impl TextFile {
         start..end
     }
 
-    pub fn get_hash(&self) -> &String {
+    pub fn get_hash(&self) -> String {
+        self.hash.clone()
+    }
+    pub fn get_hash_str(&self) -> &str {
         &self.hash
     }
 

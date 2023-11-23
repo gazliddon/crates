@@ -9,7 +9,7 @@ use std::{
 pub struct SourceFile {
     pub file_id: AsmSource,
     pub file: PathBuf,
-    pub source: TextFile,
+    source: TextFile,
 }
 
 impl SourceFile {
@@ -22,10 +22,6 @@ impl SourceFile {
             source: TextFile::new(source),
             file_id,
         }
-    }
-
-    pub fn as_text_edit(&self) -> &TextFile {
-        &self.source
     }
 
     /// Get Line n from source file
@@ -49,6 +45,9 @@ impl SourceFile {
         };
 
         &self.source.source[range]
+    }
+    pub fn get_text(&self) -> &TextFile {
+        &self.source
     }
 }
 

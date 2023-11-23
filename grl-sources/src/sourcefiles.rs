@@ -31,8 +31,8 @@ impl SourceFiles {
     }
 
     pub fn get_hash<P: AsRef<Path>>(&self, p: P) -> SResult<String> {
-        let (_, source) = self.get_source(&p)?;
-        Ok(source.source.get_hash().clone())
+        self.get_source(&p)
+            .map(|(_, src)| src.get_text().get_hash())
     }
 
     pub fn get_source<P: AsRef<Path>>(&self, p: P) -> SResult<(u64, &SourceFile)> {
