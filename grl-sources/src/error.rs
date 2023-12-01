@@ -1,7 +1,7 @@
 #![deny(unused_imports)]
 use thiserror::Error;
 
-#[derive(Error, Debug, Clone)]
+#[derive(Error, Debug, Clone,PartialEq)]
 pub enum SourceErrorType {
     #[error(transparent)]
     FileError(#[from] grl_utils::FileError),
