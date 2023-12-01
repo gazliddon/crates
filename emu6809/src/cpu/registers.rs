@@ -60,9 +60,13 @@ impl FromStr for RegEnum {
 
 impl RegEnum {
     /// Is this register okay to use as an index?
-    pub fn is_valid_for_index(&self) -> bool {
+    pub fn valid_for_index(&self) -> bool {
         use RegEnum::*;
         matches!(self, X | Y | S | U)
+    }
+    pub fn valid_abd(&self) -> bool {
+        use RegEnum::*;
+        matches!(self, A | B | D )
     }
 }
 
