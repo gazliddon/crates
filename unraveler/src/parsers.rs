@@ -186,7 +186,7 @@ where
         }
     }
 }
-pub fn all<I, O, E, P>(mut first: P) -> impl FnMut(I) -> Result<(I, O), E>
+pub fn all<I, O, E, P>(mut first: P) -> impl FnMut(I) -> Result<(I, O), E> + Copy
 where
     I: Collection + Copy,
     P: Parser<I, O, E>,
@@ -462,6 +462,18 @@ where
     E: ParseError<I>,
 {
     move |i: I| p.parse(i).map(|(r, m)| (r, mapper(m)))
+}
+pub fn and_then<I, E, P, M, O,XO>(
+    mut p: P,
+    mut mapper: M,
+) -> impl FnMut(I) -> Result<(I, XO), E> + Copy
+where
+    P: FnMut(I) -> Result<(I, O), E> + Copy,
+    M: FnMut((I,O)) -> Result<(I,XO),E> + Copy,
+    I: Collection + Clone + Copy,
+    E: ParseError<I>,
+{
+    move |i: I| p.parse(i).and_then(|e| mapper(e))
 }
 
 pub fn match_span<P, I, O, E>(mut p: P) -> impl FnMut(I) -> Result<(I, (I, O)), E> + Copy + Clone
