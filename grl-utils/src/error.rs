@@ -3,7 +3,7 @@ use thiserror::Error;
 use std::path::PathBuf;
 use thin_vec::ThinVec;
 
-#[derive(Debug, Error, Clone)]
+#[derive(Debug, Error, Clone, PartialEq)]
 pub enum FileError {
     #[error("{0:?}")]
     Io(String),
