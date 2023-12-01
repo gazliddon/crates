@@ -49,6 +49,9 @@ impl SourceFile {
     pub fn get_text(&self) -> &TextFile {
         &self.source
     }
+    pub fn get_text_mut(&mut self) -> &mut TextFile {
+        &mut self.source
+    }
 }
 
 impl Debug for SourceFile {
