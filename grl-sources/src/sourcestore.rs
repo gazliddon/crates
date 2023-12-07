@@ -70,6 +70,7 @@ use serde::{Deserialize, Serialize};
 pub enum ItemType {
     OpCode,
     Command,
+    Other,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
