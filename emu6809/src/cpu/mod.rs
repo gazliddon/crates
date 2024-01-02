@@ -19,4 +19,3 @@ pub use flags::*;
 pub use indexed::*;
 pub use registers::*;
 
-use super::mem;

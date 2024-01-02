@@ -1,8 +1,7 @@
 #![deny(unused_imports)]
-use super::mem::MemoryIO;
 use super::{CpuErr, CpuResult};
 use crate::isa::{Dbase, Instruction};
-use crate::mem::MemReader;
+use emucore::mem::{ MemReader, MemoryIO };
 
 const RBYTE: &[u8] = include_bytes!("../../resources/opcodes6809.json");
 

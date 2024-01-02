@@ -1,12 +1,10 @@
 [package]
-name = "emu6809"
-version = "0.1.2"
+name = "emucore"
+version = "0.1.0"
 authors = ["Gaz Liddon"]
 categories =["emulators"]
-keywords = ["6809", ]
 edition = "2021"
-build = "build.rs"
-description = "In development 6809 emulator"
+description = "Core functionality for emulators"
 license = "MIT OR Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/gazliddon/crates"
@@ -26,6 +24,4 @@ serde_json = "1.0.107"
 serde_yaml = "0.9.25"
 sha1 = "0.10.6"
 thiserror="1.0.48"
-emucore= {path="../emucore"}
-
 

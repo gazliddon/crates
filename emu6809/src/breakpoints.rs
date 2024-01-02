@@ -1,7 +1,7 @@
 
 use std::collections::HashMap;
 
-use crate::mem::{Region, RegionErr};
+use emucore::mem::{Region, RegionErr};
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Copy)]
 pub enum BreakPointTypes {

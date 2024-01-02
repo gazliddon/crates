@@ -1,7 +1,5 @@
-use super::cpu6809::{IndexModes, IndexedFlags, InstructionDecoder};
+use super::cpu::{IndexModes, IndexedFlags, InstructionDecoder};
 use super::isa::Dbase;
-use super::mem::MemReader;
-use super::mem::*;
 use super::byteorder;
 
 pub struct Disassembly {
@@ -9,6 +7,8 @@ pub struct Disassembly {
     pub index_mode: Option<IndexedFlags>,
     pub decoded: InstructionDecoder,
 }
+
+use emucore::mem::{ MemBlock, MemoryIO, MemReader };
 
 pub struct DissCtx {
     pub data: MemBlock<byteorder::BigEndian>,
@@ -127,7 +127,7 @@ impl Diss {
         let mut reader = MemReader::new(mem);
         reader.set_addr(addr);
 
-        let x = super::cpu6809::InstructionDecoder::new_from_reader(&mut reader).unwrap();
+        let x = super::cpu::InstructionDecoder::new_from_reader(&mut reader).unwrap();
 
         reader.set_addr(x.operand_addr);
 
@@ -174,7 +174,7 @@ impl Diss {
 
             RegisterPair => {
                 let r = reader.next_byte().unwrap();
-                let (a, b) = super::cpu6809::get_tfr_regs(r);
+                let (a, b) = super::cpu::get_tfr_regs(r);
                 format!("{a},{b}")
             }
 

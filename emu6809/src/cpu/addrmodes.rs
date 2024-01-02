@@ -1,6 +1,6 @@
 #![deny(unused_imports)]
-use super::{mem, CpuErr, IndexModes, IndexedFlags, InstructionDecoder, Regs};
-use mem::MemoryIO;
+use super::{CpuErr, IndexModes, IndexedFlags, InstructionDecoder, Regs};
+use emucore::mem::MemoryIO;
 
 use crate::isa::AddrModeEnum;
 

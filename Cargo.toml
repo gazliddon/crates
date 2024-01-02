@@ -1,5 +1,5 @@
 [workspace]
-members = ["emu6809","grl-eval","grl-sources","unraveler","grl-utils", "grl-symbols"]
+members = ["emu6809","grl-eval","grl-sources","unraveler","grl-utils", "grl-symbols","emucore", "emu6800"]
 resolver = "2"
 
 

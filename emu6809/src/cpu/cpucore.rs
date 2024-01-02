@@ -35,10 +35,11 @@ pub const VEC_RESET: usize = 0xfffe;
 // Handles CPU emulation
 use super::{
     alu,
-    mem::{MemErrorTypes, MemoryIO},
     AddressLines, Direct, Extended, Flags, Immediate16, Immediate8, Indexed, Inherent,
     InstructionDecoder, RegEnum, RegisterPair, RegisterSet, Regs, Relative, Relative16,
 };
+
+use emucore::mem::{MemErrorTypes, MemoryIO};
 
 
 
