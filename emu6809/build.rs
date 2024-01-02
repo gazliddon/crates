@@ -8,7 +8,7 @@ mod isa;
 
 fn main() {
     println!("ABOUT TO DO IT");
-    let js_str = include_str!("src/cpu/resources/opcodes6809.json");
+    let js_str = include_str!("resources/opcodes6809.json");
     let dbase = isa::Dbase::from_text(js_str);
     let source = format!("{dbase}");
     let out_dir = env::var("OUT_DIR").unwrap();

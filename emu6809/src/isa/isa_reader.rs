@@ -4,6 +4,28 @@ use serde::{Deserialize, Deserializer};
 use std::collections::HashMap;
 use std::fmt;
 
+////////////////////////////////////////////////////////////////////////////////
+pub trait InstructionDbaseTrait<I,A,INF> 
+where 
+  A: PartialEq + Eq + std::hash::Hash + Copy + Clone
+{
+    fn from_text(json_str: &str) -> Self;
+    fn from_filename(file_name: &str) -> Self;
+    fn from_data(instructions: Vec<I>, unknown: I) -> Self;
+    fn get_opcode(&self, input: &str) -> Option<&INF>;
+    fn get_opcode_info_from_opcode(&self, opcode: usize) -> Option<&INF>;
+}
+
+// A = Addressing mode enum
+pub trait InstructionInfoTrait<A, I> 
+where 
+  A: PartialEq + Eq + std::hash::Hash + Copy + Clone
+{
+    fn supports_addr_mode(&self, m: A) -> bool;
+    fn get_instruction(&self, amode: A) -> Option<&I>;
+}
+////////////////////////////////////////////////////////////////////////////////
+
 // Custom deserializers
 fn hex_str_to_num<'de, D>(deserializer: D) -> Result<usize, D::Error>
 where
@@ -62,6 +84,8 @@ pub struct InstructionInfo {
     pub ops: Vec<Instruction>,
     pub addressing_modes: std::collections::HashMap<AddrModeEnum, Instruction>,
 }
+
+
 
 impl InstructionInfo {
     pub fn new(i: Instruction) -> Self {
@@ -126,6 +150,7 @@ fn split_opcodes(_input: &str) -> Option<(&str, &str)> {
         Some((split[0], split[1]))
     }
 }
+
 
 impl Dbase {
     pub fn from_text(json_str: &str) -> Self {
@@ -192,6 +217,7 @@ impl Dbase {
         let op = input.to_string().to_lowercase();
         self.name_to_ins.get(&op)
     }
+
     pub fn get_opcode_info_from_opcode(&self, opcode: usize) -> Option<&InstructionInfo> {
         self.opcode_to_ins.get(&opcode)
     }
@@ -214,7 +240,7 @@ impl Dbase {
 
 impl Default for Dbase {
     fn default() -> Self {
-        let json_str = include_str!("../cpu/resources/opcodes6809.json");
+        let json_str = include_str!("../../resources/opcodes6809.json");
         let loaded: Dbase = serde_json::from_str(json_str).unwrap();
         Self::from_data(loaded.instructions, loaded.unknown)
     }
