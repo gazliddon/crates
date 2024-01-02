@@ -214,7 +214,7 @@ impl Dbase {
 
 impl Default for Dbase {
     fn default() -> Self {
-        let json_str = include_str!("../cpu/resources/opcodes.json");
+        let json_str = include_str!("../cpu/resources/opcodes6809.json");
         let loaded: Dbase = serde_json::from_str(json_str).unwrap();
         Self::from_data(loaded.instructions, loaded.unknown)
     }

@@ -4,7 +4,7 @@ use super::{CpuErr, CpuResult};
 use crate::isa::{Dbase, Instruction};
 use crate::mem::MemReader;
 
-const RBYTE: &[u8] = include_bytes!("resources/opcodes.json");
+const RBYTE: &[u8] = include_bytes!("resources/opcodes6809.json");
 
 lazy_static::lazy_static! {
     static ref DBASE: Dbase = {
