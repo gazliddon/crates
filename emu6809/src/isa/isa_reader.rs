@@ -5,26 +5,6 @@ use std::collections::HashMap;
 use std::fmt;
 
 ////////////////////////////////////////////////////////////////////////////////
-pub trait InstructionDbaseTrait<I,A,INF> 
-where 
-  A: PartialEq + Eq + std::hash::Hash + Copy + Clone
-{
-    fn from_text(json_str: &str) -> Self;
-    fn from_filename(file_name: &str) -> Self;
-    fn from_data(instructions: Vec<I>, unknown: I) -> Self;
-    fn get_opcode(&self, input: &str) -> Option<&INF>;
-    fn get_opcode_info_from_opcode(&self, opcode: usize) -> Option<&INF>;
-}
-
-// A = Addressing mode enum
-pub trait InstructionInfoTrait<A, I> 
-where 
-  A: PartialEq + Eq + std::hash::Hash + Copy + Clone
-{
-    fn supports_addr_mode(&self, m: A) -> bool;
-    fn get_instruction(&self, amode: A) -> Option<&I>;
-}
-////////////////////////////////////////////////////////////////////////////////
 
 // Custom deserializers
 fn hex_str_to_num<'de, D>(deserializer: D) -> Result<usize, D::Error>

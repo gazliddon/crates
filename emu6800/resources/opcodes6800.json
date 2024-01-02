@@ -1,5 +1,18 @@
 {
+    "default": {
+            "opcode": 1,
+            "cycles": 2,
+            "size": 1,
+            "addr_mode": "Inherent",
+            "text": "nop"
+        },
     "instructions" : [
-
+        {
+            "opcode": 0,
+            "cycles": 0,
+            "size": 0,
+            "addr_mode": "Immediate",
+            "text": "lda"
+        }
     ]
 }
