@@ -1,7 +1,9 @@
 use serde::Deserialize;
-#[derive(Debug, Copy, Clone, PartialEq, Hash, Eq, Deserialize)]
+use serde::Serialize;
+#[derive(Debug, Copy, Clone, PartialEq, Hash, Eq, Deserialize, Serialize, )]
 pub enum AddrModeEnum {
-    Acc,
+    AccA,
+    AccB,
     Immediate,
     Direct,
     Extended,

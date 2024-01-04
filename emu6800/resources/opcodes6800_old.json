@@ -1,0 +1,1383 @@
+{
+  "default": {
+    "opcode": 0,
+    "cycles": 2,
+    "size": 1,
+    "addr_mode": "Inherent",
+    "text": "nop"
+  },
+  "instructions": [
+    {
+      "opcode": 27,
+      "cycles": 2,
+      "size": 1,
+      "addr_mode": "AccA",
+      "text": "ABA"
+    },
+    {
+      "opcode": 137,
+      "cycles": 2,
+      "size": 2,
+      "addr_mode": "Immediate",
+      "text": "ADC"
+    },
+    {
+      "opcode": 153,
+      "cycles": 3,
+      "size": 2,
+      "addr_mode": "Direct",
+      "text": "ADC"
+    },
+    {
+      "opcode": 169,
+      "cycles": 5,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "ADC"
+    },
+    {
+      "opcode": 185,
+      "cycles": 4,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "ADC"
+    },
+    {
+      "opcode": 201,
+      "cycles": 2,
+      "size": 2,
+      "addr_mode": "Immediate",
+      "text": "ADC"
+    },
+    {
+      "opcode": 217,
+      "cycles": 3,
+      "size": 2,
+      "addr_mode": "Direct",
+      "text": "ADC"
+    },
+    {
+      "opcode": 233,
+      "cycles": 5,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "ADC"
+    },
+    {
+      "opcode": 249,
+      "cycles": 4,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "ADC"
+    },
+    {
+      "opcode": 139,
+      "cycles": 2,
+      "size": 2,
+      "addr_mode": "Immediate",
+      "text": "ADD"
+    },
+    {
+      "opcode": 155,
+      "cycles": 3,
+      "size": 2,
+      "addr_mode": "Direct",
+      "text": "ADD"
+    },
+    {
+      "opcode": 171,
+      "cycles": 5,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "ADD"
+    },
+    {
+      "opcode": 187,
+      "cycles": 4,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "ADD"
+    },
+    {
+      "opcode": 203,
+      "cycles": 2,
+      "size": 2,
+      "addr_mode": "Immediate",
+      "text": "ADD"
+    },
+    {
+      "opcode": 219,
+      "cycles": 3,
+      "size": 2,
+      "addr_mode": "Direct",
+      "text": "ADD"
+    },
+    {
+      "opcode": 235,
+      "cycles": 5,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "ADD"
+    },
+    {
+      "opcode": 251,
+      "cycles": 4,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "ADD"
+    },
+    {
+      "opcode": 132,
+      "cycles": 2,
+      "size": 2,
+      "addr_mode": "Immediate",
+      "text": "AND"
+    },
+    {
+      "opcode": 148,
+      "cycles": 3,
+      "size": 2,
+      "addr_mode": "Direct",
+      "text": "AND"
+    },
+    {
+      "opcode": 164,
+      "cycles": 5,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "AND"
+    },
+    {
+      "opcode": 180,
+      "cycles": 4,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "AND"
+    },
+    {
+      "opcode": 196,
+      "cycles": 2,
+      "size": 2,
+      "addr_mode": "Immediate",
+      "text": "AND"
+    },
+    {
+      "opcode": 212,
+      "cycles": 3,
+      "size": 2,
+      "addr_mode": "Direct",
+      "text": "AND"
+    },
+    {
+      "opcode": 228,
+      "cycles": 5,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "AND"
+    },
+    {
+      "opcode": 244,
+      "cycles": 4,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "AND"
+    },
+    {
+      "opcode": 72,
+      "cycles": 2,
+      "size": 1,
+      "addr_mode": "AccA",
+      "text": "ASL"
+    },
+    {
+      "opcode": 88,
+      "cycles": 2,
+      "size": 1,
+      "addr_mode": "AccB",
+      "text": "ASL"
+    },
+    {
+      "opcode": 104,
+      "cycles": 7,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "ASL"
+    },
+    {
+      "opcode": 120,
+      "cycles": 6,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "ASL"
+    },
+    {
+      "opcode": 71,
+      "cycles": 2,
+      "size": 1,
+      "addr_mode": "AccA",
+      "text": "ASR"
+    },
+    {
+      "opcode": 87,
+      "cycles": 2,
+      "size": 1,
+      "addr_mode": "AccB",
+      "text": "ASR"
+    },
+    {
+      "opcode": 103,
+      "cycles": 7,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "ASR"
+    },
+    {
+      "opcode": 119,
+      "cycles": 6,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "ASR"
+    },
+    {
+      "opcode": 36,
+      "cycles": 4,
+      "size": 2,
+      "addr_mode": "Relative",
+      "text": "BCC"
+    },
+    {
+      "opcode": 37,
+      "cycles": 4,
+      "size": 2,
+      "addr_mode": "Relative",
+      "text": "BCS"
+    },
+    {
+      "opcode": 39,
+      "cycles": 4,
+      "size": 2,
+      "addr_mode": "Relative",
+      "text": "BEQ"
+    },
+    {
+      "opcode": 44,
+      "cycles": 4,
+      "size": 2,
+      "addr_mode": "Relative",
+      "text": "BGE"
+    },
+    {
+      "opcode": 46,
+      "cycles": 4,
+      "size": 2,
+      "addr_mode": "Relative",
+      "text": "BGT"
+    },
+    {
+      "opcode": 34,
+      "cycles": 4,
+      "size": 2,
+      "addr_mode": "Relative",
+      "text": "BHI"
+    },
+    {
+      "opcode": 133,
+      "cycles": 2,
+      "size": 2,
+      "addr_mode": "Immediate",
+      "text": "BIT"
+    },
+    {
+      "opcode": 149,
+      "cycles": 3,
+      "size": 2,
+      "addr_mode": "Direct",
+      "text": "BIT"
+    },
+    {
+      "opcode": 165,
+      "cycles": 5,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "BIT"
+    },
+    {
+      "opcode": 181,
+      "cycles": 4,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "BIT"
+    },
+    {
+      "opcode": 197,
+      "cycles": 2,
+      "size": 2,
+      "addr_mode": "Immediate",
+      "text": "BIT"
+    },
+    {
+      "opcode": 213,
+      "cycles": 3,
+      "size": 2,
+      "addr_mode": "Direct",
+      "text": "BIT"
+    },
+    {
+      "opcode": 229,
+      "cycles": 5,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "BIT"
+    },
+    {
+      "opcode": 245,
+      "cycles": 4,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "BIT"
+    },
+    {
+      "opcode": 47,
+      "cycles": 4,
+      "size": 2,
+      "addr_mode": "Relative",
+      "text": "ble"
+    },
+    {
+      "opcode": 35,
+      "cycles": 4,
+      "size": 2,
+      "addr_mode": "Relative",
+      "text": "bls"
+    },
+    {
+      "opcode": 45,
+      "cycles": 4,
+      "size": 2,
+      "addr_mode": "Relative",
+      "text": "blt"
+    },
+    {
+      "opcode": 43,
+      "cycles": 4,
+      "size": 2,
+      "addr_mode": "Relative",
+      "text": "bmi"
+    },
+    {
+      "opcode": 38,
+      "cycles": 4,
+      "size": 2,
+      "addr_mode": "Relative",
+      "text": "bne"
+    },
+    {
+      "opcode": 42,
+      "cycles": 4,
+      "size": 2,
+      "addr_mode": "Relative",
+      "text": "bpl"
+    },
+    {
+      "opcode": 32,
+      "cycles": 4,
+      "size": 2,
+      "addr_mode": "Relative",
+      "text": "bra"
+    },
+    {
+      "opcode": 141,
+      "cycles": 8,
+      "size": 2,
+      "addr_mode": "Relative",
+      "text": "bsr"
+    },
+    {
+      "opcode": 40,
+      "cycles": 4,
+      "size": 2,
+      "addr_mode": "Relative",
+      "text": "bvc"
+    },
+    {
+      "opcode": 41,
+      "cycles": 4,
+      "size": 2,
+      "addr_mode": "Relative",
+      "text": "bvs"
+    },
+    {
+      "opcode": 17,
+      "cycles": 2,
+      "size": 1,
+      "addr_mode": "Inherent",
+      "text": "cba"
+    },
+    {
+      "opcode": 12,
+      "cycles": 2,
+      "size": 1,
+      "addr_mode": "Inherent",
+      "text": "clc"
+    },
+    {
+      "opcode": 14,
+      "cycles": 2,
+      "size": 1,
+      "addr_mode": "Inherent",
+      "text": "CLI"
+    },
+    {
+      "opcode": 79,
+      "cycles": 2,
+      "size": 1,
+      "addr_mode": "AccA",
+      "text": "clr"
+    },
+    {
+      "opcode": 95,
+      "cycles": 2,
+      "size": 1,
+      "addr_mode": "AccA",
+      "text": "clr"
+    },
+    {
+      "opcode": 111,
+      "cycles": 7,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "clr"
+    },
+    {
+      "opcode": 127,
+      "cycles": 6,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "clr"
+    },
+    {
+      "opcode": 10,
+      "cycles": 2,
+      "size": 1,
+      "addr_mode": "Inherent",
+      "text": "CLV"
+    },
+    {
+      "opcode": 129,
+      "cycles": 2,
+      "size": 2,
+      "addr_mode": "Immediate",
+      "text": "cmp"
+    },
+    {
+      "opcode": 145,
+      "cycles": 3,
+      "size": 2,
+      "addr_mode": "Direct",
+      "text": "cmp"
+    },
+    {
+      "opcode": 161,
+      "cycles": 5,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "cmp"
+    },
+    {
+      "opcode": 177,
+      "cycles": 4,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "cmp"
+    },
+    {
+      "opcode": 193,
+      "cycles": 2,
+      "size": 2,
+      "addr_mode": "Immediate",
+      "text": "cmp"
+    },
+    {
+      "opcode": 209,
+      "cycles": 3,
+      "size": 2,
+      "addr_mode": "Direct",
+      "text": "cmp"
+    },
+    {
+      "opcode": 225,
+      "cycles": 5,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "cmp"
+    },
+    {
+      "opcode": 241,
+      "cycles": 4,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "cmp"
+    },
+    {
+      "opcode": 67,
+      "cycles": 2,
+      "size": 1,
+      "addr_mode": "AccA",
+      "text": "com"
+    },
+    {
+      "opcode": 83,
+      "cycles": 2,
+      "size": 1,
+      "addr_mode": "AccB",
+      "text": "com"
+    },
+    {
+      "opcode": 99,
+      "cycles": 7,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "com"
+    },
+    {
+      "opcode": 115,
+      "cycles": 6,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "com"
+    },
+    {
+      "opcode": 156,
+      "cycles": 4,
+      "size": 2,
+      "addr_mode": "Direct",
+      "text": "cpx"
+    },
+    {
+      "opcode": 172,
+      "cycles": 6,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "cpx"
+    },
+    {
+      "opcode": 140,
+      "cycles": 3,
+      "size": 3,
+      "addr_mode": "Immediate",
+      "text": "cpx"
+    },
+    {
+      "opcode": 188,
+      "cycles": 5,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "cpx"
+    },
+    {
+      "opcode": 25,
+      "cycles": 2,
+      "size": 1,
+      "addr_mode": "Inherent",
+      "text": "daa"
+    },
+    {
+      "opcode": 74,
+      "cycles": 2,
+      "size": 1,
+      "addr_mode": "AccA",
+      "text": "dec"
+    },
+    {
+      "opcode": 90,
+      "cycles": 2,
+      "size": 1,
+      "addr_mode": "AccB",
+      "text": "dec"
+    },
+    {
+      "opcode": 106,
+      "cycles": 7,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "dec"
+    },
+    {
+      "opcode": 122,
+      "cycles": 6,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "dec"
+    },
+    {
+      "opcode": 52,
+      "cycles": 4,
+      "size": 1,
+      "addr_mode": "Inherent",
+      "text": "des"
+    },
+    {
+      "opcode": 9,
+      "cycles": 4,
+      "size": 1,
+      "addr_mode": "Inherent",
+      "text": "dex"
+    },
+    {
+      "opcode": 136,
+      "cycles": 2,
+      "size": 2,
+      "addr_mode": "Immediate",
+      "text": "eor"
+    },
+    {
+      "opcode": 152,
+      "cycles": 3,
+      "size": 2,
+      "addr_mode": "Direct",
+      "text": "eor"
+    },
+    {
+      "opcode": 168,
+      "cycles": 5,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "eor"
+    },
+    {
+      "opcode": 184,
+      "cycles": 4,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "eor"
+    },
+    {
+      "opcode": 200,
+      "cycles": 2,
+      "size": 2,
+      "addr_mode": "Immediate",
+      "text": "eor"
+    },
+    {
+      "opcode": 216,
+      "cycles": 3,
+      "size": 2,
+      "addr_mode": "Direct",
+      "text": "eor"
+    },
+    {
+      "opcode": 232,
+      "cycles": 5,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "eor"
+    },
+    {
+      "opcode": 248,
+      "cycles": 4,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "eor"
+    },
+    {
+      "opcode": 76,
+      "cycles": 2,
+      "size": 1,
+      "addr_mode": "AccA",
+      "text": "inc"
+    },
+    {
+      "opcode": 92,
+      "cycles": 2,
+      "size": 1,
+      "addr_mode": "AccB",
+      "text": "inc"
+    },
+    {
+      "opcode": 108,
+      "cycles": 7,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "inc"
+    },
+    {
+      "opcode": 124,
+      "cycles": 6,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "inc"
+    },
+    {
+      "opcode": 49,
+      "cycles": 4,
+      "size": 1,
+      "addr_mode": "Inherent",
+      "text": "ins"
+    },
+    {
+      "opcode": 8,
+      "cycles": 4,
+      "size": 1,
+      "addr_mode": "Inherent",
+      "text": "inx"
+    },
+    {
+      "opcode": 110,
+      "cycles": 4,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "jmp"
+    },
+    {
+      "opcode": 126,
+      "cycles": 3,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "jmp"
+    },
+    {
+      "opcode": 173,
+      "cycles": 8,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "jsr"
+    },
+    {
+      "opcode": 189,
+      "cycles": 9,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "jsr"
+    },
+    {
+      "opcode": 134,
+      "cycles": 2,
+      "size": 2,
+      "addr_mode": "Immediate",
+      "text": "lda"
+    },
+    {
+      "opcode": 150,
+      "cycles": 3,
+      "size": 2,
+      "addr_mode": "Direct",
+      "text": "lda"
+    },
+    {
+      "opcode": 166,
+      "cycles": 5,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "lda"
+    },
+    {
+      "opcode": 182,
+      "cycles": 4,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "lda"
+    },
+    {
+      "opcode": 198,
+      "cycles": 2,
+      "size": 2,
+      "addr_mode": "Immediate",
+      "text": "lda"
+    },
+    {
+      "opcode": 214,
+      "cycles": 3,
+      "size": 2,
+      "addr_mode": "Direct",
+      "text": "lda"
+    },
+    {
+      "opcode": 230,
+      "cycles": 5,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "lda"
+    },
+    {
+      "opcode": 246,
+      "cycles": 4,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "lda"
+    },
+    {
+      "opcode": 158,
+      "cycles": 4,
+      "size": 2,
+      "addr_mode": "Direct",
+      "text": "lds"
+    },
+    {
+      "opcode": 174,
+      "cycles": 6,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "lds"
+    },
+    {
+      "opcode": 142,
+      "cycles": 3,
+      "size": 3,
+      "addr_mode": "Immediate",
+      "text": "lds"
+    },
+    {
+      "opcode": 190,
+      "cycles": 5,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "lds"
+    },
+    {
+      "opcode": 222,
+      "cycles": 4,
+      "size": 2,
+      "addr_mode": "Direct",
+      "text": "ldx"
+    },
+    {
+      "opcode": 238,
+      "cycles": 6,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "ldx"
+    },
+    {
+      "opcode": 206,
+      "cycles": 3,
+      "size": 3,
+      "addr_mode": "Immediate",
+      "text": "ldx"
+    },
+    {
+      "opcode": 254,
+      "cycles": 5,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "ldx"
+    },
+    {
+      "opcode": 68,
+      "cycles": 2,
+      "size": 1,
+      "addr_mode": "AccA",
+      "text": "lsr"
+    },
+    {
+      "opcode": 84,
+      "cycles": 2,
+      "size": 1,
+      "addr_mode": "AccB",
+      "text": "lsr"
+    },
+    {
+      "opcode": 100,
+      "cycles": 7,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "lsr"
+    },
+    {
+      "opcode": 116,
+      "cycles": 6,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "lsr"
+    },
+    {
+      "opcode": 64,
+      "cycles": 2,
+      "size": 1,
+      "addr_mode": "AccA",
+      "text": "neg"
+    },
+    {
+      "opcode": 80,
+      "cycles": 2,
+      "size": 1,
+      "addr_mode": "AccB",
+      "text": "neg"
+    },
+    {
+      "opcode": 96,
+      "cycles": 7,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "neg"
+    },
+    {
+      "opcode": 112,
+      "cycles": 6,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "neg"
+    },
+    {
+      "opcode": 1,
+      "cycles": 2,
+      "size": 1,
+      "addr_mode": "Inherent",
+      "text": "nop"
+    },
+    {
+      "opcode": 138,
+      "cycles": 2,
+      "size": 2,
+      "addr_mode": "Immediate",
+      "text": "ora"
+    },
+    {
+      "opcode": 154,
+      "cycles": 3,
+      "size": 2,
+      "addr_mode": "Direct",
+      "text": "ora"
+    },
+    {
+      "opcode": 170,
+      "cycles": 5,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "ora"
+    },
+    {
+      "opcode": 186,
+      "cycles": 4,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "ora"
+    },
+    {
+      "opcode": 202,
+      "cycles": 2,
+      "size": 2,
+      "addr_mode": "Immediate",
+      "text": "ora"
+    },
+    {
+      "opcode": 218,
+      "cycles": 3,
+      "size": 2,
+      "addr_mode": "Direct",
+      "text": "ora"
+    },
+    {
+      "opcode": 234,
+      "cycles": 5,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "ora"
+    },
+    {
+      "opcode": 250,
+      "cycles": 4,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "ora"
+    },
+    {
+      "opcode": 54,
+      "cycles": 4,
+      "size": 1,
+      "addr_mode": "AccA",
+      "text": "psh"
+    },
+    {
+      "opcode": 55,
+      "cycles": 4,
+      "size": 1,
+      "addr_mode": "AccB",
+      "text": "psh"
+    },
+    {
+      "opcode": 50,
+      "cycles": 4,
+      "size": 1,
+      "addr_mode": "AccA",
+      "text": "pul"
+    },
+    {
+      "opcode": 51,
+      "cycles": 4,
+      "size": 1,
+      "addr_mode": "AccB",
+      "text": "pul"
+    },
+    {
+      "opcode": 73,
+      "cycles": 2,
+      "size": 1,
+      "addr_mode": "AccA",
+      "text": "rol"
+    },
+    {
+      "opcode": 89,
+      "cycles": 2,
+      "size": 1,
+      "addr_mode": "AccB",
+      "text": "rol"
+    },
+    {
+      "opcode": 105,
+      "cycles": 7,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "rol"
+    },
+    {
+      "opcode": 121,
+      "cycles": 6,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "rol"
+    },
+    {
+      "opcode": 70,
+      "cycles": 2,
+      "size": 1,
+      "addr_mode": "AccA",
+      "text": "ror"
+    },
+    {
+      "opcode": 86,
+      "cycles": 2,
+      "size": 1,
+      "addr_mode": "AccB",
+      "text": "ror"
+    },
+    {
+      "opcode": 102,
+      "cycles": 7,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "ror"
+    },
+    {
+      "opcode": 118,
+      "cycles": 6,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "ror"
+    },
+    {
+      "opcode": 59,
+      "cycles": 10,
+      "size": 1,
+      "addr_mode": "Inherent",
+      "text": "rti"
+    },
+    {
+      "opcode": 57,
+      "cycles": 5,
+      "size": 1,
+      "addr_mode": "Inherent",
+      "text": "rts"
+    },
+    {
+      "opcode": 16,
+      "cycles": 2,
+      "size": 1,
+      "addr_mode": "Inherent",
+      "text": "sba"
+    },
+    {
+      "opcode": 130,
+      "cycles": 2,
+      "size": 2,
+      "addr_mode": "Immediate",
+      "text": "sbc"
+    },
+    {
+      "opcode": 146,
+      "cycles": 3,
+      "size": 2,
+      "addr_mode": "Direct",
+      "text": "sbc"
+    },
+    {
+      "opcode": 162,
+      "cycles": 5,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "sbc"
+    },
+    {
+      "opcode": 178,
+      "cycles": 4,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "sbc"
+    },
+    {
+      "opcode": 194,
+      "cycles": 2,
+      "size": 2,
+      "addr_mode": "Immediate",
+      "text": "sbc"
+    },
+    {
+      "opcode": 210,
+      "cycles": 3,
+      "size": 2,
+      "addr_mode": "Direct",
+      "text": "sbc"
+    },
+    {
+      "opcode": 226,
+      "cycles": 5,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "sbc"
+    },
+    {
+      "opcode": 242,
+      "cycles": 4,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "sbc"
+    },
+    {
+      "opcode": 13,
+      "cycles": 2,
+      "size": 1,
+      "addr_mode": "Inherent",
+      "text": "sec"
+    },
+    {
+      "opcode": 15,
+      "cycles": 2,
+      "size": 1,
+      "addr_mode": "Inherent",
+      "text": "sei"
+    },
+    {
+      "opcode": 11,
+      "cycles": 2,
+      "size": 1,
+      "addr_mode": "Inherent",
+      "text": "sev"
+    },
+    {
+      "opcode": 151,
+      "cycles": 4,
+      "size": 2,
+      "addr_mode": "Direct",
+      "text": "sta"
+    },
+    {
+      "opcode": 167,
+      "cycles": 6,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "sta"
+    },
+    {
+      "opcode": 183,
+      "cycles": 5,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "sta"
+    },
+    {
+      "opcode": 215,
+      "cycles": 4,
+      "size": 2,
+      "addr_mode": "Direct",
+      "text": "sta"
+    },
+    {
+      "opcode": 231,
+      "cycles": 6,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "sta"
+    },
+    {
+      "opcode": 247,
+      "cycles": 5,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "sta"
+    },
+    {
+      "opcode": 159,
+      "cycles": 5,
+      "size": 2,
+      "addr_mode": "Direct",
+      "text": "sts"
+    },
+    {
+      "opcode": 175,
+      "cycles": 7,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "sts"
+    },
+    {
+      "opcode": 191,
+      "cycles": 6,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "sts"
+    },
+    {
+      "opcode": 223,
+      "cycles": 5,
+      "size": 2,
+      "addr_mode": "Direct",
+      "text": "stx"
+    },
+    {
+      "opcode": 239,
+      "cycles": 7,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "stx"
+    },
+    {
+      "opcode": 255,
+      "cycles": 6,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "stx"
+    },
+    {
+      "opcode": 128,
+      "cycles": 2,
+      "size": 2,
+      "addr_mode": "Immediate",
+      "text": "sub"
+    },
+    {
+      "opcode": 144,
+      "cycles": 3,
+      "size": 2,
+      "addr_mode": "Direct",
+      "text": "sub"
+    },
+    {
+      "opcode": 160,
+      "cycles": 5,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "sub"
+    },
+    {
+      "opcode": 176,
+      "cycles": 4,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "sub"
+    },
+    {
+      "opcode": 192,
+      "cycles": 2,
+      "size": 2,
+      "addr_mode": "Immediate",
+      "text": "sub"
+    },
+    {
+      "opcode": 208,
+      "cycles": 3,
+      "size": 2,
+      "addr_mode": "Direct",
+      "text": "sub"
+    },
+    {
+      "opcode": 224,
+      "cycles": 5,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "sub"
+    },
+    {
+      "opcode": 240,
+      "cycles": 4,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "sub"
+    },
+    {
+      "opcode": 63,
+      "cycles": 12,
+      "size": 1,
+      "addr_mode": "Inherent",
+      "text": "swi"
+    },
+    {
+      "opcode": 22,
+      "cycles": 2,
+      "size": 1,
+      "addr_mode": "Inherent",
+      "text": "tab"
+    },
+    {
+      "opcode": 6,
+      "cycles": 2,
+      "size": 1,
+      "addr_mode": "Inherent",
+      "text": "tap"
+    },
+    {
+      "opcode": 23,
+      "cycles": 2,
+      "size": 1,
+      "addr_mode": "Inherent",
+      "text": "tba"
+    },
+    {
+      "opcode": 7,
+      "cycles": 2,
+      "size": 1,
+      "addr_mode": "Inherent",
+      "text": "tpa"
+    },
+    {
+      "opcode": 77,
+      "cycles": 2,
+      "size": 1,
+      "addr_mode": "AccA",
+      "text": "tst"
+    },
+    {
+      "opcode": 93,
+      "cycles": 2,
+      "size": 1,
+      "addr_mode": "AccB",
+      "text": "tst"
+    },
+    {
+      "opcode": 109,
+      "cycles": 7,
+      "size": 2,
+      "addr_mode": "Indexed",
+      "text": "tst"
+    },
+    {
+      "opcode": 125,
+      "cycles": 6,
+      "size": 3,
+      "addr_mode": "Extended",
+      "text": "tst"
+    },
+    {
+      "opcode": 48,
+      "cycles": 4,
+      "size": 1,
+      "addr_mode": "Inherent",
+      "text": "tsx"
+    },
+    {
+      "opcode": 53,
+      "cycles": 4,
+      "size": 1,
+      "addr_mode": "Inherent",
+      "text": "txs"
+    }
+  ]
+}
