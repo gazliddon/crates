@@ -1,9 +1,5 @@
 /// Registers, Flags and regiter store
-use std::{
-    fmt::Debug,
-    hash::Hash,
-    str::FromStr,
-};
+use std::{fmt::Debug, hash::Hash, str::FromStr};
 
 use emucore::traits::*;
 
@@ -60,7 +56,7 @@ impl RegEnumTrait for RegEnum {
 
 pub struct Flags(u8);
 
-bitflags::bitflags! { 
+bitflags::bitflags! {
     impl Flags: u8 {
         const H  = 1 << 5;
         const I  = 1 << 4;
@@ -71,13 +67,133 @@ bitflags::bitflags! {
     }
 }
 
+impl Flags {
+    #[inline]
+    pub fn n(&self) -> bool {
+        self.contains(Flags::N)
+    }
+    #[inline]
+    pub fn z(&self) -> bool {
+        self.contains(Flags::Z)
+    }
+    #[inline]
+    pub fn c(&self) -> bool {
+        self.contains(Flags::C)
+    }
+    #[inline]
+    pub fn v(&self) -> bool {
+        self.contains(Flags::V)
+    }
+
+    #[inline]
+    pub fn hi(&self) -> bool {
+        panic!()
+    }
+
+    #[inline]
+    pub fn gt(&self) -> bool {
+        panic!()
+    }
+
+    #[inline]
+    pub fn le(&self) -> bool {
+        panic!()
+    }
+
+    #[inline]
+    pub fn lt(&self) -> bool {
+        panic!()
+    }
+
+    #[inline]
+    pub fn ls(&self) -> bool {
+        panic!()
+    }
+
+    #[inline]
+    pub fn pl(&self) -> bool {
+        panic!()
+    }
+
+    #[inline]
+    pub fn mi(&self) -> bool {
+        panic!()
+    }
+
+    #[inline]
+    pub fn ne(&self) -> bool {
+        panic!()
+    }
+
+    #[inline]
+    pub fn eq(&self) -> bool {
+        panic!()
+    }
+
+    #[inline]
+    pub fn ge(&self) -> bool {
+        panic!()
+    }
+
+    #[inline]
+    pub fn set_nz(&mut self, _val : u8) {
+        panic!()
+    }
+    #[inline]
+    pub fn set_nz_16(&mut self, _val : u16) {
+        panic!()
+    }
+
+    #[inline]
+    pub fn set_v(&mut self, _val: bool) {
+        panic!()
+    }
+
+    #[inline]
+    pub fn set_z(&mut self, _val : bool) {
+        panic!()
+    }
+
+    #[inline]
+    pub fn set_c(&mut self, _val :bool) {
+        panic!()
+    }
+
+    #[inline]
+    pub fn set_n(&mut self, _val : bool) {
+        panic!()
+    }
+
+
+    #[inline]
+    pub fn clv(&mut self) {
+        self.remove(Flags::V)
+    }
+
+    #[inline]
+    pub fn sev(&mut self) {
+        self.set(Flags::V, true)
+    }
+
+    #[inline]
+    pub fn clc(&mut self) {
+        self.remove(Flags::C)
+    }
+
+    #[inline]
+    pub fn sec(&mut self) {
+        self.set(Flags::C, true)
+    }
+
+}
+
 pub struct Regs {
     pub a: u8,
     pub b: u8,
     pub x: u16,
     pub pc: u16,
     pub sp: u16,
-    pub flags: Flags
+    pub flags: Flags,
 }
 
 impl RegistersTrait<RegEnum> for Regs {
@@ -90,7 +206,7 @@ impl RegistersTrait<RegEnum> for Regs {
             X => self.x as u64,
             PC => self.pc as u64,
             SP => self.sp as u64,
-            SR => u64::from(self.flags.bits())
+            SR => u64::from(self.flags.bits()),
         }
     }
 
@@ -105,9 +221,7 @@ impl RegistersTrait<RegEnum> for Regs {
             X => self.x = v16,
             PC => self.pc = v16,
             SP => self.sp = v16,
-            SR => self.flags = Flags(v8)
+            SR => self.flags = Flags(v8),
         }
     }
 }
-
-

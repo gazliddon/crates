@@ -1,12 +1,12 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-
 use super::AddrModeEnum;
 use strum::EnumString;
 
 #[derive(
     Clone, Copy, Deserialize, Serialize, Debug, EnumString, Hash, PartialEq, PartialOrd, Eq,
 )]
+
 pub enum Mnemonic {
     Des,
     Bmi,
