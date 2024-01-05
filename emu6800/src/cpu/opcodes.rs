@@ -295,12 +295,49 @@ fn ora_b<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
 // Adds, subs
 
 
-fn do_sub<A: Bus, M: MemoryIO>(_bus: A, _m: &mut Machine<M>, _c: bool, _a: u8, _b: u8) -> CpuResult<u8> { 
-    panic!()
+fn do_sub<M: MemoryIO>(m: &mut Machine<M>, c: bool, val: u8, op: u8) -> CpuResult<u8> { 
+
+    let c_num = if c {
+        1u8
+    } else {
+        0u8
+    };
+
+    let new_val = val.wrapping_sub(op).wrapping_sub(c_num);
+
+    let n = new_val & 0x80 == 0x80 ;
+    let z = new_val == 0;
+    let v  = new_val & 0x80 != val & 0x80;
+    let c = new_val > val;
+
+    m.regs.flags.set_n(n);
+    m.regs.flags.set_z(z);
+    m.regs.flags.set_z(v);
+    m.regs.flags.set_c(c);
+
+    Ok(val)
 }
 
-fn do_add<A: Bus, M: MemoryIO>(_bus: A, _m: &mut Machine<M>, _c: bool, _a: u8, _b: u8) -> CpuResult<u8> { 
-    panic!()
+fn do_add<M: MemoryIO>( m: &mut Machine<M>, c: bool, val: u8, op: u8) -> CpuResult<u8> { 
+    let c_num = if c {
+        1u8
+    } else {
+        0u8
+    };
+
+    let new_val = val.wrapping_add(op).wrapping_add(c_num);
+
+    let n = new_val & 0x80 == 0x80 ;
+    let z = new_val == 0;
+    let v  = new_val & 0x80 != val & 0x80;
+    let c = new_val > val;
+
+    m.regs.flags.set_n(n);
+    m.regs.flags.set_z(z);
+    m.regs.flags.set_z(v);
+    m.regs.flags.set_c(c);
+
+    Ok(val)
 }
 
 #[inline]
@@ -314,79 +351,79 @@ fn neg<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
 #[inline]
 fn cmp_a<A: Bus, M: MemoryIO>(mut bus: A, m: &mut Machine<M>) -> CpuResult<()> {
     let op = bus.fetch_operand(m)?;
-    let _ = do_sub(bus,m,false,m.regs.a,op)?;
+    let _ = do_sub(m,false,m.regs.a,op)?;
     Ok(())
 }
 
 #[inline]
 fn cmp_b<A: Bus, M: MemoryIO>(mut bus: A, m: &mut Machine<M>) -> CpuResult<()> {
     let op = bus.fetch_operand(m)?;
-    let _ = do_sub(bus,m,false,m.regs.a,op)?;
+    let _ = do_sub(m,false,m.regs.a,op)?;
     Ok(())
 }
 
 #[inline]
 fn add_b<A: Bus, M: MemoryIO>(mut bus: A, m: &mut Machine<M>) -> CpuResult<()> {
     let op = bus.fetch_operand(m)?;
-    m.regs.b = do_add(bus,m,false,m.regs.b,op)?;
+    m.regs.b = do_add(m,false,m.regs.b,op)?;
     Ok(())
 }
 
 #[inline]
 fn adc_b<A: Bus, M: MemoryIO>(mut bus: A, m: &mut Machine<M>) -> CpuResult<()> {
     let op = bus.fetch_operand(m)?;
-    m.regs.b = do_add(bus,m,m.regs.flags.c(),m.regs.b,op)?;
+    m.regs.b = do_add(m,m.regs.flags.c(),m.regs.b,op)?;
     Ok(())
 }
 
 #[inline]
 fn add_a<A: Bus, M: MemoryIO>(mut bus: A, m: &mut Machine<M>) -> CpuResult<()> {
     let op = bus.fetch_operand(m)?;
-    m.regs.a = do_add(bus,m,false,m.regs.a,op)?;
+    m.regs.a = do_add(m,false,m.regs.a,op)?;
     Ok(())
 }
 #[inline]
 fn adc_a<A: Bus, M: MemoryIO>(mut bus: A, m: &mut Machine<M>) -> CpuResult<()> {
     let op = bus.fetch_operand(m)?;
-    m.regs.a = do_add(bus,m,m.regs.flags.c(),m.regs.a,op)?;
+    m.regs.a = do_add(m,m.regs.flags.c(),m.regs.a,op)?;
     Ok(())
 }
 
 #[inline]
-fn aba<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    m.regs.a = do_add(bus,m,false,m.regs.a, m.regs.b)?;
+fn aba<A: Bus, M: MemoryIO>(_bus: A, m: &mut Machine<M>) -> CpuResult<()> {
+    m.regs.a = do_add(m,false,m.regs.a, m.regs.b)?;
     Ok(())
 }
 
 #[inline]
-fn sba<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    m.regs.a = do_sub(bus,m,false,m.regs.a, m.regs.b)?;
+fn sba<A: Bus, M: MemoryIO>(_bus: A, m: &mut Machine<M>) -> CpuResult<()> {
+    m.regs.a = do_sub(m,false,m.regs.a, m.regs.b)?;
     Ok(())
 }
 
 #[inline]
 fn sub_a<A: Bus, M: MemoryIO>(mut bus: A, m: &mut Machine<M>) -> CpuResult<()> {
     let op = bus.fetch_operand(m)?;
-    m.regs.a = do_sub(bus,m,false,m.regs.a,op)?;
+    m.regs.a = do_sub(m,false,m.regs.a,op)?;
     Ok(())
 }
 #[inline]
 fn sub_b<A: Bus, M: MemoryIO>(mut bus: A, m: &mut Machine<M>) -> CpuResult<()> {
     let op = bus.fetch_operand(m)?;
-    m.regs.b = do_sub(bus,m,false,m.regs.b, op)?;
+    m.regs.b = do_sub(m,false,m.regs.b, op)?;
     Ok(())
 }
 
 #[inline]
 fn sbc_a<A: Bus, M: MemoryIO>(mut bus: A, m: &mut Machine<M>) -> CpuResult<()> {
     let op = bus.fetch_operand(m)?;
-    m.regs.a = do_sub(bus,m,m.regs.flags.c(),m.regs.a, op)?;
+    m.regs.a = do_sub(m,m.regs.flags.c(),m.regs.a, op)?;
     Ok(())
 }
 
 fn sbc_b<A: Bus, M: MemoryIO>(mut bus: A, m: &mut Machine<M>) -> CpuResult<()> {
     let op = bus.fetch_operand(m)?;
-    m.regs.b = do_sub(bus,m,m.regs.flags.c(),m.regs.b, op)?;
+    m.regs.b = do_sub(m,m.regs.flags.c(),m.regs.b, op)?;
     Ok(())
 }
 
@@ -409,8 +446,8 @@ fn cpx<A: Bus, M: MemoryIO>(mut bus: A, m: &mut Machine<M>) -> CpuResult<()> {
 }
 
 #[inline]
-fn cba<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    let _ = do_sub(bus,m,false,m.regs.a,m.regs.b)?;
+fn cba<A: Bus, M: MemoryIO>(_bus: A, m: &mut Machine<M>) -> CpuResult<()> {
+    let _ = do_sub(m,false,m.regs.a,m.regs.b)?;
     Ok(())
 }
 
