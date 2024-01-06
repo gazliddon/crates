@@ -2,16 +2,16 @@ use super::registers::*;
 use std::collections::HashSet;
 
 struct DebugRegisterFile<'a> {
-    writable_flags: Flags,
-    readable_flags: Flags,
+    writable_flags: StatusReg,
+    readable_flags: StatusReg,
     regs_read: HashSet<RegEnum>,
     regs_write: HashSet<RegEnum>,
     regs: &'a mut Regs,
 }
 
 enum DebugRegsError {
-    FlagRead(Flags),
-    FlagWrite(Flags),
+    FlagRead(StatusReg),
+    FlagWrite(StatusReg),
     RegisterRead(RegEnum),
     RegisterWrite(RegEnum),
 }
@@ -38,12 +38,12 @@ impl<'a> DebugRegisterFile<'a> {
     }
 
     #[inline]
-    pub fn check_flag_read(&self, f: Flags) -> bool {
+    pub fn check_flag_read(&self, f: StatusReg) -> bool {
         self.readable_flags.contains(f)
     }
     
     #[inline]
-    pub fn check_flag_write(&self, f: Flags) -> bool {
+    pub fn check_flag_write(&self, f: StatusReg) -> bool {
         self.writable_flags.contains(f)
     }
 }
@@ -115,7 +115,7 @@ impl<'a> RegisterFileTrait for DebugRegisterFile<'a> {
 
     #[inline]
     fn v(&mut self) -> bool {
-        self.regs.flags.contains(Flags::V)
+        self.regs.flags.contains(StatusReg::V)
     }
 
     #[inline]
