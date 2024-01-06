@@ -2,6 +2,7 @@
 use std::{fmt::Debug, hash::Hash, str::FromStr};
 
 use emucore::traits::*;
+use serde::{ Deserialize, Serialize };
 
 ////////////////////////////////////////////////////////////////////////////////
 pub trait RegisterFileTrait {
@@ -284,7 +285,7 @@ impl RegisterFileTrait for Regs {
     }
 }
 
-#[derive(Copy,Debug, Clone, Hash, Ord, Eq, PartialEq, PartialOrd, Default)]
+#[derive(Copy,Debug, Clone, Hash, Ord, Eq, PartialEq, PartialOrd, Default, Serialize, Deserialize)]
 pub enum RegEnum {
     #[default]
     A,
@@ -333,6 +334,7 @@ impl RegEnumTrait for RegEnum {
     }
 }
 
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub struct Flags(u8);
 
 bitflags::bitflags! {

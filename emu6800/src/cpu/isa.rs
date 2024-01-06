@@ -1,6 +1,6 @@
+use super::{AddrModeEnum, Flags, RegEnum};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
-use super::AddrModeEnum;
+use std::collections::{HashMap, HashSet};
 use strum::EnumString;
 
 #[derive(
@@ -82,12 +82,21 @@ pub enum Mnemonic {
 }
 
 #[derive(Default, Serialize, Deserialize, Debug, Clone)]
-pub struct AddrModes {
-    addr_modes: HashMap<AddrModeEnum, InstructionData>,
+/// All of the information for all of the address modes
+/// of this instruction
+pub struct Instruction {
+    #[serde(default)]
+    flags_modified: Flags,
+    addr_modes: HashMap<AddrModeEnum, OpcodeData>,
 }
 
 #[derive(Default, Serialize, Deserialize, Debug, Clone)]
-pub struct InstructionData {
+/// Data for an individual opcode
+pub struct OpcodeData {
+    #[serde(default)]
+    pub regs_read: HashSet<RegEnum>,
+    #[serde(default)]
+    pub regs_written: HashSet<RegEnum>,
     pub opcode: usize,
     pub cycles: usize,
     pub size: usize,
@@ -95,18 +104,18 @@ pub struct InstructionData {
 
 #[derive(Default, Serialize, Deserialize, Debug)]
 pub struct Isa {
-    instructions: HashMap<Mnemonic, AddrModes>,
+    instructions: HashMap<Mnemonic, Instruction>,
 }
 
 struct InstructionInfo<'a> {
     mnemonic: Mnemonic,
     addr_mode: AddrModeEnum,
-    instruction: &'a InstructionData,
+    instruction: &'a OpcodeData,
 }
 
 pub struct IsaDatabase {
-    op_code_to_data: HashMap<usize, (Mnemonic, AddrModeEnum, InstructionData)>,
-    m_to_addr_modes: HashMap<Mnemonic, AddrModes>,
+    op_code_to_data: HashMap<usize, (Mnemonic, AddrModeEnum, OpcodeData)>,
+    m_to_addr_modes: HashMap<Mnemonic, Instruction>,
 }
 
 impl IsaDatabase {
@@ -126,7 +135,7 @@ impl IsaDatabase {
         }
     }
 
-    fn get_instruction_address_modes(&self, _m: Mnemonic) -> &AddrModes {
+    fn get_instruction_address_modes(&self, _m: Mnemonic) -> &Instruction {
         self.m_to_addr_modes.get(&_m).unwrap()
     }
 
