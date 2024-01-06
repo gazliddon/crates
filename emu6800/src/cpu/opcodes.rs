@@ -1,18 +1,10 @@
 use emucore::mem::MemoryIO;
 
-use super::{Bus, Flags};
+use super::{Bus, RegEnum, RegisterFileTrait};
 use super::{CpuResult, Machine};
 
 ////////////////////////////////////////////////////////////////////////////////
 // Helpers
-#[inline]
-fn branch_cond<A: Bus, M: MemoryIO>(mut bus: A, m: &mut Machine<M>, cond: bool) -> CpuResult<()> {
-    let addr = bus.fetch_rel_addr(m)?;
-    if cond {
-        m.regs.pc = addr;
-    }
-    Ok(())
-}
 
 #[inline]
 fn bool_as_u8(m: bool) -> u8 {
@@ -23,692 +15,903 @@ fn bool_as_u8(m: bool) -> u8 {
     }
 }
 
+struct Ins<'a, A, R, M>
+where
+    A: Bus,
+    R: RegisterFileTrait,
+    M: MemoryIO,
+{
+    bus: A,
+    m: &'a mut Machine<M, R>,
+}
 ////////////////////////////////////////////////////////////////////////////////
-// Relative branches
-#[inline]
-fn bra<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    branch_cond(bus, m, true)
-}
-
-#[inline]
-fn bpl<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    branch_cond(bus, m, !m.regs.flags.pl())
-}
-
-#[inline]
-fn blt<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    branch_cond(bus, m, !m.regs.flags.lt())
-}
-
-#[inline]
-fn bmi<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    branch_cond(bus, m, m.regs.flags.mi())
-}
-
-#[inline]
-fn bne<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    branch_cond(bus, m, !m.regs.flags.ne())
-}
-
-#[inline]
-fn beq<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    branch_cond(bus, m, m.regs.flags.eq())
-}
-
-#[inline]
-fn bhi<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    branch_cond(bus, m, m.regs.flags.hi())
-}
-
-#[inline]
-fn bgt<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    branch_cond(bus, m, m.regs.flags.gt())
-}
-
-#[inline]
-fn ble<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    branch_cond(bus, m, m.regs.flags.le())
-}
-
-#[inline]
-fn bls<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    branch_cond(bus, m, m.regs.flags.ls())
-}
-
-#[inline]
-fn bge<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    branch_cond(bus, m, m.regs.flags.ge())
-}
-
-#[inline]
-fn bcs<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    branch_cond(bus, m, m.regs.flags.c())
-}
-
-#[inline]
-fn bcc<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    branch_cond(bus, m, !m.regs.flags.c())
-}
-
-#[inline]
-fn bvs<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    branch_cond(bus, m, m.regs.flags.v())
-}
-
-#[inline]
-fn bvc<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    branch_cond(bus, m, !m.regs.flags.v())
+// Utils
+impl<'a, A, R, M> Ins<'a, A, R, M>
+where
+    A: Bus,
+    R: RegisterFileTrait,
+    M: MemoryIO,
+{
+    #[inline]
+    fn fetch_operand(&mut self) -> CpuResult<u8> {
+        let r = self.bus.fetch_operand(self.m)?;
+        Ok(r)
+    }
+    #[inline]
+    fn fetch_operand_16(&mut self) -> CpuResult<u16> {
+        let r = self.bus.fetch_operand_16(self.m)?;
+        Ok(r)
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// Relative branches
+impl<'a, A, R, M> Ins<'a, A, R, M>
+where
+    A: Bus,
+    R: RegisterFileTrait,
+    M: MemoryIO,
+{
+    #[inline]
+    fn branch_cond(&mut self, cond: bool) -> CpuResult<()> {
+        let addr = self.bus.fetch_rel_addr(self.m)?;
+        if cond {
+            self.m.regs.set_pc(addr);
+        }
+        Ok(())
+    }
+
+    #[inline]
+    fn bra(&mut self) -> CpuResult<()> {
+        self.branch_cond(true)
+    }
+
+    #[inline]
+    fn bpl(&mut self) -> CpuResult<()> {
+        let n = self.m.regs.n();
+        self.branch_cond(!n)
+    }
+    #[inline]
+    fn blt(&mut self) -> CpuResult<()> {
+        let lt = self.m.regs.lt();
+        self.branch_cond(lt)
+    }
+    #[inline]
+    fn bmi(&mut self) -> CpuResult<()> {
+        let n = self.m.regs.n();
+        self.branch_cond(n)
+    }
+
+    #[inline]
+    fn bne(&mut self) -> CpuResult<()> {
+        let z = self.m.regs.z();
+        self.branch_cond(!z)
+    }
+
+    #[inline]
+    fn beq(&mut self) -> CpuResult<()> {
+        let z = self.m.regs.z();
+        self.branch_cond(z)
+    }
+
+    #[inline]
+    fn bhi(&mut self) -> CpuResult<()> {
+        let hi = self.m.regs.hi();
+        self.branch_cond(hi)
+    }
+
+    #[inline]
+    fn bgt(&mut self) -> CpuResult<()> {
+        let gt = self.m.regs.gt();
+        self.branch_cond(gt)
+    }
+
+    #[inline]
+    fn ble(&mut self) -> CpuResult<()> {
+        let le = self.m.regs.le();
+        self.branch_cond(le)
+    }
+
+    #[inline]
+    fn bls(&mut self) -> CpuResult<()> {
+        let ls = self.m.regs.ls();
+        self.branch_cond(ls)
+    }
+
+    #[inline]
+    fn bge(&mut self) -> CpuResult<()> {
+        let ge = self.m.regs.ge();
+        self.branch_cond(ge)
+    }
+
+    #[inline]
+    fn bcs(&mut self) -> CpuResult<()> {
+        let c = self.m.regs.c();
+        self.branch_cond(c)
+    }
+
+    #[inline]
+    fn bcc(&mut self) -> CpuResult<()> {
+        let c = self.m.regs.c();
+        self.branch_cond(!c)
+    }
+
+    #[inline]
+    fn bvs(&mut self) -> CpuResult<()> {
+        let v = self.m.regs.v();
+        self.branch_cond(v)
+    }
+
+    #[inline]
+    fn bvc(&mut self) -> CpuResult<()> {
+        let v = self.m.regs.v();
+        self.branch_cond(!v)
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Flags
-#[inline]
-fn clc<A: Bus, M: MemoryIO>(_bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    m.regs.flags.remove(Flags::C);
-    Ok(())
-}
+impl<'a, A, R, M> Ins<'a, A, R, M>
+where
+    A: Bus,
+    R: RegisterFileTrait,
+    M: MemoryIO,
+{
+    #[inline]
+    fn clc(&mut self) -> CpuResult<()> {
+        self.m.regs.clc();
+        Ok(())
+    }
 
-#[inline]
-fn sec<A: Bus, M: MemoryIO>(_bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    m.regs.flags.set(Flags::C, false);
-    Ok(())
-}
+    #[inline]
+    fn sec(&mut self) -> CpuResult<()> {
+        self.m.regs.sec();
+        Ok(())
+    }
 
-#[inline]
-fn clv<A: Bus, M: MemoryIO>(_bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    m.regs.flags.set(Flags::V, false);
-    Ok(())
-}
+    #[inline]
+    fn clv(&mut self) -> CpuResult<()> {
+        self.m.regs.clv();
+        Ok(())
+    }
 
-#[inline]
-fn sev<A: Bus, M: MemoryIO>(_bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    m.regs.flags.set(Flags::V, true);
-    Ok(())
-}
+    #[inline]
+    fn sev(&mut self) -> CpuResult<()> {
+        self.m.regs.sev();
+        Ok(())
+    }
 
-#[inline]
-fn cli<A: Bus, M: MemoryIO>(_bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    m.regs.flags.set(Flags::I, false);
-    Ok(())
-}
-#[inline]
-fn sei<A: Bus, M: MemoryIO>(_bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    m.regs.flags.set(Flags::I, true);
-    Ok(())
+    #[inline]
+    fn cli(&mut self) -> CpuResult<()> {
+        self.m.regs.cli();
+        Ok(())
+    }
+    #[inline]
+    fn sei(&mut self) -> CpuResult<()> {
+        self.m.regs.sei();
+        Ok(())
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Stack stuff
-#[inline]
-fn pul<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    let val = m.pop_byte()?;
-    bus.store_byte(m, val)?;
-    Ok(())
-}
+impl<'a, A, R, M> Ins<'a, A, R, M>
+where
+    A: Bus,
+    R: RegisterFileTrait,
+    M: MemoryIO,
+{
+    #[inline]
+    fn pul(&mut self) -> CpuResult<()> {
+        let val = self.m.pop_byte()?;
+        self.bus.store_byte(self.m, val)?;
+        Ok(())
+    }
+    #[inline]
+    fn psh(&mut self) -> CpuResult<()> {
+        let val = self.fetch_operand()?;
+        self.m.push_byte(val)?;
+        Ok(())
+    }
 
-#[inline]
-fn psh<A: Bus, M: MemoryIO>(mut bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    let val = bus.fetch_operand(m)?;
-    m.push_byte(val)?;
-    Ok(())
-}
+    #[inline]
+    fn ins(&mut self) -> CpuResult<()> {
+        // m.regs.sp = self.m.regs.sp.wrapping_add(1);
 
-#[inline]
-fn ins<A: Bus, M: MemoryIO>(_bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    m.regs.sp = m.regs.sp.wrapping_add(1);
-    Ok(())
-}
-#[inline]
-fn des<A: Bus, M: MemoryIO>(_bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    m.regs.sp = m.regs.sp.wrapping_sub(1);
-    Ok(())
+        // Ok(())
+        todo!()
+    }
+    #[inline]
+    fn des(&mut self) -> CpuResult<()> {
+        // m.regs.sp = m.regs.sp.wrapping_sub(1);
+        // Ok(())
+        todo!()
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-#[inline]
-fn nop<A: Bus, M: MemoryIO>(_bus: A, _machine: &mut Machine<M>) -> CpuResult<()> {
-    Ok(())
+// Misc
+impl<'a, A, R, M> Ins<'a, A, R, M>
+where
+    A: Bus,
+    R: RegisterFileTrait,
+    M: MemoryIO,
+{
+    #[inline]
+    fn nop(&mut self) -> CpuResult<()> {
+        Ok(())
+    }
 }
+
+////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
 // jmp / sub / returns
-#[inline]
-fn rti<A: Bus, M: MemoryIO>(_bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    m.regs.flags = Flags::from_bits(m.pop_byte()?).unwrap();
-    m.regs.b = m.pop_byte()?;
-    m.regs.a = m.pop_byte()?;
-    m.regs.x = m.pop_word()?;
-    m.regs.pc = m.pop_word()?;
-    Ok(())
-}
+impl<'a, A, R, M> Ins<'a, A, R, M>
+where
+    A: Bus,
+    R: RegisterFileTrait,
+    M: MemoryIO,
+{
+    #[inline]
+    fn rti(&mut self) -> CpuResult<()> {
+        let sr = self.m.pop_byte()?;
+        let b = self.m.pop_byte()?;
+        let a = self.m.pop_byte()?;
+        let x = self.m.pop_word()?;
+        let pc = self.m.pop_word()?;
 
-#[inline]
-fn jmp<A: Bus, M: MemoryIO>(_bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    let addr = m.fetch_word()?;
-    m.regs.pc = addr;
-    Ok(())
-}
+        let regs = self.regs_mut();
 
-#[inline]
-fn bsr<A: Bus, M: MemoryIO>(mut bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    let addr = bus.fetch_rel_addr(m)?;
-    m.push_word(m.regs.pc)?;
-    m.regs.pc = addr;
-    Ok(())
-}
+        regs.set_sr(sr).set_a(a).set_b(b).set_x(x).set_pc(pc);
 
-#[inline]
-fn swi<A: Bus, M: MemoryIO>(_bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    m.push_word(m.regs.pc)?;
-    m.push_word(m.regs.x)?;
-    m.push_byte(m.regs.a)?;
-    m.push_byte(m.regs.b)?;
-    m.push_byte(m.regs.flags.bits())?;
+        Ok(())
+    }
 
-    let addr = m.mem_mut().load_word(0xfffa)?;
+    #[inline]
+    fn jmp(&mut self) -> CpuResult<()> {
+        let addr = self.m.fetch_word()?;
+        self.m.regs.set_pc(addr);
+        Ok(())
+    }
 
-    m.regs.pc = addr;
-    Ok(())
-}
+    #[inline]
+    fn bsr(&mut self) -> CpuResult<()> {
+        let addr = self.bus.fetch_rel_addr(self.m)?;
+        let pc = self.m.regs.pc();
+        self.m.push_word(pc)?;
+        self.m.regs.set_pc(addr);
+        Ok(())
+    }
 
-#[inline]
-fn jsr<A: Bus, M: MemoryIO>(mut bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    let addr = bus.fetch_operand_16(m)?;
-    m.push_word(m.regs.pc)?;
-    m.regs.pc = addr;
-    Ok(())
-}
+    #[inline]
+    fn swi(&mut self) -> CpuResult<()> {
+        let pc = self.m.regs.pc();
+        let x = self.m.regs.x();
+        let a = self.m.regs.a();
+        let b = self.m.regs.b();
+        let sr = self.m.regs.sr();
 
-#[inline]
-fn rts<A: Bus, M: MemoryIO>(_bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    let addr = m.pop_word()?;
-    m.regs.pc = addr;
-    Ok(())
+        self.m.push_word(pc)?;
+        self.m.push_word(x)?;
+        self.m.push_byte(a)?;
+        self.m.push_byte(b)?;
+        self.m.push_byte(sr)?;
+
+        let addr = self.m.mem_mut().load_word(0xfffa)?;
+        let regs = self.regs_mut();
+        regs.set_pc(addr);
+
+        Ok(())
+    }
+
+    #[inline]
+    fn jsr(&mut self) -> CpuResult<()> {
+        let addr = self.bus.fetch_operand_16(self.m)?;
+        let pc = self.m.regs.pc();
+        self.m.push_word(pc)?;
+        self.m.regs.set_pc(addr);
+        Ok(())
+    }
+
+    #[inline]
+    fn rts(&mut self) -> CpuResult<()> {
+        let addr = self.m.pop_word()?;
+        self.m.regs.set_pc(addr);
+        Ok(())
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // bool logic
-#[inline]
-fn eor_val<A: Bus, M: MemoryIO>(_bus: A, m: &mut Machine<M>, val: u8) -> CpuResult<u8> {
-    let operand = m.fetch_byte()?;
-    let res = val ^ operand;
-    m.regs.flags.set_nz(res);
-    m.regs.flags.clv();
-    Ok(res)
-}
+impl<'a, A, R, M> Ins<'a, A, R, M>
+where
+    A: Bus,
+    R: RegisterFileTrait,
+    M: MemoryIO,
+{
+    #[inline]
+    fn eor_val(&mut self, val: u8) -> CpuResult<u8> {
+        let operand = self.m.fetch_byte()?;
+        let res = val ^ operand;
+        self.m.regs.nz_from_u8(res);
+        self.m.regs.clv();
+        Ok(res)
+    }
 
-fn and_val<A: Bus, M: MemoryIO>(_bus: A, m: &mut Machine<M>, val: u8) -> CpuResult<u8> {
-    let operand = m.fetch_byte()?;
-    let res = val & operand;
-    m.regs.flags.set_nz(res);
-    m.regs.flags.clv();
-    Ok(res)
-}
+    fn and_val(&mut self, val: u8) -> CpuResult<u8> {
+        let operand = self.m.fetch_byte()?;
+        let res = val & operand;
+        self.m.regs.nz_from_u8(res);
+        self.m.regs.clv();
+        Ok(res)
+    }
 
-fn or_val<A: Bus, M: MemoryIO>(_bus: A, m: &mut Machine<M>, val: u8) -> CpuResult<u8> {
-    let res = val | m.fetch_byte()?;
-    m.regs.flags.set_nz(res);
-    m.regs.flags.clv();
-    Ok(res)
-}
+    fn or_val(&mut self, val: u8) -> CpuResult<u8> {
+        let res = val | self.m.fetch_byte()?;
+        self.m.regs.nz_from_u8(res);
+        self.m.regs.clv();
+        Ok(res)
+    }
 
-#[inline]
-fn com<A: Bus, M: MemoryIO>(mut bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    let val = !bus.fetch_operand(m)?;
-    bus.store_byte(m, val)?;
-    m.regs.flags.sec();
-    m.regs.flags.clv();
-    m.regs.flags.set_nz(val);
-    Ok(())
-}
+    #[inline]
+    fn com(&mut self) -> CpuResult<()> {
+        let val = !self.bus.fetch_operand(self.m)?;
+        self.bus.store_byte(self.m, val)?;
+        let regs = self.regs_mut();
+        regs.sec().clv().nz_from_u8(val);
+        Ok(())
+    }
 
-#[inline]
-fn eor_a<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    m.regs.a = eor_val(bus, m, m.regs.a)?;
-    Ok(())
-}
+    #[inline]
+    fn eor_a(&mut self) -> CpuResult<()> {
+        let a = self.m.regs.get_reg_8(RegEnum::A);
+        let new_a = self.eor_val(a)?;
+        self.m.regs.set_reg_8(RegEnum::A, new_a);
+        Ok(())
+    }
 
-#[inline]
-fn eor_b<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    m.regs.b = eor_val(bus, m, m.regs.b)?;
-    Ok(())
-}
+    #[inline]
+    fn eor_b(&mut self) -> CpuResult<()> {
+        let b = self.m.regs.get_reg_8(RegEnum::B);
+        let new_b = self.eor_val(b)?;
+        self.m.regs.set_reg_8(RegEnum::B, new_b);
+        Ok(())
+    }
 
-#[inline]
-fn and_a<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    m.regs.a = and_val(bus, m, m.regs.a)?;
-    Ok(())
-}
+    #[inline]
+    fn and_a(&mut self) -> CpuResult<()> {
+        let a = self.m.regs.get_reg_8(RegEnum::A);
+        let new_a = self.and_val(a)?;
+        self.m.regs.set_reg_8(RegEnum::A, new_a);
+        Ok(())
+    }
 
-#[inline]
-fn and_b<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    m.regs.b = and_val(bus, m, m.regs.b)?;
-    Ok(())
-}
+    #[inline]
+    fn and_b(&mut self) -> CpuResult<()> {
+        let b = self.m.regs.get_reg_8(RegEnum::B);
+        let new_b = self.and_val(b)?;
+        self.m.regs.set_reg_8(RegEnum::B, new_b);
+        Ok(())
+    }
 
-#[inline]
-fn ora_a<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    m.regs.a = or_val(bus, m, m.regs.a)?;
-    Ok(())
-}
+    #[inline]
+    fn ora_a(&mut self) -> CpuResult<()> {
+        let a = self.m.regs.get_reg_8(RegEnum::A);
+        let new_a = self.or_val(a)?;
+        self.m.regs.set_reg_8(RegEnum::A, new_a);
+        Ok(())
+    }
 
-#[inline]
-fn ora_b<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    m.regs.b = or_val(bus, m, m.regs.b)?;
-    Ok(())
+    #[inline]
+    fn ora_b(&mut self) -> CpuResult<()> {
+        let b = self.m.regs.get_reg_8(RegEnum::B);
+        let new_b = self.or_val(b)?;
+        self.m.regs.set_reg_8(RegEnum::B, new_b);
+        Ok(())
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Adds, subs
+impl<'a, A, R, M> Ins<'a, A, R, M>
+where
+    A: Bus,
+    R: RegisterFileTrait,
+    M: MemoryIO,
+{
+    fn do_sub(&mut self, c: bool, val: u8, op: u8) -> CpuResult<u8> {
+        let new_val = val.wrapping_sub(op).wrapping_sub(bool_as_u8(c));
 
-fn do_sub<M: MemoryIO>(m: &mut Machine<M>, c: bool, val: u8, op: u8) -> CpuResult<u8> {
-    let new_val = val.wrapping_sub(op).wrapping_sub(bool_as_u8(c));
+        let n = new_val & 0x80 == 0x80;
+        let z = new_val == 0;
+        let v = new_val & 0x80 != val & 0x80;
+        let c = new_val > val;
 
-    let n = new_val & 0x80 == 0x80;
-    let z = new_val == 0;
-    let v = new_val & 0x80 != val & 0x80;
-    let c = new_val > val;
+        self.m.regs.set_n(n);
+        self.m.regs.set_z(z);
+        self.m.regs.set_v(v);
+        self.m.regs.set_c(c);
 
-    m.regs.flags.set_n(n);
-    m.regs.flags.set_z(z);
-    m.regs.flags.set_z(v);
-    m.regs.flags.set_c(c);
+        Ok(val)
+    }
 
-    Ok(val)
-}
+    fn do_add(&mut self, c: bool, val: u8, op: u8) -> CpuResult<u8> {
+        let new_val = val.wrapping_add(op).wrapping_add(bool_as_u8(c));
 
-fn do_add<M: MemoryIO>(m: &mut Machine<M>, c: bool, val: u8, op: u8) -> CpuResult<u8> {
-    let new_val = val.wrapping_add(op).wrapping_add(bool_as_u8(c));
+        let n = new_val & 0x80 == 0x80;
+        let z = new_val == 0;
+        let v = new_val & 0x80 != val & 0x80;
+        let c = new_val > val;
 
-    let n = new_val & 0x80 == 0x80;
-    let z = new_val == 0;
-    let v = new_val & 0x80 != val & 0x80;
-    let c = new_val > val;
+        self.m.regs.set_n(n);
+        self.m.regs.set_z(z);
+        self.m.regs.set_v(v);
+        self.m.regs.set_c(c);
 
-    m.regs.flags.set_n(n);
-    m.regs.flags.set_z(z);
-    m.regs.flags.set_z(v);
-    m.regs.flags.set_c(c);
+        Ok(val)
+    }
 
-    Ok(val)
-}
+    #[inline]
+    fn neg(&mut self) -> CpuResult<()> {
+        let val = self.m.fetch_byte()? as i8;
+        let new_val = -val;
+        self.bus.store_byte(self.m, new_val as u8)?;
+        panic!()
+    }
 
-#[inline]
-fn neg<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    let val = m.fetch_byte()? as i8;
-    let new_val = -val;
-    bus.store_byte(m, new_val as u8)?;
-    panic!()
-}
+    #[inline]
+    fn cmp_a(&mut self) -> CpuResult<()> {
+        let op = self.fetch_operand()?;
+        let a = self.m.regs.a();
+        let _ = self.do_sub(false, a, op)?;
+        Ok(())
+    }
 
-#[inline]
-fn cmp_a<A: Bus, M: MemoryIO>(mut bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    let op = bus.fetch_operand(m)?;
-    let _ = do_sub(m, false, m.regs.a, op)?;
-    Ok(())
-}
+    #[inline]
+    fn cmp_b(&mut self) -> CpuResult<()> {
+        let op = self.fetch_operand()?;
+        let b = self.m.regs.b();
+        let _ = self.do_sub(false, b, op)?;
+        Ok(())
+    }
 
-#[inline]
-fn cmp_b<A: Bus, M: MemoryIO>(mut bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    let op = bus.fetch_operand(m)?;
-    let _ = do_sub(m, false, m.regs.a, op)?;
-    Ok(())
-}
+    #[inline]
+    fn add_b(&mut self) -> CpuResult<()> {
+        let op = self.fetch_operand()?;
+        let b = self.m.regs.b();
+        let b =self.do_add(false, b, op)?;
+        self.regs_mut().set_b(b);
+        Ok(())
+    }
 
-#[inline]
-fn add_b<A: Bus, M: MemoryIO>(mut bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    let op = bus.fetch_operand(m)?;
-    m.regs.b = do_add(m, false, m.regs.b, op)?;
-    Ok(())
-}
+    #[inline]
+    fn adc_b(&mut self) -> CpuResult<()> {
+        let op = self.fetch_operand()?;
+        let b = self.m.regs.b();
+        let c = self.m.regs.c();
+        let new_b = self.do_add(c, b, op)?;
+        self.m.regs.set_b(new_b);
+        Ok(())
+    }
 
-#[inline]
-fn adc_b<A: Bus, M: MemoryIO>(mut bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    let op = bus.fetch_operand(m)?;
-    m.regs.b = do_add(m, m.regs.flags.c(), m.regs.b, op)?;
-    Ok(())
-}
+    #[inline]
+    fn add_a(&mut self) -> CpuResult<()> {
+        let op = self.bus.fetch_operand(self.m)?;
+        let a = self.m.regs.a();
+        let new_a = self.do_add(false, a, op)?;
+        self.m.regs.set_a(new_a);
+        Ok(())
+    }
+    #[inline]
+    fn adc_a(&mut self) -> CpuResult<()> {
+        let op = self.fetch_operand()?;
+        let a = self.m.regs.a();
+        let c = self.m.regs.c();
+        let a = self.do_add(c, a, op)?;
+        self.m.regs.set_a(a);
+        Ok(())
+    }
 
-#[inline]
-fn add_a<A: Bus, M: MemoryIO>(mut bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    let op = bus.fetch_operand(m)?;
-    m.regs.a = do_add(m, false, m.regs.a, op)?;
-    Ok(())
-}
-#[inline]
-fn adc_a<A: Bus, M: MemoryIO>(mut bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    let op = bus.fetch_operand(m)?;
-    m.regs.a = do_add(m, m.regs.flags.c(), m.regs.a, op)?;
-    Ok(())
-}
+    #[inline]
+    fn aba(&mut self) -> CpuResult<()> {
+        let a = self.m.regs.a();
+        let b = self.m.regs.b();
+        let a = self.do_add(false, a, b)?;
+        self.m.regs.set_a(a);
+        Ok(())
+    }
 
-#[inline]
-fn aba<A: Bus, M: MemoryIO>(_bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    m.regs.a = do_add(m, false, m.regs.a, m.regs.b)?;
-    Ok(())
-}
+    #[inline]
+    fn sba(&mut self) -> CpuResult<()> {
+        let a = self.m.regs.a();
+        let b = self.m.regs.b();
+        let a = self.do_sub(false, a, b)?;
+        self.m.regs.set_a(a);
+        Ok(())
+    }
 
-#[inline]
-fn sba<A: Bus, M: MemoryIO>(_bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    m.regs.a = do_sub(m, false, m.regs.a, m.regs.b)?;
-    Ok(())
-}
+    #[inline]
+    fn sub_a(&mut self) -> CpuResult<()> {
+        self.sub_reg(false, RegEnum::A)
+    }
 
-#[inline]
-fn sub_a<A: Bus, M: MemoryIO>(mut bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    let op = bus.fetch_operand(m)?;
-    m.regs.a = do_sub(m, false, m.regs.a, op)?;
-    Ok(())
-}
-#[inline]
-fn sub_b<A: Bus, M: MemoryIO>(mut bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    let op = bus.fetch_operand(m)?;
-    m.regs.b = do_sub(m, false, m.regs.b, op)?;
-    Ok(())
-}
+    #[inline]
+    fn sub_b(&mut self) -> CpuResult<()> {
+        self.sub_reg(false, RegEnum::B)
+    }
 
-#[inline]
-fn sbc_a<A: Bus, M: MemoryIO>(mut bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    let op = bus.fetch_operand(m)?;
-    m.regs.a = do_sub(m, m.regs.flags.c(), m.regs.a, op)?;
-    Ok(())
-}
+    #[inline]
+    fn sbc_a(&mut self) -> CpuResult<()> {
+        let c = self.m.regs.c();
+        self.sub_reg(c, RegEnum::A)
+    }
 
-fn sbc_b<A: Bus, M: MemoryIO>(mut bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    let op = bus.fetch_operand(m)?;
-    m.regs.b = do_sub(m, m.regs.flags.c(), m.regs.b, op)?;
-    Ok(())
-}
+    fn sub_reg(&mut self, c: bool, reg: RegEnum) -> CpuResult<()> {
+        let op = self.fetch_operand()?;
+        let r = self.m.regs.get_reg_8(reg);
+        let v = self.do_sub(c, r, op)?;
+        self.m.regs.set_reg_8(reg, v);
+        Ok(())
+    }
 
-#[inline]
-fn cpx<A: Bus, M: MemoryIO>(mut bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    let op = bus.fetch_operand_16(m)?;
-    let x = m.regs.x;
-    let new_x = m.regs.x.wrapping_sub(op);
-    m.regs.x = new_x;
+    fn sbc_b(&mut self) -> CpuResult<()> {
+        let c = self.m.regs.c();
+        self.sub_reg(c, RegEnum::B)
+    }
 
-    let n = new_x & 0x8000 == 0x8000;
-    let z = new_x == 0;
-    let v = new_x & 0x8000 != x & 0x8000;
+    #[inline]
+    fn cpx(&mut self) -> CpuResult<()> {
+        let op = self.fetch_operand_16()?;
+        let x = self.m.regs.x();
+        let new_x = x.wrapping_sub(op);
+        self.m.regs.set_x(new_x);
 
-    m.regs.flags.set_n(n);
-    m.regs.flags.set_z(z);
-    m.regs.flags.set_z(v);
+        let n = new_x & 0x8000 == 0x8000;
+        let z = new_x == 0;
+        let v = new_x & 0x8000 != x & 0x8000;
 
-    Ok(())
-}
+        self.m.regs.set_n(n);
+        self.m.regs.set_z(z);
+        self.m.regs.set_z(v);
 
-#[inline]
-fn cba<A: Bus, M: MemoryIO>(_bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    let _ = do_sub(m, false, m.regs.a, m.regs.b)?;
-    Ok(())
+        Ok(())
+    }
+
+    #[inline]
+    fn cba(&mut self) -> CpuResult<()> {
+        let a = self.m.regs.a();
+        let b = self.m.regs.b();
+        let _ = self.do_sub(false, a, b)?;
+        Ok(())
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // inc / dec
-#[inline]
-fn inx<A: Bus, M: MemoryIO>(_bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    let x = m.regs.x.wrapping_add(1);
-    // dex only sets zero flag - no bpl/bmu x loops on 6800
-    m.regs.flags.set_z(x == 0);
-    m.regs.x = x;
-    Ok(())
-}
+impl<'a, A, R, M> Ins<'a, A, R, M>
+where
+    A: Bus,
+    R: RegisterFileTrait,
+    M: MemoryIO,
+{
+    #[inline]
+    fn inx(&mut self) -> CpuResult<()> {
+        let x = self.m.regs.x().wrapping_add(1);
+        // dex only sets zero flag - no bpl/bmu x loops on 6800
+        self.m.regs.set_z(x == 0);
+        self.m.regs.set_x(x);
+        Ok(())
+    }
 
-#[inline]
-fn dex<A: Bus, M: MemoryIO>(_bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    let x = m.regs.x.wrapping_add(0xff);
-    // dex only sets zero flag - no bpl/bmi x loops on 6800
-    m.regs.flags.set_z(x == 0);
-    m.regs.x = x;
-    Ok(())
-}
+    #[inline]
+    fn dex(&mut self) -> CpuResult<()> {
+        let x = self.m.regs.x().wrapping_sub(1);
+        // dex only sets zero flag - no bpl/bmi x loops on 6800
+        self.m.regs.set_z(x == 0);
+        self.m.regs.set_x(x);
+        Ok(())
+    }
 
-#[inline]
-fn inc<A: Bus, M: MemoryIO>(mut bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    let val = bus.fetch_operand(m)?;
-    let new_val = val.wrapping_add(1);
-    bus.store_byte(m, new_val)?;
-    m.regs.flags.set_nz(new_val);
-    m.regs.flags.set_v(new_val < val);
-    Ok(())
-}
+    #[inline]
+    fn inc(&mut self) -> CpuResult<()> {
+        let val = self.fetch_operand()?;
+        let new_val = val.wrapping_add(1);
+        self.bus.store_byte(self.m, new_val)?;
+        self.m.regs.nz_from_u8(new_val);
+        self.m.regs.set_v(new_val < val);
+        Ok(())
+    }
 
-#[inline]
-fn dec<A: Bus, M: MemoryIO>(mut bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    let val = bus.fetch_operand(m)?;
-    let new_val = val.wrapping_sub(1);
-    bus.store_byte(m, new_val)?;
-    m.regs.flags.set_nz(new_val);
-    m.regs.flags.set_v(new_val > val);
-    Ok(())
+    #[inline]
+    fn dec(&mut self) -> CpuResult<()> {
+        let val = self.fetch_operand()?;
+        let new_val = val.wrapping_sub(1);
+        self.bus.store_byte(self.m, new_val)?;
+        self.m.regs.nz_from_u8(new_val);
+        self.m.regs.set_v(new_val > val);
+        Ok(())
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Shifts
 //
-fn finish_a_shift<A: Bus, M: MemoryIO>(
-    bus: A,
-    m: &mut Machine<M>,
-    c: bool,
-    val: u8,
-    new_val: u8,
-) -> CpuResult<()> {
-    bus.store_byte(m, new_val)?;
-    let v = val & 0x80 != new_val & 0x80;
-    m.regs.flags.set(Flags::C, c);
-    m.regs.flags.set_nz(new_val);
-    m.regs.flags.set_v(v);
-    Ok(())
-}
+impl<'a, A, R, M> Ins<'a, A, R, M>
+where
+    A: Bus,
+    R: RegisterFileTrait,
+    M: MemoryIO,
+{
+    fn finish_a_shift(&mut self, c: bool, val: u8, new_val: u8) -> CpuResult<()> {
+        self.bus.store_byte(self.m, new_val)?;
+        let v = val & 0x80 != new_val & 0x80;
+        self.m.regs.set_c(c);
+        self.m.regs.nz_from_u8(new_val);
+        self.m.regs.set_v(v);
+        Ok(())
+    }
 
-#[inline]
-fn asr<A: Bus, M: MemoryIO>(mut bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    let val = bus.fetch_operand(m)?;
-    let new_val = val.wrapping_shr(1);
-    let new_val = new_val | (val & 0x80);
-    let c = (val & 0x80) == 0x80;
-    finish_a_shift(bus, m, c, val, new_val)
-}
+    #[inline]
+    fn asr(&mut self) -> CpuResult<()> {
+        let val = self.fetch_operand()?;
+        let new_val = val.wrapping_shr(1);
+        let new_val = new_val | (val & 0x80);
+        let c = (val & 0x80) == 0x80;
+        self.finish_a_shift(c, val, new_val)
+    }
 
-#[inline]
-fn asl<A: Bus, M: MemoryIO>(mut bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    let val = bus.fetch_operand(m)?;
-    let new_val = val.wrapping_shl(1);
-    let c = (val & 0x80) == 0x80;
-    finish_a_shift(bus, m, c, val, new_val)
-}
+    #[inline]
+    fn asl(&mut self) -> CpuResult<()> {
+        let val = self.fetch_operand()?;
+        let new_val = val.wrapping_shl(1);
+        let c = (val & 0x80) == 0x80;
+        self.finish_a_shift(c, val, new_val)
+    }
 
-#[inline]
-fn lsr<A: Bus, M: MemoryIO>(mut bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    let val = bus.fetch_operand(m)?;
-    let new_val = val.wrapping_shr(1);
-    let c = (val & 1) == 1;
-    finish_a_shift(bus, m, c, val, new_val)
-}
+    #[inline]
+    fn lsr(&mut self) -> CpuResult<()> {
+        let val = self.fetch_operand()?;
+        let new_val = val.wrapping_shr(1);
+        let c = (val & 1) == 1;
+        self.finish_a_shift(c, val, new_val)
+    }
 
-#[inline]
-fn ror<A: Bus, M: MemoryIO>(mut bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    let val = bus.fetch_operand(m)?;
+    #[inline]
+    fn ror(&mut self) -> CpuResult<()> {
+        let val = self.fetch_operand()?;
 
-    let new_val = if m.regs.flags.c() {
-        val.wrapping_shr(1) | 0x80
-    } else {
-        val.wrapping_shr(1)
-    };
+        let new_val = if self.m.regs.c() {
+            val.wrapping_shr(1) | 0x80
+        } else {
+            val.wrapping_shr(1)
+        };
 
-    let c = (val & 1) == 1;
+        let c = (val & 1) == 1;
 
-    finish_a_shift(bus, m, c, val, new_val)
-}
+        self.finish_a_shift(c, val, new_val)
+    }
 
-#[inline]
-fn rol<A: Bus, M: MemoryIO>(mut bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    let val = bus.fetch_operand(m)?;
+    #[inline]
+    fn rol(&mut self) -> CpuResult<()> {
+        let val = self.fetch_operand()?;
 
-    let new_val = if m.regs.flags.c() {
-        val.wrapping_shl(1) | 1
-    } else {
-        val.wrapping_shr(1)
-    };
+        let new_val = if self.m.regs.c() {
+            val.wrapping_shl(1) | 1
+        } else {
+            val.wrapping_shr(1)
+        };
 
-    let c = (val & 0x80) == 0x80;
+        let c = (val & 0x80) == 0x80;
 
-    finish_a_shift(bus, m, c, val, new_val)
+        self.finish_a_shift(c, val, new_val)
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Transfers
-#[inline]
-fn tpa<A: Bus, M: MemoryIO>(_bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    m.regs.a = m.regs.flags.bits();
-    Ok(())
-}
-#[inline]
-fn tap<A: Bus, M: MemoryIO>(_bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    m.regs.flags = Flags::from_bits(m.regs.a).unwrap();
-    Ok(())
-}
-#[inline]
-fn tba<A: Bus, M: MemoryIO>(_bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    m.regs.a = m.regs.b;
-    m.regs.flags.set_nz(m.regs.a);
-    m.regs.flags.clv();
-    Ok(())
-}
+impl<'a, A, R, M> Ins<'a, A, R, M>
+where
+    A: Bus,
+    R: RegisterFileTrait,
+    M: MemoryIO,
+{
+    #[inline]
+    fn tpa(&mut self) -> CpuResult<()> {
+        let regs = self.regs_mut();
+        let sr = regs.sr();
+        regs.set_a(sr);
+        Ok(())
+    }
+    #[inline]
+    fn tap(&mut self) -> CpuResult<()> {
+        let regs = self.regs_mut();
+        let a = regs.a();
+        regs.set_sr(a);
+        Ok(())
+    }
+    #[inline]
+    fn tba(&mut self) -> CpuResult<()> {
+        let regs = &mut self.m.regs;
+        let b = regs.b();
+        regs.set_a(b).nz_from_u8(b).clv();
+        Ok(())
+    }
 
-#[inline]
-fn tab<A: Bus, M: MemoryIO>(_bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    m.regs.b = m.regs.a;
-    m.regs.flags.set_nz(m.regs.a);
-    m.regs.flags.clv();
-    Ok(())
-}
+    #[inline]
+    fn tab(&mut self) -> CpuResult<()> {
+        let regs = &mut self.m.regs;
+        let b = regs.b();
+        regs.set_b(b);
+        regs.nz_from_u8(b).clv();
+        Ok(())
+    }
 
-#[inline]
-fn tsx<A: Bus, M: MemoryIO>(_bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    m.regs.x = m.regs.sp;
-    Ok(())
-}
-#[inline]
-fn txs<A: Bus, M: MemoryIO>(_bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    m.regs.sp = m.regs.x;
-    Ok(())
+    #[inline]
+    fn tsx(&mut self) -> CpuResult<()> {
+        let regs = &mut self.m.regs;
+        let sp = regs.sp();
+        regs.set_x(sp);
+        Ok(())
+    }
+    #[inline]
+    fn txs(&mut self) -> CpuResult<()> {
+        let regs = &mut self.m.regs;
+        let x = regs.x();
+        regs.set_sp(x);
+        Ok(())
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Load / stores
-fn ld8<A: Bus, M: MemoryIO>(mut bus: A, m: &mut Machine<M>) -> CpuResult<u8> {
-    let val = bus.fetch_operand(m)?;
-    m.regs.flags.set_nz(val);
-    m.regs.flags.clc();
-    Ok(val)
-}
-fn ld16<A: Bus, M: MemoryIO>(mut bus: A, m: &mut Machine<M>) -> CpuResult<u16> {
-    let val = bus.fetch_operand_16(m)?;
-    m.regs.flags.set_nz_16(val);
-    m.regs.flags.clc();
-    Ok(val)
-}
+impl<'a, A, R, M> Ins<'a, A, R, M>
+where
+    A: Bus,
+    R: RegisterFileTrait,
+    M: MemoryIO,
+{
+    fn regs_mut(&mut self) -> &mut R {
+        &mut self.m.regs
+    }
+    fn regs(&self) -> &R {
+        &self.m.regs
+    }
 
-#[inline]
-fn lds<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    m.regs.sp = ld16(bus, m)?;
-    Ok(())
-}
+    fn ld8(&mut self) -> CpuResult<u8> {
+        let val = self.fetch_operand()?;
+        let regs = self.regs_mut();
+        regs.nz_from_u8(val);
+        regs.clc();
+        Ok(val)
+    }
 
-#[inline]
-fn lda_a<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    m.regs.a = ld8(bus, m)?;
-    Ok(())
-}
+    fn ld16(&mut self) -> CpuResult<u16> {
+        let val = self.fetch_operand_16()?;
+        let regs = self.regs_mut();
+        regs.nz_from_u16(val);
+        regs.clc();
+        Ok(val)
+    }
 
-#[inline]
-fn lda_b<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    m.regs.b = ld8(bus, m)?;
-    Ok(())
-}
+    #[inline]
+    fn lds(&mut self) -> CpuResult<()> {
+        let sp = self.ld16()?;
+        self.m.regs.set_sp(sp);
+        Ok(())
+    }
 
-#[inline]
-fn ldx<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    m.regs.x = ld16(bus, m)?;
-    Ok(())
-}
+    #[inline]
+    fn lda_a(&mut self) -> CpuResult<()> {
+        let a = self.ld8()?;
+        self.regs_mut().set_a(a);
+        Ok(())
+    }
 
-#[inline]
-fn st8<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>, val: u8) -> CpuResult<()> {
-    m.regs.flags.set_nz(val);
-    m.regs.flags.clv();
-    bus.store_byte(m, val)?;
-    Ok(())
-}
-#[inline]
-fn st16<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>, val: u16) -> CpuResult<()> {
-    m.regs.flags.set_nz_16(val);
-    m.regs.flags.clv();
-    bus.store_word(m, val)?;
-    Ok(())
-}
+    #[inline]
+    fn lda_b(&mut self) -> CpuResult<()> {
+        let r = self.ld8()?;
+        self.regs_mut().set_b(r);
+        Ok(())
+    }
 
-#[inline]
-fn sta_a<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    st8(bus, m, m.regs.a)
-}
+    #[inline]
+    fn ldx(&mut self) -> CpuResult<()> {
+        let r = self.ld16()?;
+        self.regs_mut().set_x(r);
+        Ok(())
+    }
 
-#[inline]
-fn sta_b<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    st8(bus, m, m.regs.b)
-}
+    #[inline]
+    fn st8(&mut self, val: u8) -> CpuResult<()> {
+        let regs = self.regs_mut();
+        regs.nz_from_u8(val);
+        regs.clv();
+        self.bus.store_byte(self.m, val)?;
+        Ok(())
+    }
+    #[inline]
+    fn st16(&mut self, val: u16) -> CpuResult<()> {
+        let regs = self.regs_mut();
+        regs.nz_from_u16(val);
+        regs.clv();
+        self.bus.store_word(self.m, val)?;
+        Ok(())
+    }
 
-#[inline]
-fn sts<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    st16(bus, m, m.regs.sp)
-}
-#[inline]
-fn stx<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    st16(bus, m, m.regs.x)
+    #[inline]
+    fn sta_a(&mut self) -> CpuResult<()> {
+        let a= self.m.regs.a();
+        self.st8(a)
+    }
+
+    #[inline]
+    fn sta_b(&mut self) -> CpuResult<()> {
+        let b= self.m.regs.b();
+        self.st8(b)
+    }
+
+    #[inline]
+    fn sts(&mut self) -> CpuResult<()> {
+        let sp = self.m.regs.sp();
+        self.st16(sp)
+    }
+    #[inline]
+    fn stx(&mut self) -> CpuResult<()> {
+        let x = self.m.regs.x();
+        self.st16(x)
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-#[inline]
-fn clr<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    m.regs.flags.set(Flags::N | Flags::C | Flags::V, false);
-    m.regs.flags.set(Flags::Z, true);
-    bus.store_byte(m, 0)?;
-    Ok(())
-}
-#[inline]
-fn do_bit<A: Bus, M: MemoryIO>(mut bus: A, m: &mut Machine<M>, val: u8) -> CpuResult<u8> {
-    let operand = bus.fetch_operand(m)?;
-    let new_val = val & operand;
-    m.regs.flags.set_nz(new_val);
-    m.regs.flags.clc();
-    Ok(new_val)
-}
+impl<'a, A, R, M> Ins<'a, A, R, M>
+where
+    A: Bus,
+    R: RegisterFileTrait,
+    M: MemoryIO,
+{
+    #[inline]
+    fn clr(&mut self) -> CpuResult<()> {
+        let regs = self.regs_mut();
+        regs.cln().clc().clv().sez();
+        self.bus.store_byte(self.m, 0)?;
+        Ok(())
+    }
+    #[inline]
+    fn do_bit(&mut self, val: u8) -> CpuResult<u8> {
+        let operand = self.fetch_operand()?;
+        let new_val = val & operand;
+        let regs = self.regs_mut();
+        regs.set_nz_from_u8(new_val).clc();
+        Ok(new_val)
+    }
 
-#[inline]
-fn bit_a<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    m.regs.a = do_bit(bus, m, m.regs.a)?;
-    Ok(())
-}
+    #[inline]
+    fn bit_a(&mut self) -> CpuResult<()> {
+        let r = RegEnum::A;
+        let result = self.do_bit(self.m.regs.get_reg_8(r))?;
+        self.m.regs.set_reg_8(r, result);
+        Ok(())
+    }
 
-#[inline]
-fn bit_b<A: Bus, M: MemoryIO>(bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    m.regs.b = do_bit(bus, m, m.regs.b)?;
-    Ok(())
-}
+    #[inline]
+    fn bit_b(&mut self) -> CpuResult<()> {
+        let r = RegEnum::B;
+        let result = self.do_bit(self.m.regs.get_reg_8(r))?;
+        self.m.regs.set_reg_8(r, result);
+        Ok(())
+    }
 
-#[inline]
-fn daa<A: Bus, M: MemoryIO>(_bus: A, _machine: &mut Machine<M>) -> CpuResult<()> {
-    panic!()
-}
+    #[inline]
+    fn daa(&mut self) -> CpuResult<()> {
+        panic!()
+    }
 
-#[inline]
-fn tst<A: Bus, M: MemoryIO>(mut bus: A, m: &mut Machine<M>) -> CpuResult<()> {
-    let val = bus.fetch_operand(m)?;
-    m.regs.flags.set_nz(val);
-    m.regs.flags.set(Flags::V | Flags::C, false);
-    Ok(())
+    #[inline]
+    fn tst(&mut self) -> CpuResult<()> {
+        let val = self.fetch_operand()?;
+        let regs = self.regs_mut();
+        regs.set_nz_from_u8(val).clv().clc();
+        Ok(())
+    }
 }

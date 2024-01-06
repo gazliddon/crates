@@ -4,10 +4,12 @@ mod opcodes;
 mod registers;
 mod machine;
 mod error;
+mod debug_regs;
 
 pub use addrmodes::*;
 pub use isa::*;
 pub use registers::*;
 pub use machine::*;
 pub use error::*;
+pub use debug_regs::*;
 

@@ -6,6 +6,7 @@ use serde::Deserialize;
 use serde::Serialize;
 
 use super::Machine;
+use super::RegisterFileTrait;
 
 #[derive(Debug, Copy, Clone, PartialEq, Hash, Eq, Deserialize, Serialize)]
 pub enum AddrModeEnum {
@@ -29,29 +30,29 @@ pub fn u8_sign_extend(byte: u8) -> u16 {
 }
 
 pub trait Bus {
-    fn fetch_rel_addr<M: MemoryIO>(&mut self, _m: &mut Machine<M>) -> MemResult<u16> {
+    fn fetch_rel_addr<M: MemoryIO, R: RegisterFileTrait>(&mut self, _m: &mut Machine<M,R>) -> MemResult<u16> {
         panic!()
     }
 
-    fn fetch_operand<M: MemoryIO>(&mut self, _m: &mut Machine<M>) -> MemResult<u8> {
+    fn fetch_operand<M: MemoryIO,R: RegisterFileTrait>(&mut self, _m: &mut Machine<M,R>) -> MemResult<u8> {
         panic!()
     }
 
-    fn fetch_operand_16<M: MemoryIO>(&mut self, _m: &mut Machine<M>) -> MemResult<u16> {
+    fn fetch_operand_16<M: MemoryIO,R: RegisterFileTrait>(&mut self, _m: &mut Machine<M,R>) -> MemResult<u16> {
         panic!()
     }
 
-    fn store_byte<M: MemoryIO>(
+    fn store_byte<M: MemoryIO,R: RegisterFileTrait>(
         &self,
-        _m: &mut Machine<M>,
+        _m: &mut Machine<M,R>,
         _val: u8,
     ) -> MemResult<()>{
         panic!()
     }
 
-    fn store_word<M: MemoryIO>(
+    fn store_word<M: MemoryIO,R: RegisterFileTrait>(
         &self,
-        _m: &mut Machine<M>,
+        _m: &mut Machine<M,R>,
         _val: u16,
     ) -> MemResult<()> {
         panic!()

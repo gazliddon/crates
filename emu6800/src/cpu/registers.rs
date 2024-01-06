@@ -4,8 +4,287 @@ use std::{fmt::Debug, hash::Hash, str::FromStr};
 use emucore::traits::*;
 
 ////////////////////////////////////////////////////////////////////////////////
+pub trait RegisterFileTrait {
+    fn set_reg_8(&mut self, r: RegEnum, val: u8) -> &mut Self;
+    fn set_reg_16(&mut self, r: RegEnum, val: u16) -> &mut Self;
+    fn get_reg_8(&self, r: RegEnum) -> u8;
+    fn get_reg_16(&self, r: RegEnum) -> u16;
 
-#[derive(Debug, Clone, Hash, Ord, Eq, PartialEq, PartialOrd, Default)]
+    fn set_a(&mut self, val: u8) -> &mut Self{
+        self.set_reg_8(RegEnum::A, val)
+    }
+    fn set_b(&mut self, val: u8) -> &mut Self{
+        self.set_reg_8(RegEnum::B, val)
+    }
+
+    fn set_x(&mut self, val: u16) -> &mut Self{
+        self.set_reg_16(RegEnum::X, val)
+    }
+
+    fn set_sp(&mut self, val: u16) -> &mut Self{
+        self.set_reg_16(RegEnum::SP, val)
+    }
+
+    fn set_sr(&mut self, val: u8) -> &mut Self{
+        self.set_reg_8(RegEnum::SR, val)
+    }
+
+    fn a(&mut self) -> u8 {
+        self.get_reg_8(RegEnum::A)
+    }
+
+    fn b(&mut self) -> u8 {
+        self.get_reg_8(RegEnum::B)
+    }
+
+    fn x(&mut self) -> u16 {
+        self.get_reg_16(RegEnum::X)
+    }
+
+    fn sr(&mut self) -> u8 {
+        self.get_reg_8(RegEnum::SR)
+    }
+
+    fn pc(&mut self) -> u16 {
+        self.get_reg_16(RegEnum::PC)
+    }
+
+    fn sp(&mut self) -> u16 {
+        self.get_reg_16(RegEnum::SP)
+    }
+
+    fn set_pc(&mut self, pc: u16) -> &mut Self{
+        self.set_reg_16(RegEnum::PC, pc)
+    }
+
+    fn set_n(&mut self, val: bool)-> &mut Self;
+    fn set_v(&mut self, val: bool)-> &mut Self;
+    fn set_c(&mut self, val: bool)-> &mut Self;
+    fn set_h(&mut self, val: bool)-> &mut Self;
+    fn set_i(&mut self, val: bool)-> &mut Self;
+    fn set_z(&mut self, val: bool)-> &mut Self;
+
+    fn n(&mut self) -> bool;
+    fn v(&mut self) -> bool;
+    fn c(&mut self) -> bool;
+    fn h(&mut self) -> bool;
+    fn i(&mut self) -> bool;
+    fn z(&mut self) -> bool;
+
+    fn hi(&mut self) -> bool {
+        panic!()
+    }
+
+    fn gt(&mut self) -> bool {
+        panic!()
+    }
+
+    fn le(&mut self) -> bool {
+        panic!()
+    }
+
+    fn ls(&mut self) -> bool {
+        panic!()
+    }
+
+    fn ge(&mut self) -> bool {
+        panic!()
+    }
+
+    fn nz_from_u8(&mut self, _val: u8) -> &mut Self {
+        panic!()
+    }
+    fn nz_from_u16(&mut self, _val: u16) -> &mut Self {
+        panic!()
+    }
+
+    fn cln(&mut self) -> &mut Self{
+        self.set_n(false);
+        self
+    }
+    fn sen(&mut self) -> &mut Self{
+        self.set_n(true);
+        self
+    }
+
+    fn clv(&mut self) -> &mut Self{
+        self.set_v(false);
+        self
+    }
+    fn sev(&mut self) -> &mut Self{
+        self.set_v(true);
+        self
+    }
+
+    fn clc(&mut self) -> &mut Self{
+        self.set_c(false);
+        self
+    }
+    fn sec(&mut self) -> &mut Self{
+        self.set_c(true);
+        self
+    }
+
+    fn set_nz_from_u8(&mut self, val: u8) -> &mut Self {
+        let n = val &0x80 == 0x80;
+        let z = val == 0x0000;
+        self.set_n(n).set_z(z)
+    }
+
+    fn set_nz_from_u16(&mut self, val: u16) -> &mut Self {
+        let n = val &0x8000 == 0x8000;
+        let z = val == 0x0000;
+        self.set_n(n).set_z(z)
+    }
+
+    fn clh(&mut self) -> &mut Self{
+        self.set_h(false);
+        self
+    }
+    fn seh(&mut self) -> &mut Self{
+        self.set_h(true);
+        self
+    }
+
+    fn cli(&mut self) -> &mut Self{
+        self.set_i(false);
+        self
+    }
+    fn sei(&mut self) -> &mut Self{
+        self.set_i(true);
+        self
+    }
+
+    fn clz(&mut self) -> &mut Self{
+        self.set_z(false);
+        self
+    }
+    fn sez(&mut self) -> &mut Self{
+        self.set_z(true);
+        self
+    }
+
+    fn lt(&mut self) -> bool {
+        panic!()
+    }
+}
+
+impl RegisterFileTrait for Regs {
+    #[inline]
+    fn set_reg_8(&mut self, r: RegEnum, val: u8) -> &mut Self{
+        use RegEnum::*;
+        match r {
+            A => self.a = val,
+            B => self.b = val,
+            SR => self.flags = Flags(val),
+            _ => panic!(),
+        }
+        self
+    }
+
+    #[inline]
+    fn set_reg_16(&mut self, r: RegEnum, val: u16) -> &mut Self{
+        use RegEnum::*;
+        match r {
+            X => self.x = val,
+            PC => self.pc = val,
+            SP => self.sp = val,
+            _ => panic!(),
+        }
+        self
+    }
+
+    #[inline]
+    fn get_reg_8(&self, r: RegEnum) -> u8 {
+        use RegEnum::*;
+        match r {
+            A => self.a,
+            B => self.b,
+            SR => self.flags.bits(),
+            _ => panic!(),
+        }
+    }
+
+    #[inline]
+    fn get_reg_16(&self, r: RegEnum) -> u16 {
+        use RegEnum::*;
+        match r {
+            X => self.x,
+            PC => self.pc,
+            SP => self.sp,
+            _ => panic!(),
+        }
+    }
+
+    #[inline]
+    fn set_n(&mut self, val: bool) -> &mut Self{
+        self.flags.set(Flags::N, val);
+        self
+    }
+
+    #[inline]
+    fn set_v(&mut self, val: bool) -> &mut Self{
+        self.flags.set(Flags::V, val);
+        self
+    }
+
+    #[inline]
+    fn set_c(&mut self, val: bool) -> &mut Self{
+        self.flags.set(Flags::C, val);
+        self
+    }
+
+    #[inline]
+    fn set_h(&mut self, val: bool) -> &mut Self{
+        self.flags.set(Flags::H, val);
+        self
+    }
+
+    #[inline]
+    fn set_i(&mut self, val: bool) -> &mut Self{
+        self.flags.set(Flags::I, val);
+        self
+
+    }
+
+    #[inline]
+    fn set_z(&mut self, val: bool) -> &mut Self{
+        self.flags.set(Flags::Z, val);
+        self
+    }
+
+    #[inline]
+    fn n(&mut self) -> bool {
+        self.flags.contains(Flags::N)
+    }
+
+    #[inline]
+    fn v(&mut self) -> bool {
+        self.flags.contains(Flags::V)
+    }
+
+    #[inline]
+    fn c(&mut self) -> bool {
+        self.flags.contains(Flags::C)
+    }
+
+    #[inline]
+    fn h(&mut self) -> bool {
+        self.flags.contains(Flags::H)
+    }
+
+    #[inline]
+    fn i(&mut self) -> bool {
+        self.flags.contains(Flags::I)
+    }
+
+    #[inline]
+    fn z(&mut self) -> bool {
+        self.flags.contains(Flags::Z)
+    }
+}
+
+#[derive(Copy,Debug, Clone, Hash, Ord, Eq, PartialEq, PartialOrd, Default)]
 pub enum RegEnum {
     #[default]
     A,
@@ -67,11 +346,23 @@ bitflags::bitflags! {
     }
 }
 
+impl Default for Flags {
+    fn default() -> Self {
+        Self(Default::default())
+    }
+}
+
 impl Flags {
+    #[inline]
+    pub fn i(&self) -> bool {
+        self.contains(Flags::I)
+    }
+
     #[inline]
     pub fn n(&self) -> bool {
         self.contains(Flags::N)
     }
+
     #[inline]
     pub fn z(&self) -> bool {
         self.contains(Flags::Z)
@@ -80,6 +371,7 @@ impl Flags {
     pub fn c(&self) -> bool {
         self.contains(Flags::C)
     }
+
     #[inline]
     pub fn v(&self) -> bool {
         self.contains(Flags::V)
@@ -136,55 +428,70 @@ impl Flags {
     }
 
     #[inline]
-    pub fn set_nz(&mut self, _val : u8) {
-        panic!()
+    pub fn set_i(&mut self, val: bool) {
+        self.set(Flags::I, val)
     }
+
     #[inline]
-    pub fn set_nz_16(&mut self, _val : u16) {
-        panic!()
+    pub fn nz_from_u8(&mut self, _val: u8) {
+        self.set_n(_val & 0x80 == 0x80);
+        self.set_z(_val == 0);
+    }
+
+    #[inline]
+    pub fn nz_from_u16(&mut self, _val: u16) {
+        self.set_n(_val & 0x8000 == 0x8000);
+        self.set_z(_val == 0);
     }
 
     #[inline]
     pub fn set_v(&mut self, _val: bool) {
-        panic!()
+        self.set(Flags::V, _val)
     }
 
     #[inline]
-    pub fn set_z(&mut self, _val : bool) {
-        panic!()
+    pub fn set_z(&mut self, _val: bool) {
+        self.set(Flags::Z, _val)
     }
 
     #[inline]
-    pub fn set_c(&mut self, _val :bool) {
-        panic!()
+    pub fn set_c(&mut self, _val: bool) {
+        self.set(Flags::C, _val)
     }
 
     #[inline]
-    pub fn set_n(&mut self, _val : bool) {
-        panic!()
+    pub fn set_n(&mut self, _val: bool) {
+        self.set(Flags::N, _val)
     }
-
 
     #[inline]
     pub fn clv(&mut self) {
-        self.remove(Flags::V)
+        self.set_v(false);
     }
 
     #[inline]
     pub fn sev(&mut self) {
-        self.set(Flags::V, true)
+        self.set_v(true);
     }
 
     #[inline]
     pub fn clc(&mut self) {
-        self.remove(Flags::C)
+        self.set_c(false);
     }
 
     #[inline]
     pub fn sec(&mut self) {
-        self.set(Flags::C, true)
+        self.set_c(true);
+    }
+    #[inline]
+    pub fn cli(&mut self) {
+        self.set_i(false);
     }
 
+    #[inline]
+    pub fn sei(&mut self) {
+        self.set_i(true);
+    }
 }
 
 pub struct Regs {
