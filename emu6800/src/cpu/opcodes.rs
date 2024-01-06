@@ -207,6 +207,8 @@ where
         self.bus.store_byte(self.m, val)?;
         Ok(())
     }
+
+
     #[inline]
     fn psh(&mut self) -> CpuResult<()> {
         let val = self.fetch_operand()?;
@@ -215,17 +217,21 @@ where
     }
 
     #[inline]
+    /// Increment stack ptr
     fn ins(&mut self) -> CpuResult<()> {
-        // m.regs.sp = self.m.regs.sp.wrapping_add(1);
-
-        // Ok(())
-        todo!()
+        let r = self.regs_mut();
+        let sp = r.sp();
+        r.set_sp(sp.wrapping_add(1));
+        Ok(())
     }
+
     #[inline]
+    /// Decrement stack ptr
     fn des(&mut self) -> CpuResult<()> {
-        // m.regs.sp = m.regs.sp.wrapping_sub(1);
-        // Ok(())
-        todo!()
+        let r = self.regs_mut();
+        let sp = r.sp();
+        r.set_sp(sp.wrapping_sub(1));
+        Ok(())
     }
 }
 
@@ -877,29 +883,27 @@ where
         self.bus.store_byte(self.m, 0)?;
         Ok(())
     }
+
     #[inline]
-    fn do_bit(&mut self, val: u8) -> CpuResult<u8> {
+    fn do_bit(&mut self, val: u8) -> CpuResult<()> {
         let operand = self.fetch_operand()?;
         let new_val = val & operand;
         let regs = self.regs_mut();
         regs.set_nz_from_u8(new_val).clc();
-        Ok(new_val)
+        self.bus.store_byte(self.m, new_val)?;
+        Ok(())
     }
 
     #[inline]
     fn bit_a(&mut self) -> CpuResult<()> {
-        let r = RegEnum::A;
-        let result = self.do_bit(self.m.regs.get_reg_8(r))?;
-        self.m.regs.set_reg_8(r, result);
-        Ok(())
+        let val = self.regs_mut().a();
+        self.do_bit(val)
     }
 
     #[inline]
     fn bit_b(&mut self) -> CpuResult<()> {
-        let r = RegEnum::B;
-        let result = self.do_bit(self.m.regs.get_reg_8(r))?;
-        self.m.regs.set_reg_8(r, result);
-        Ok(())
+        let val = self.regs_mut().a();
+        self.do_bit(val)
     }
 
     #[inline]

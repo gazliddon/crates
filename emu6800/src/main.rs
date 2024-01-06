@@ -33,7 +33,6 @@ impl Isa {
     }
 
     pub fn add(&mut self, _ins: emu6800::cpu::InstructionData) {
-
         // let text = ins.text.to_case(Case::Title);
         // use convert_case::{Case, Casing};
         // let m = Mnemonic::from_str(&text).unwrap();

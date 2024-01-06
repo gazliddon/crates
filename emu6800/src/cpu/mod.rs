@@ -1,3 +1,4 @@
+#![allow(unused_imports)]
 mod addrmodes;
 mod isa;
 mod opcodes;

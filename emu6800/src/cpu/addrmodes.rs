@@ -69,13 +69,68 @@ struct Inherent;
 struct Relative;
 struct Illegal;
 
-impl Bus for AccA {}
-impl Bus for AccB {}
-impl Bus for Immediate {}
+impl Bus for AccA {
+    fn fetch_operand<M: MemoryIO,R: RegisterFileTrait>(&mut self, _m: &mut Machine<M,R>) -> MemResult<u8> {
+        Ok(_m.regs.a())
+    }
+
+    fn store_byte<M: MemoryIO,R: RegisterFileTrait>(
+            &self,
+            m: &mut Machine<M,R>,
+            val: u8,
+        ) -> MemResult<()> {
+        m.regs.set_a(val);
+        Ok(())
+    }
+}
+
+impl Bus for AccB {
+    fn fetch_operand<M: MemoryIO,R: RegisterFileTrait>(&mut self, _m: &mut Machine<M,R>) -> MemResult<u8> {
+        Ok(_m.regs.b())
+    }
+
+    fn store_byte<M: MemoryIO,R: RegisterFileTrait>(
+            &self,
+            m: &mut Machine<M,R>,
+            val: u8,
+        ) -> MemResult<()> {
+        m.regs.set_b(val);
+        Ok(())
+    }
+}
+
+impl Bus for Immediate {
+    fn fetch_operand<M: MemoryIO,R: RegisterFileTrait>(&mut self, _m: &mut Machine<M,R>) -> MemResult<u8> {
+        let pc = _m.regs.pc();
+        let ret = _m.mem_mut().load_byte(pc as usize)?;
+        _m.regs.set_pc(pc.wrapping_add(1));
+        Ok(ret)
+    }
+}
 
 impl Bus for Direct {}
-impl Bus for Extended {}
+impl Bus for Extended {
+    fn fetch_operand<M: MemoryIO,R: RegisterFileTrait>(&mut self, _m: &mut Machine<M,R>) -> MemResult<u8> {
+        let pc = _m.regs.pc();
+        let ret = _m.mem_mut().load_word(pc as usize)?;
+        _m.regs.set_pc(pc.wrapping_add(2));
+        _m.mem_mut().load_byte(ret as usize)
+    }
+
+    fn store_byte<M: MemoryIO,R: RegisterFileTrait>(
+            &self,
+            _m: &mut Machine<M,R>,
+            _val: u8,
+        ) -> MemResult<()> {
+        let pc = _m.regs.pc();
+        let ret = _m.mem_mut().load_word(pc as usize)?;
+        _m.regs.set_pc(pc.wrapping_add(2));
+        _m.mem_mut().store_byte(ret as usize, _val)
+    }
+}
+
 impl Bus for Indexed {}
 impl Bus for Inherent {}
 impl Bus for Relative {}
 impl Bus for Illegal {}
+

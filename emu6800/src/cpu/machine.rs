@@ -1,7 +1,7 @@
-use super::{ RegisterFileTrait};
+use super::RegisterFileTrait;
 use emucore::mem::{MemResult, MemoryIO};
 
-pub struct Machine<M, R >
+pub struct Machine<M, R>
 where
     M: MemoryIO,
     R: RegisterFileTrait,
@@ -18,7 +18,7 @@ fn u8_sign_extend(byte: u8) -> u16 {
     }
 }
 
-impl<M,R> Machine<M,R>
+impl<M, R> Machine<M, R>
 where
     M: MemoryIO,
     R: RegisterFileTrait,
@@ -62,13 +62,17 @@ where
         &self.mem
     }
 
+    // [[SP]] ← [val(LO)],
+    // [[SP] - 1] ← [val(HI)],
+    // [SP] ← [SP] - 2,
     pub fn push_word(&mut self, val: u16) -> MemResult<()> {
-        let sp = self.regs.sp();
+        let sp = self.regs.sp().wrapping_sub(1);
         self.mem.store_word(sp as usize, val)?;
-        self.regs.set_sp(sp.wrapping_sub(2));
+        self.regs.set_sp(sp.wrapping_sub(1));
         Ok(())
     }
 
+    // [[SP]] ← [A], [SP] ← [SP] - 1
     pub fn push_byte(&mut self, val: u8) -> MemResult<()> {
         let sp = self.regs.sp();
         self.mem.store_byte(sp as usize, val)?;
@@ -76,13 +80,17 @@ where
         Ok(())
     }
 
+    // [res(HI)] ← [[SP] + 1],
+    // [res(LO)] ← [[SP] + 2],
+    // [SP] ← [SP] + 2
     pub fn pop_word(&mut self) -> MemResult<u16> {
-        let sp = self.regs.sp().wrapping_add(2);
+        let sp = self.regs.sp().wrapping_add(1);
         let word = self.mem.load_word(sp as usize)?;
-        self.regs.set_sp(sp);
+        self.regs.set_sp(sp.wrapping_add(1));
         Ok(word)
     }
 
+    //[SP] ← [SP] + 1, [A] ← [[SP]]
     pub fn pop_byte(&mut self) -> MemResult<u8> {
         let sp = self.regs.sp().wrapping_add(1);
         let byte = self.mem.load_byte(sp as usize)?;
