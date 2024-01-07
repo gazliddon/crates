@@ -66,37 +66,30 @@ pub trait RegisterFileTrait {
     fn set_i(&mut self, val: bool) -> &mut Self;
     fn set_z(&mut self, val: bool) -> &mut Self;
 
-    fn n(&mut self) -> bool;
-    fn v(&mut self) -> bool;
-    fn c(&mut self) -> bool;
-    fn h(&mut self) -> bool;
-    fn i(&mut self) -> bool;
-    fn z(&mut self) -> bool;
+    fn n(&self) -> bool;
+    fn v(&self) -> bool;
+    fn c(&self) -> bool;
+    fn h(&self) -> bool;
+    fn i(&self) -> bool;
+    fn z(&self) -> bool;
 
-    fn hi(&mut self) -> bool {
+    fn hi(&self) -> bool {
         panic!()
     }
 
-    fn gt(&mut self) -> bool {
+    fn gt(&self) -> bool {
         panic!()
     }
 
-    fn le(&mut self) -> bool {
+    fn le(&self) -> bool {
         panic!()
     }
 
-    fn ls(&mut self) -> bool {
+    fn ls(&self) -> bool {
         panic!()
     }
 
-    fn ge(&mut self) -> bool {
-        panic!()
-    }
-
-    fn nz_from_u8(&mut self, _val: u8) -> &mut Self {
-        panic!()
-    }
-    fn nz_from_u16(&mut self, _val: u16) -> &mut Self {
+    fn ge(&self) -> bool {
         panic!()
     }
 
@@ -255,32 +248,32 @@ impl RegisterFileTrait for Regs {
     }
 
     #[inline]
-    fn n(&mut self) -> bool {
+    fn n(&self) -> bool {
         self.flags.contains(StatusReg::N)
     }
 
     #[inline]
-    fn v(&mut self) -> bool {
+    fn v(&self) -> bool {
         self.flags.contains(StatusReg::V)
     }
 
     #[inline]
-    fn c(&mut self) -> bool {
+    fn c(&self) -> bool {
         self.flags.contains(StatusReg::C)
     }
 
     #[inline]
-    fn h(&mut self) -> bool {
+    fn h(&self) -> bool {
         self.flags.contains(StatusReg::H)
     }
 
     #[inline]
-    fn i(&mut self) -> bool {
+    fn i(&self) -> bool {
         self.flags.contains(StatusReg::I)
     }
 
     #[inline]
-    fn z(&mut self) -> bool {
+    fn z(&self) -> bool {
         self.flags.contains(StatusReg::Z)
     }
 }
@@ -337,7 +330,7 @@ impl RegEnumTrait for RegEnum {
 }
 
 bitflags::bitflags! {
-    #[derive(Clone, Copy, Debug,Deserialize, Serialize, )]
+    #[derive(Clone, Copy, Debug,Deserialize, Serialize, PartialEq)]
     #[serde(transparent)]
     pub struct StatusReg : u8
         {
@@ -498,6 +491,7 @@ impl StatusReg {
     }
 }
 
+#[derive(Clone,Debug,PartialEq)]
 pub struct Regs {
     pub a: u8,
     pub b: u8,

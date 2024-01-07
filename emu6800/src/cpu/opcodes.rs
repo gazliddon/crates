@@ -340,7 +340,7 @@ where
     fn eor_val(&mut self, val: u8) -> CpuResult<u8> {
         let operand = self.m.fetch_byte()?;
         let res = val ^ operand;
-        self.m.regs.nz_from_u8(res);
+        self.m.regs.set_nz_from_u8(res);
         self.m.regs.clv();
         Ok(res)
     }
@@ -348,14 +348,14 @@ where
     fn and_val(&mut self, val: u8) -> CpuResult<u8> {
         let operand = self.m.fetch_byte()?;
         let res = val & operand;
-        self.m.regs.nz_from_u8(res);
+        self.m.regs.set_nz_from_u8(res);
         self.m.regs.clv();
         Ok(res)
     }
 
     fn or_val(&mut self, val: u8) -> CpuResult<u8> {
         let res = val | self.m.fetch_byte()?;
-        self.m.regs.nz_from_u8(res);
+        self.m.regs.set_nz_from_u8(res);
         self.m.regs.clv();
         Ok(res)
     }
@@ -365,7 +365,7 @@ where
         let val = !self.bus.fetch_operand(self.m)?;
         self.bus.store_byte(self.m, val)?;
         let regs = self.regs_mut();
-        regs.sec().clv().nz_from_u8(val);
+        regs.sec().clv().set_nz_from_u8(val);
         Ok(())
     }
 
@@ -624,7 +624,7 @@ where
         let val = self.fetch_operand()?;
         let new_val = val.wrapping_add(1);
         self.bus.store_byte(self.m, new_val)?;
-        self.m.regs.nz_from_u8(new_val);
+        self.m.regs.set_nz_from_u8(new_val);
         self.m.regs.set_v(new_val < val);
         Ok(())
     }
@@ -634,7 +634,7 @@ where
         let val = self.fetch_operand()?;
         let new_val = val.wrapping_sub(1);
         self.bus.store_byte(self.m, new_val)?;
-        self.m.regs.nz_from_u8(new_val);
+        self.m.regs.set_nz_from_u8(new_val);
         self.m.regs.set_v(new_val > val);
         Ok(())
     }
@@ -653,7 +653,7 @@ where
         self.bus.store_byte(self.m, new_val)?;
         let v = val & 0x80 != new_val & 0x80;
         self.m.regs.set_c(c);
-        self.m.regs.nz_from_u8(new_val);
+        self.m.regs.set_nz_from_u8(new_val);
         self.m.regs.set_v(v);
         Ok(())
     }
@@ -740,7 +740,7 @@ where
     fn tba(&mut self) -> CpuResult<()> {
         let regs = &mut self.m.regs;
         let b = regs.b();
-        regs.set_a(b).nz_from_u8(b).clv();
+        regs.set_a(b).set_nz_from_u8(b).clv();
         Ok(())
     }
 
@@ -749,7 +749,7 @@ where
         let regs = &mut self.m.regs;
         let b = regs.b();
         regs.set_b(b);
-        regs.nz_from_u8(b).clv();
+        regs.set_nz_from_u8(b).clv();
         Ok(())
     }
 
@@ -787,7 +787,7 @@ where
     fn ld8(&mut self) -> CpuResult<u8> {
         let val = self.fetch_operand()?;
         let regs = self.regs_mut();
-        regs.nz_from_u8(val);
+        regs.set_nz_from_u8(val);
         regs.clc();
         Ok(val)
     }
@@ -795,7 +795,7 @@ where
     fn ld16(&mut self) -> CpuResult<u16> {
         let val = self.fetch_operand_16()?;
         let regs = self.regs_mut();
-        regs.nz_from_u16(val);
+        regs.set_nz_from_u16(val);
         regs.clc();
         Ok(val)
     }
@@ -831,7 +831,7 @@ where
     #[inline]
     fn st8(&mut self, val: u8) -> CpuResult<()> {
         let regs = self.regs_mut();
-        regs.nz_from_u8(val);
+        regs.set_nz_from_u8(val);
         regs.clv();
         self.bus.store_byte(self.m, val)?;
         Ok(())
@@ -839,7 +839,7 @@ where
     #[inline]
     fn st16(&mut self, val: u16) -> CpuResult<()> {
         let regs = self.regs_mut();
-        regs.nz_from_u16(val);
+        regs.set_nz_from_u16(val);
         regs.clv();
         self.bus.store_word(self.m, val)?;
         Ok(())
