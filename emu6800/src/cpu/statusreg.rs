@@ -126,7 +126,6 @@ pub trait StatusRegTrait {
     }
 }
 
-
 impl StatusRegTrait for StatusReg {
     fn set_n(&mut self, val: bool) -> &mut Self {
         self.set(StatusReg::N, val);
