@@ -1,6 +1,6 @@
 use emucore::mem::MemoryIO;
 
-use super::{Bus, RegEnum, RegisterFileTrait};
+use super::{Bus, RegEnum, RegisterFileTrait, StatusRegTrait};
 use super::{CpuResult, Machine};
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -49,7 +49,7 @@ where
 impl<'a, A, R, M> Ins<'a, A, R, M>
 where
     A: Bus,
-    R: RegisterFileTrait,
+    R: RegisterFileTrait + StatusRegTrait,
     M: MemoryIO,
 {
     #[inline]
@@ -154,7 +154,7 @@ where
 impl<'a, A, R, M> Ins<'a, A, R, M>
 where
     A: Bus,
-    R: RegisterFileTrait,
+    R: RegisterFileTrait + StatusRegTrait,
     M: MemoryIO,
 {
     #[inline]
@@ -198,7 +198,7 @@ where
 impl<'a, A, R, M> Ins<'a, A, R, M>
 where
     A: Bus,
-    R: RegisterFileTrait,
+    R: RegisterFileTrait + StatusRegTrait,
     M: MemoryIO,
 {
     #[inline]
@@ -207,7 +207,6 @@ where
         self.bus.store_byte(self.m, val)?;
         Ok(())
     }
-
 
     #[inline]
     fn psh(&mut self) -> CpuResult<()> {
@@ -240,7 +239,7 @@ where
 impl<'a, A, R, M> Ins<'a, A, R, M>
 where
     A: Bus,
-    R: RegisterFileTrait,
+    R: RegisterFileTrait + StatusRegTrait,
     M: MemoryIO,
 {
     #[inline]
@@ -256,7 +255,7 @@ where
 impl<'a, A, R, M> Ins<'a, A, R, M>
 where
     A: Bus,
-    R: RegisterFileTrait,
+    R: RegisterFileTrait + StatusRegTrait,
     M: MemoryIO,
 {
     #[inline]
@@ -333,7 +332,7 @@ where
 impl<'a, A, R, M> Ins<'a, A, R, M>
 where
     A: Bus,
-    R: RegisterFileTrait,
+    R: RegisterFileTrait + StatusRegTrait,
     M: MemoryIO,
 {
     #[inline]
@@ -423,7 +422,7 @@ where
 impl<'a, A, R, M> Ins<'a, A, R, M>
 where
     A: Bus,
-    R: RegisterFileTrait,
+    R: RegisterFileTrait + StatusRegTrait,
     M: MemoryIO,
 {
     fn do_sub(&mut self, c: bool, val: u8, op: u8) -> CpuResult<u8> {
@@ -486,7 +485,7 @@ where
     fn add_b(&mut self) -> CpuResult<()> {
         let op = self.fetch_operand()?;
         let b = self.m.regs.b();
-        let b =self.do_add(false, b, op)?;
+        let b = self.do_add(false, b, op)?;
         self.regs_mut().set_b(b);
         Ok(())
     }
@@ -598,7 +597,7 @@ where
 impl<'a, A, R, M> Ins<'a, A, R, M>
 where
     A: Bus,
-    R: RegisterFileTrait,
+    R: RegisterFileTrait + StatusRegTrait,
     M: MemoryIO,
 {
     #[inline]
@@ -646,7 +645,7 @@ where
 impl<'a, A, R, M> Ins<'a, A, R, M>
 where
     A: Bus,
-    R: RegisterFileTrait,
+    R: RegisterFileTrait + StatusRegTrait,
     M: MemoryIO,
 {
     fn finish_a_shift(&mut self, c: bool, val: u8, new_val: u8) -> CpuResult<()> {
@@ -719,7 +718,7 @@ where
 impl<'a, A, R, M> Ins<'a, A, R, M>
 where
     A: Bus,
-    R: RegisterFileTrait,
+    R: RegisterFileTrait + StatusRegTrait,
     M: MemoryIO,
 {
     #[inline]
@@ -774,7 +773,7 @@ where
 impl<'a, A, R, M> Ins<'a, A, R, M>
 where
     A: Bus,
-    R: RegisterFileTrait,
+    R: RegisterFileTrait + StatusRegTrait,
     M: MemoryIO,
 {
     fn regs_mut(&mut self) -> &mut R {
@@ -847,13 +846,13 @@ where
 
     #[inline]
     fn sta_a(&mut self) -> CpuResult<()> {
-        let a= self.m.regs.a();
+        let a = self.m.regs.a();
         self.st8(a)
     }
 
     #[inline]
     fn sta_b(&mut self) -> CpuResult<()> {
-        let b= self.m.regs.b();
+        let b = self.m.regs.b();
         self.st8(b)
     }
 
@@ -873,7 +872,7 @@ where
 impl<'a, A, R, M> Ins<'a, A, R, M>
 where
     A: Bus,
-    R: RegisterFileTrait,
+    R: RegisterFileTrait + StatusRegTrait,
     M: MemoryIO,
 {
     #[inline]

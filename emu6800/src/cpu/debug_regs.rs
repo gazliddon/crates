@@ -1,4 +1,5 @@
 use super::registers::*;
+use super::statusreg::*;
 use std::collections::HashSet;
 
 struct DebugRegisterFile<'a> {
@@ -88,6 +89,9 @@ impl<'a> RegisterFileTrait for DebugRegisterFile<'a> {
         self.regs.get_reg_16(r)
     }
 
+}
+
+impl<'a> StatusRegTrait for DebugRegisterFile<'a> {
     #[inline]
     fn set_n(&mut self, val: bool) -> &mut Self {
         self.set_altered(StatusReg::N);
