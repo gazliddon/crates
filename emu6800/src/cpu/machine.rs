@@ -23,6 +23,11 @@ where
     M: MemoryIO,
     R: RegisterFileTrait,
 {
+    pub fn new(mem: M, regs: R) -> Self {
+        Self {
+            mem, regs
+        }
+    }
     pub fn mem_mut(&mut self) -> &mut M {
         &mut self.mem
     }

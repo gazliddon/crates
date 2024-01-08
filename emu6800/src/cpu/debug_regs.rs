@@ -2,7 +2,7 @@ use super::registers::*;
 use super::statusreg::*;
 use std::collections::HashSet;
 
-struct DebugRegisterFile<'a> {
+pub struct DebugRegisterFile<'a> {
     flags_that_will_alter: StatusReg,
     regs_read: HashSet<RegEnum>,
     regs_write: HashSet<RegEnum>,
@@ -10,15 +10,23 @@ struct DebugRegisterFile<'a> {
     flags_altered: StatusReg,
 }
 
-enum DebugRegsErrorKind {
+pub enum DebugRegsErrorKind {
     FlagsNotAltered(StatusReg),
     RegisterRead(RegEnum),
     RegisterWrite(RegEnum),
 }
 
-struct DebugRegsError {
+pub struct DebugRegsError {
     kind: DebugRegsErrorKind,
     regs: Regs,
+}
+
+impl<'a> std::fmt::Display for DebugRegisterFile<'a> {
+    // TODO file this in 
+    fn fmt(&self, _f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(_f,"{}", self.regs)?;
+        write!(_f,"Fill this in dummy")
+    }
 }
 
 impl<'a> DebugRegisterFile<'a> {
@@ -43,8 +51,14 @@ impl<'a> DebugRegisterFile<'a> {
     }
 
     #[inline]
-    fn set_altered(&mut self, f: StatusReg) {
-        self.flags_altered.set(f, true)
+    fn set_write_status_reg(&mut self, f: StatusReg) -> &mut Self{
+        self.flags_altered.set(f, true);
+        self
+    }
+
+    #[inline]
+    fn set_write_register(&mut self, _r: RegEnum) -> &mut Self{
+        self
     }
 
     #[inline]
@@ -94,44 +108,38 @@ impl<'a> RegisterFileTrait for DebugRegisterFile<'a> {
 impl<'a> StatusRegTrait for DebugRegisterFile<'a> {
     #[inline]
     fn set_n(&mut self, val: bool) -> &mut Self {
-        self.set_altered(StatusReg::N);
         self.regs.set_n(val);
-        self
+        self.set_write_status_reg(StatusReg::N)
     }
 
     #[inline]
     fn set_v(&mut self, val: bool) -> &mut Self {
-        self.set_altered(StatusReg::V);
         self.regs.set_v(val);
-        self
+        self.set_write_status_reg(StatusReg::V)
     }
 
     #[inline]
     fn set_c(&mut self, val: bool) -> &mut Self {
-        self.set_altered(StatusReg::C);
         self.regs.set_c(val);
-        self
+        self.set_write_status_reg(StatusReg::C)
     }
 
     #[inline]
     fn set_h(&mut self, val: bool) -> &mut Self {
-        self.set_altered(StatusReg::H);
         self.regs.set_h(val);
-        self
+        self.set_write_status_reg(StatusReg::H)
     }
 
     #[inline]
     fn set_i(&mut self, val: bool) -> &mut Self {
-        self.set_altered(StatusReg::I);
         self.regs.set_i(val);
-        self
+        self.set_write_status_reg(StatusReg::I)
     }
 
     #[inline]
     fn set_z(&mut self, val: bool) -> &mut Self {
-        self.set_altered(StatusReg::Z);
         self.regs.set_z(val);
-        self
+        self.set_write_status_reg(StatusReg::Z)
     }
 
     #[inline]

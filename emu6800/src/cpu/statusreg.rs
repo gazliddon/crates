@@ -21,6 +21,7 @@ impl Default for StatusReg {
 }
 
 pub trait StatusRegTrait {
+
     fn set_n(&mut self, val: bool) -> &mut Self;
     fn set_v(&mut self, val: bool) -> &mut Self;
     fn set_c(&mut self, val: bool) -> &mut Self;

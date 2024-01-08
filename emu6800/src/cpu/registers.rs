@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use super::{StatusReg, StatusRegTrait};
 
 ////////////////////////////////////////////////////////////////////////////////
-pub trait RegisterFileTrait {
+pub trait RegisterFileTrait : std::fmt::Display{
     fn set_reg_8(&mut self, r: RegEnum, val: u8) -> &mut Self;
     fn set_reg_16(&mut self, r: RegEnum, val: u16) -> &mut Self;
     fn get_reg_8(&self, r: RegEnum) -> u8;
@@ -62,146 +62,41 @@ pub trait RegisterFileTrait {
         self.set_reg_16(RegEnum::PC, pc)
     }
 
-    // fn set_n(&mut self, val: bool) -> &mut Self;
-    // fn set_v(&mut self, val: bool) -> &mut Self;
-    // fn set_c(&mut self, val: bool) -> &mut Self;
-    // fn set_h(&mut self, val: bool) -> &mut Self;
-    // fn set_i(&mut self, val: bool) -> &mut Self;
-    // fn set_z(&mut self, val: bool) -> &mut Self;
-
-    // fn n(&self) -> bool;
-    // fn v(&self) -> bool;
-    // fn c(&self) -> bool;
-    // fn h(&self) -> bool;
-    // fn i(&self) -> bool;
-    // fn z(&self) -> bool;
-
-    // fn hi(&self) -> bool {
-    //     panic!()
-    // }
-
-    // fn gt(&self) -> bool {
-    //     panic!()
-    // }
-
-    // fn le(&self) -> bool {
-    //     panic!()
-    // }
-
-    // fn ls(&self) -> bool {
-    //     panic!()
-    // }
-
-    // fn ge(&self) -> bool {
-    //     panic!()
-    // }
-
-    // fn cln(&mut self) -> &mut Self {
-    //     self.set_n(false);
-    //     self
-    // }
-    // fn sen(&mut self) -> &mut Self {
-    //     self.set_n(true);
-    //     self
-    // }
-
-    // fn clv(&mut self) -> &mut Self {
-    //     self.set_v(false);
-    //     self
-    // }
-    // fn sev(&mut self) -> &mut Self {
-    //     self.set_v(true);
-    //     self
-    // }
-
-    // fn clc(&mut self) -> &mut Self {
-    //     self.set_c(false);
-    //     self
-    // }
-    // fn sec(&mut self) -> &mut Self {
-    //     self.set_c(true);
-    //     self
-    // }
-
-    // fn set_nz_from_u8(&mut self, val: u8) -> &mut Self {
-    //     let n = val & 0x80 == 0x80;
-    //     let z = val == 0x0000;
-    //     self.set_n(n).set_z(z)
-    // }
-
-    // fn set_nz_from_u16(&mut self, val: u16) -> &mut Self {
-    //     let n = val & 0x8000 == 0x8000;
-    //     let z = val == 0x0000;
-    //     self.set_n(n).set_z(z)
-    // }
-
-    // fn clh(&mut self) -> &mut Self {
-    //     self.set_h(false);
-    //     self
-    // }
-    // fn seh(&mut self) -> &mut Self {
-    //     self.set_h(true);
-    //     self
-    // }
-
-    // fn cli(&mut self) -> &mut Self {
-    //     self.set_i(false);
-    //     self
-    // }
-    // fn sei(&mut self) -> &mut Self {
-    //     self.set_i(true);
-    //     self
-    // }
-
-    // fn clz(&mut self) -> &mut Self {
-    //     self.set_z(false);
-    //     self
-    // }
-    // fn sez(&mut self) -> &mut Self {
-    //     self.set_z(true);
-    //     self
-    // }
-
-    // fn lt(&mut self) -> bool {
-    //     panic!()
-    // }
+    fn inc_pc(&mut self) -> &mut Self {
+        let pc = self.pc().wrapping_add(1);
+        self.set_pc(pc)
+    }
 }
 
 impl StatusRegTrait for Regs {
     #[inline]
     fn set_n(&mut self, val: bool) -> &mut Self {
-        self.flags.set(StatusReg::N, val);
-        self
+        self.set_status_reg(StatusReg::N, val)
     }
 
     #[inline]
     fn set_v(&mut self, val: bool) -> &mut Self {
-        self.flags.set(StatusReg::V, val);
-        self
+        self.set_status_reg(StatusReg::V, val)
     }
 
     #[inline]
     fn set_c(&mut self, val: bool) -> &mut Self {
-        self.flags.set(StatusReg::C, val);
-        self
+        self.set_status_reg(StatusReg::C, val)
     }
 
     #[inline]
     fn set_h(&mut self, val: bool) -> &mut Self {
-        self.flags.set(StatusReg::H, val);
-        self
+        self.set_status_reg(StatusReg::H, val)
     }
 
     #[inline]
     fn set_i(&mut self, val: bool) -> &mut Self {
-        self.flags.set(StatusReg::I, val);
-        self
+        self.set_status_reg(StatusReg::I, val)
     }
 
     #[inline]
     fn set_z(&mut self, val: bool) -> &mut Self {
-        self.flags.set(StatusReg::Z, val);
-        self
+        self.set_status_reg(StatusReg::Z, val)
     }
 
     #[inline]
@@ -334,7 +229,7 @@ impl RegEnumTrait for RegEnum {
     }
 }
 
-#[derive(Clone,Debug,PartialEq)]
+#[derive(Clone,Debug,PartialEq, Default)]
 pub struct Regs {
     pub a: u8,
     pub b: u8,
@@ -342,6 +237,20 @@ pub struct Regs {
     pub pc: u16,
     pub sp: u16,
     pub flags: StatusReg,
+}
+
+impl std::fmt::Display for Regs {
+    // TODO file this in 
+    fn fmt(&self, _f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        todo!()
+    }
+}
+
+impl Regs {
+    fn set_status_reg(&mut self, f: StatusReg, val: bool) -> &mut Self {
+        self.flags.set(f, val);
+        self
+    }
 }
 
 impl RegistersTrait<RegEnum> for Regs {

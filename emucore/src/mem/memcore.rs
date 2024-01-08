@@ -42,6 +42,13 @@ pub trait CheckedMemoryIo {
 }
 
 pub trait MemoryIO {
+    fn store_bytes(&mut self, addr: usize,data: &[u8]) -> MemResult<()> {
+        for (i,b) in data.iter().enumerate() {
+            self.store_byte(addr + i, *b)?
+        }
+        Ok(())
+    }
+
     fn inspect_word(&self, _addr: usize) -> MemResult<u16>;
 
     // Min implementation

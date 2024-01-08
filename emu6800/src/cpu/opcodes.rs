@@ -15,7 +15,7 @@ fn bool_as_u8(m: bool) -> u8 {
     }
 }
 
-struct Ins<'a, A, R, M>
+pub struct Ins<'a, A, R, M>
 where
     A: Bus,
     R: RegisterFileTrait,
@@ -24,6 +24,7 @@ where
     bus: A,
     m: &'a mut Machine<M, R>,
 }
+
 ////////////////////////////////////////////////////////////////////////////////
 // Utils
 impl<'a, A, R, M> Ins<'a, A, R, M>
@@ -32,6 +33,10 @@ where
     R: RegisterFileTrait,
     M: MemoryIO,
 {
+    pub fn new(bus: A, m: &'a mut Machine<M, R>) -> Self {
+        Self { bus, m }
+    }
+
     #[inline]
     fn fetch_operand(&mut self) -> CpuResult<u8> {
         let r = self.bus.fetch_operand(self.m)?;
@@ -62,7 +67,7 @@ where
     }
 
     #[inline]
-    fn bra(&mut self) -> CpuResult<()> {
+    pub fn bra(&mut self) -> CpuResult<()> {
         self.branch_cond(true)
     }
 
@@ -807,14 +812,14 @@ where
     }
 
     #[inline]
-    fn lda_a(&mut self) -> CpuResult<()> {
+    pub fn ldaa(&mut self) -> CpuResult<()> {
         let a = self.ld8()?;
         self.regs_mut().set_a(a);
         Ok(())
     }
 
     #[inline]
-    fn lda_b(&mut self) -> CpuResult<()> {
+    fn ldab(&mut self) -> CpuResult<()> {
         let r = self.ld8()?;
         self.regs_mut().set_b(r);
         Ok(())

@@ -15,4 +15,5 @@ pub use machine::*;
 pub use error::*;
 pub use debug_regs::*;
 pub use statusreg::*;
+pub use opcodes::*;
 

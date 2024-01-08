@@ -59,15 +59,15 @@ pub trait Bus {
     }
 }
 
-struct AccA;
-struct AccB;
-struct Immediate;
-struct Direct;
-struct Extended;
-struct Indexed;
-struct Inherent;
-struct Relative;
-struct Illegal;
+pub struct AccA;
+pub struct AccB;
+pub struct Immediate;
+pub struct Direct;
+pub struct Extended;
+pub struct Indexed;
+pub struct Inherent;
+pub struct Relative;
+pub struct Illegal;
 
 impl Bus for AccA {
     fn fetch_operand<M: MemoryIO,R: RegisterFileTrait>(&mut self, _m: &mut Machine<M,R>) -> MemResult<u8> {
