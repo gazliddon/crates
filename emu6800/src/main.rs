@@ -39,6 +39,7 @@ fn main() {
     println!("regs: {:?}", machine.regs);
 
     let mut ins =  Ins::new(Immediate, &mut machine);
+
     ins.ldaa().unwrap();
 
     println!("regs: {:?}", machine.regs);

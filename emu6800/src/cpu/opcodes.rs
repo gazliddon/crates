@@ -374,7 +374,7 @@ where
     }
 
     #[inline]
-    fn eor_a(&mut self) -> CpuResult<()> {
+    fn eora(&mut self) -> CpuResult<()> {
         let a = self.m.regs.get_reg_8(RegEnum::A);
         let new_a = self.eor_val(a)?;
         self.m.regs.set_reg_8(RegEnum::A, new_a);
@@ -382,7 +382,7 @@ where
     }
 
     #[inline]
-    fn eor_b(&mut self) -> CpuResult<()> {
+    fn eorb(&mut self) -> CpuResult<()> {
         let b = self.m.regs.get_reg_8(RegEnum::B);
         let new_b = self.eor_val(b)?;
         self.m.regs.set_reg_8(RegEnum::B, new_b);
@@ -390,7 +390,7 @@ where
     }
 
     #[inline]
-    fn and_a(&mut self) -> CpuResult<()> {
+    fn anda(&mut self) -> CpuResult<()> {
         let a = self.m.regs.get_reg_8(RegEnum::A);
         let new_a = self.and_val(a)?;
         self.m.regs.set_reg_8(RegEnum::A, new_a);
@@ -398,7 +398,7 @@ where
     }
 
     #[inline]
-    fn and_b(&mut self) -> CpuResult<()> {
+    fn andb(&mut self) -> CpuResult<()> {
         let b = self.m.regs.get_reg_8(RegEnum::B);
         let new_b = self.and_val(b)?;
         self.m.regs.set_reg_8(RegEnum::B, new_b);
@@ -406,7 +406,7 @@ where
     }
 
     #[inline]
-    fn ora_a(&mut self) -> CpuResult<()> {
+    fn oraa(&mut self) -> CpuResult<()> {
         let a = self.m.regs.get_reg_8(RegEnum::A);
         let new_a = self.or_val(a)?;
         self.m.regs.set_reg_8(RegEnum::A, new_a);
@@ -414,7 +414,7 @@ where
     }
 
     #[inline]
-    fn ora_b(&mut self) -> CpuResult<()> {
+    fn orab(&mut self) -> CpuResult<()> {
         let b = self.m.regs.get_reg_8(RegEnum::B);
         let new_b = self.or_val(b)?;
         self.m.regs.set_reg_8(RegEnum::B, new_b);
@@ -471,7 +471,7 @@ where
     }
 
     #[inline]
-    fn cmp_a(&mut self) -> CpuResult<()> {
+    fn cmpa(&mut self) -> CpuResult<()> {
         let op = self.fetch_operand()?;
         let a = self.m.regs.a();
         let _ = self.do_sub(false, a, op)?;
@@ -479,7 +479,7 @@ where
     }
 
     #[inline]
-    fn cmp_b(&mut self) -> CpuResult<()> {
+    fn cmpb(&mut self) -> CpuResult<()> {
         let op = self.fetch_operand()?;
         let b = self.m.regs.b();
         let _ = self.do_sub(false, b, op)?;
@@ -487,7 +487,7 @@ where
     }
 
     #[inline]
-    fn add_b(&mut self) -> CpuResult<()> {
+    fn addb(&mut self) -> CpuResult<()> {
         let op = self.fetch_operand()?;
         let b = self.m.regs.b();
         let b = self.do_add(false, b, op)?;
@@ -496,7 +496,7 @@ where
     }
 
     #[inline]
-    fn adc_b(&mut self) -> CpuResult<()> {
+    fn adcb(&mut self) -> CpuResult<()> {
         let op = self.fetch_operand()?;
         let b = self.m.regs.b();
         let c = self.m.regs.c();
@@ -506,7 +506,7 @@ where
     }
 
     #[inline]
-    fn add_a(&mut self) -> CpuResult<()> {
+    fn adda(&mut self) -> CpuResult<()> {
         let op = self.bus.fetch_operand(self.m)?;
         let a = self.m.regs.a();
         let new_a = self.do_add(false, a, op)?;
@@ -514,7 +514,7 @@ where
         Ok(())
     }
     #[inline]
-    fn adc_a(&mut self) -> CpuResult<()> {
+    fn adca(&mut self) -> CpuResult<()> {
         let op = self.fetch_operand()?;
         let a = self.m.regs.a();
         let c = self.m.regs.c();
@@ -542,21 +542,27 @@ where
     }
 
     #[inline]
-    fn sub_a(&mut self) -> CpuResult<()> {
+    fn suba(&mut self) -> CpuResult<()> {
         self.sub_reg(false, RegEnum::A)
     }
 
     #[inline]
-    fn sub_b(&mut self) -> CpuResult<()> {
+    fn subb(&mut self) -> CpuResult<()> {
         self.sub_reg(false, RegEnum::B)
     }
 
     #[inline]
-    fn sbc_a(&mut self) -> CpuResult<()> {
+    fn sbca(&mut self) -> CpuResult<()> {
         let c = self.m.regs.c();
         self.sub_reg(c, RegEnum::A)
     }
+    #[inline]
+    fn sbcb(&mut self) -> CpuResult<()> {
+        let c = self.m.regs.c();
+        self.sub_reg(c, RegEnum::B)
+    }
 
+    #[inline]
     fn sub_reg(&mut self, c: bool, reg: RegEnum) -> CpuResult<()> {
         let op = self.fetch_operand()?;
         let r = self.m.regs.get_reg_8(reg);
@@ -565,10 +571,6 @@ where
         Ok(())
     }
 
-    fn sbc_b(&mut self) -> CpuResult<()> {
-        let c = self.m.regs.c();
-        self.sub_reg(c, RegEnum::B)
-    }
 
     #[inline]
     fn cpx(&mut self) -> CpuResult<()> {
