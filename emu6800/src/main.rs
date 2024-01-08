@@ -2,7 +2,7 @@
 #![allow(dead_code)]
 
 use cpu::{AddrModeEnum, Isa, Mnemonic, OpcodeData};
-use emu6800::cpu::{self, RegisterFile, Machine, Instruction, Ins, StatusRegTrait, RegisterFileTrait};
+use emu6800::cpu::{self, RegisterFile, Machine, Instruction, Ins, StatusRegTrait, RegisterFileTrait, IsaDatabase};
 use emucore::{mem::MemBlock, instructions::InstructionInfoTrait};
 use std::{
     collections::{HashMap, HashSet},
@@ -14,7 +14,15 @@ use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use serde_json::{Result, Value};
 
+fn make_dbase() {
+    let txt = include_str!("../resources/opcodes6800.json");
+    let isa: Isa = serde_json::from_str(txt).unwrap();
+    let _dbase = IsaDatabase::new(&isa);
+    println!("{:?}", isa);
+}
+
 fn main() {
+    make_dbase();
     use emucore::byteorder::BigEndian;
     use emucore::mem::MemoryIO;
     use emu6800::cpu::Immediate;
