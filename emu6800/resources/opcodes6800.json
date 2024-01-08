@@ -1,9 +1,9 @@
 {
   "instructions": {
     "Com": {
-        "flags_written": "N|V|C|Z",
+      "flags_written": "N|V|C|Z",
 
-        "addr_modes": {
+      "addr_modes": {
         "Extended": {
           "opcode": 115,
           "cycles": 6,
@@ -36,7 +36,7 @@
       }
     },
     "Add": {
-        "flags_written": "H|N|V|C|Z",
+      "flags_written": "H|N|V|C|Z",
       "addr_modes": {
         "Immediate": {
           "opcode": 203,
@@ -60,9 +60,35 @@
         }
       }
     },
-    "Lda": {
 
-        "flags_written" : "N|Z|V",
+    "LdaA": {
+      "flags_written": "N|Z|V",
+      "addr_modes": {
+        "Immediate": {
+          "opcode": 134,
+          "cycles": 2,
+          "size": 2
+        },
+        "Indexed": {
+          "opcode": 166,
+          "cycles": 5,
+          "size": 2
+        },
+        "Extended": {
+          "opcode": 182,
+          "cycles": 4,
+          "size": 3
+        },
+        "Direct": {
+          "opcode": 150,
+          "cycles": 3,
+          "size": 2
+        }
+      }
+    },
+
+    "LdaB": {
+      "flags_written": "N|Z|V",
       "addr_modes": {
         "Immediate": {
           "opcode": 198,
@@ -86,8 +112,9 @@
         }
       }
     },
+
     "Lsr": {
-        "flags_written" : "N|Z|V|C",
+      "flags_written": "N|Z|V|C",
       "addr_modes": {
         "AccA": {
           "opcode": 68,
@@ -112,8 +139,7 @@
       }
     },
     "Sec": {
-
-        "flags_written": "C",
+      "flags_written": "C",
       "addr_modes": {
         "Inherent": {
           "opcode": 13,
@@ -123,7 +149,7 @@
       }
     },
     "Rol": {
-        "flags_written" : "N|Z|V|C",
+      "flags_written": "N|Z|V|C",
       "addr_modes": {
         "AccB": {
           "opcode": 89,
@@ -148,7 +174,7 @@
       }
     },
     "Sts": {
-        "flags_written" : "N|Z|V",
+      "flags_written": "N|Z|V",
 
       "addr_modes": {
         "Extended": {
@@ -169,7 +195,7 @@
       }
     },
     "Tba": {
-        "flags_written" : "N|Z|V",
+      "flags_written": "N|Z|V",
       "addr_modes": {
         "Inherent": {
           "opcode": 23,
@@ -188,7 +214,7 @@
       }
     },
     "Ldx": {
-        "flags_written" : "N|Z|V",
+      "flags_written": "N|Z|V",
       "addr_modes": {
         "Indexed": {
           "opcode": 238,
@@ -213,8 +239,7 @@
       }
     },
     "Sba": {
-
-        "flags_written" : "N|Z|V|C",
+      "flags_written": "N|Z|V|C",
       "addr_modes": {
         "Inherent": {
           "opcode": 16,
@@ -233,7 +258,7 @@
       }
     },
     "Cba": {
-        "flags_written": "N|Z|V|C",
+      "flags_written": "N|Z|V|C",
       "addr_modes": {
         "Inherent": {
           "opcode": 17,
@@ -243,7 +268,7 @@
       }
     },
     "Cli": {
-        "flags_written": "I",
+      "flags_written": "I",
       "addr_modes": {
         "Inherent": {
           "opcode": 14,
@@ -262,7 +287,7 @@
       }
     },
     "Clc": {
-        "flags_written": "C",
+      "flags_written": "C",
       "addr_modes": {
         "Inherent": {
           "opcode": 12,
@@ -290,7 +315,7 @@
       }
     },
     "Eor": {
-        "flags_written" : "N|Z|V",
+      "flags_written": "N|Z|V",
       "addr_modes": {
         "Immediate": {
           "opcode": 200,
@@ -315,7 +340,7 @@
       }
     },
     "Swi": {
-        "flags_written" : "I",
+      "flags_written": "I",
       "addr_modes": {
         "Inherent": {
           "opcode": 63,
@@ -325,8 +350,7 @@
       }
     },
     "Cpx": {
-
-        "flags_written" : "N|Z|V",
+      "flags_written": "N|Z|V",
       "addr_modes": {
         "Extended": {
           "opcode": 188,
@@ -360,7 +384,7 @@
       }
     },
     "Stx": {
-        "flags_written" : "N|Z|V",
+      "flags_written": "N|Z|V",
       "addr_modes": {
         "Direct": {
           "opcode": 223,
@@ -380,8 +404,7 @@
       }
     },
     "Dec": {
-
-        "flags_written" : "N|Z|V",
+      "flags_written": "N|Z|V",
       "addr_modes": {
         "AccB": {
           "opcode": 90,
@@ -415,8 +438,7 @@
       }
     },
     "Daa": {
-
-        "flags_written" : "N|Z|C",
+      "flags_written": "N|Z|C",
       "addr_modes": {
         "Inherent": {
           "opcode": 25,
@@ -482,7 +504,7 @@
       }
     },
     "Sub": {
-        "flags_written" : "N|Z|V|C",
+      "flags_written": "N|Z|V|C",
       "addr_modes": {
         "Extended": {
           "opcode": 240,
@@ -507,7 +529,7 @@
       }
     },
     "And": {
-        "flags_written": "N|Z|V",
+      "flags_written": "N|Z|V",
       "addr_modes": {
         "Extended": {
           "opcode": 244,
@@ -541,7 +563,7 @@
       }
     },
     "Lds": {
-        "flags_written" : "N|Z|V",
+      "flags_written": "N|Z|V",
       "addr_modes": {
         "Extended": {
           "opcode": 190,
@@ -602,7 +624,7 @@
       }
     },
     "Tab": {
-        "flags_written" : "N|Z|V",
+      "flags_written": "N|Z|V",
       "addr_modes": {
         "Inherent": {
           "opcode": 22,
@@ -626,8 +648,7 @@
       }
     },
     "Neg": {
-
-        "flags_written" : "N|Z|V|C",
+      "flags_written": "N|Z|V|C",
       "addr_modes": {
         "AccA": {
           "opcode": 64,
@@ -707,7 +728,7 @@
       }
     },
     "Sev": {
-        "flags_written": "V",
+      "flags_written": "V",
       "addr_modes": {
         "Inherent": {
           "opcode": 11,
@@ -726,7 +747,7 @@
       }
     },
     "Tap": {
-        "flags_written": "H|I|N|Z|V|C",
+      "flags_written": "H|I|N|Z|V|C",
       "addr_modes": {
         "Inherent": {
           "opcode": 6,
@@ -736,7 +757,7 @@
       }
     },
     "Adc": {
-        "flags_written": "H|N|Z|V|C",
+      "flags_written": "H|N|Z|V|C",
 
       "addr_modes": {
         "Immediate": {
@@ -762,7 +783,7 @@
       }
     },
     "Sbc": {
-        "flags_written" : "N|Z|V|C",
+      "flags_written": "N|Z|V|C",
       "addr_modes": {
         "Indexed": {
           "opcode": 226,
@@ -786,9 +807,8 @@
         }
       }
     },
-    "Sta": {
-
-        "flags_written" : "N|Z|V",
+    "StaA": {
+      "flags_written": "N|Z|V",
       "addr_modes": {
         "Direct": {
           "opcode": 215,
@@ -808,7 +828,7 @@
       }
     },
     "Asl": {
-        "flags_written": "N|Z|V|C",
+      "flags_written": "N|Z|V|C",
       "addr_modes": {
         "AccA": {
           "opcode": 72,
@@ -860,7 +880,7 @@
       }
     },
     "Inx": {
-        "flags_written" : "Z",
+      "flags_written": "Z",
       "addr_modes": {
         "Inherent": {
           "opcode": 8,
@@ -870,7 +890,7 @@
       }
     },
     "Asr": {
-        "flags_written": "N|Z|V|C",
+      "flags_written": "N|Z|V|C",
       "addr_modes": {
         "AccA": {
           "opcode": 71,
@@ -895,8 +915,7 @@
       }
     },
     "Ror": {
-        
-        "flags_written" : "N|Z|V|C",
+      "flags_written": "N|Z|V|C",
       "addr_modes": {
         "AccB": {
           "opcode": 86,
@@ -920,9 +939,33 @@
         }
       }
     },
-    "Ora": {
-
-        "flags_written" : "N|Z|V",
+    "OraA": {
+      "flags_written": "N|Z|V",
+      "addr_modes": {
+        "Extended": {
+          "opcode": 186,
+          "cycles": 4,
+          "size": 3
+        },
+        "Direct": {
+          "opcode": 154,
+          "cycles": 3,
+          "size": 2
+        },
+        "Immediate": {
+          "opcode": 138,
+          "cycles": 2,
+          "size": 2
+        },
+        "Indexed": {
+          "opcode": 170,
+          "cycles": 5,
+          "size": 2
+        }
+      }
+    },
+    "OraB": {
+      "flags_written": "N|Z|V",
       "addr_modes": {
         "Extended": {
           "opcode": 250,
@@ -947,7 +990,7 @@
       }
     },
     "Inc": {
-        "flags_written" : "N|Z|V|C",
+      "flags_written": "N|Z|V|C",
 
       "addr_modes": {
         "AccA": {
@@ -973,8 +1016,7 @@
       }
     },
     "Cmp": {
-
-        "flags_written" : "N|Z|V|C",
+      "flags_written": "N|Z|V|C",
       "addr_modes": {
         "Extended": {
           "opcode": 241,
@@ -999,7 +1041,7 @@
       }
     },
     "Tst": {
-        "flags_written" : "N|Z|V|C",
+      "flags_written": "N|Z|V|C",
       "addr_modes": {
         "AccA": {
           "opcode": 77,
@@ -1024,7 +1066,7 @@
       }
     },
     "Clr": {
-        "flags_written" : "N|Z|V|C",
+      "flags_written": "N|Z|V|C",
 
       "addr_modes": {
         "Indexed": {
@@ -1063,7 +1105,7 @@
       }
     },
     "Clv": {
-     "flags_written": "V",
+      "flags_written": "V",
       "addr_modes": {
         "Inherent": {
           "opcode": 10,
@@ -1073,7 +1115,7 @@
       }
     },
     "Sei": {
-        "flags_written": "I",
+      "flags_written": "I",
       "addr_modes": {
         "Inherent": {
           "opcode": 15,
@@ -1091,8 +1133,8 @@
         }
       }
     },
-    "Wai" : {
-        "flags_written" : "I",
+    "Wai": {
+      "flags_written": "I",
       "addr_modes": {
         "Inherent": {
           "opcode": 62,
@@ -1100,10 +1142,9 @@
           "size": 1
         }
       }
-
     },
     "Dex": {
-        "flags_written" : "Z",
+      "flags_written": "Z",
       "addr_modes": {
         "Inherent": {
           "opcode": 9,
