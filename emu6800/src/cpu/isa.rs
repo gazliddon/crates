@@ -99,7 +99,6 @@ pub enum Mnemonic {
 pub struct Instruction {
     #[serde(default)]
     flags_read: StatusReg,
-    #[serde(default)]
     flags_written: StatusReg,
     addr_modes: HashMap<AddrModeEnum, OpcodeData>,
 }

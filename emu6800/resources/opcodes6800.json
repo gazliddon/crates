@@ -506,6 +506,7 @@
       }
     },
     "BitA": {
+      "flags_written": "N|Z|V",
       "addr_modes": {
         "Immediate": {
           "opcode": 133,
@@ -530,6 +531,7 @@
       }
     },
     "BitB": {
+      "flags_written": "N|Z|V",
       "addr_modes": {
         "Immediate": {
           "opcode": 197,
@@ -689,6 +691,7 @@
       }
     },
     "Bpl": {
+      "flags_written": "",
       "addr_modes": {
         "Relative": {
           "opcode": 42,
@@ -1051,6 +1054,7 @@
       }
     },
     "Aba": {
+      "flags_written": "H|N|V|C|Z",
       "addr_modes": {
         "AccA": {
           "opcode": 27,
