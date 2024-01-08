@@ -314,7 +314,8 @@
         }
       }
     },
-    "Eor": {
+    "EorA": {},
+    "EorB": {
       "flags_written": "N|Z|V",
       "addr_modes": {
         "Immediate": {
@@ -447,7 +448,8 @@
         }
       }
     },
-    "Bit": {
+    "BitA": {},
+    "BitB": {
       "addr_modes": {
         "Immediate": {
           "opcode": 197,
@@ -503,7 +505,8 @@
         }
       }
     },
-    "Sub": {
+    "SubA": {},
+    "SubB": {
       "flags_written": "N|Z|V|C",
       "addr_modes": {
         "Extended": {
@@ -782,7 +785,8 @@
         }
       }
     },
-    "Sbc": {
+    "SbcA": {},
+    "SbcB": {
       "flags_written": "N|Z|V|C",
       "addr_modes": {
         "Indexed": {
@@ -1015,7 +1019,8 @@
         }
       }
     },
-    "Cmp": {
+    "CmpA": {},
+    "CmpB": {
       "flags_written": "N|Z|V|C",
       "addr_modes": {
         "Extended": {
