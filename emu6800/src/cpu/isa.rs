@@ -134,7 +134,7 @@ pub struct InstructionInfo<'a> {
 
 impl<'a> InstructionInfo<'a> {
     pub fn get_mnemonic_text(&self) -> String {
-        format!("{:?}", self.get_mnemonic())
+        format!("{:?}", self.get_mnemonic()).to_lowercase()
     }
     pub fn get_mnemonic(&self) -> Mnemonic {
         self.mnemonic

@@ -13,6 +13,7 @@ pub enum AddrModeEnum {
     AccA,
     AccB,
     Immediate,
+    Immediate16,
     Direct,
     Extended,
     Indexed,
