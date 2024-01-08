@@ -4,7 +4,7 @@ use std::collections::{HashMap, HashSet};
 use strum::EnumString;
 
 #[derive(
-    Clone, Copy, Deserialize, Serialize, Debug, EnumString, Hash, PartialEq, PartialOrd, Eq,
+    Clone, Copy, Deserialize, Serialize, Debug, EnumString, Hash, PartialEq, PartialOrd, Eq, Default
 )]
 
 pub enum Mnemonic {
@@ -91,6 +91,9 @@ pub enum Mnemonic {
     Tsx,
     Txs,
     Wai,
+
+    #[default]
+    Illegal,
 }
 
 #[derive(Default, Serialize, Deserialize, Debug, Clone)]
@@ -120,10 +123,22 @@ pub struct Isa {
     instructions: HashMap<Mnemonic, Instruction>,
 }
 
-struct InstructionInfo<'a> {
-    mnemonic: Mnemonic,
-    addr_mode: AddrModeEnum,
-    instruction: &'a OpcodeData,
+
+#[derive( Debug, Clone)]
+pub struct InstructionInfo<'a> {
+    pub mnemonic: Mnemonic,
+    pub addr_mode: AddrModeEnum,
+    pub opcode_data: &'a OpcodeData,
+    pub instruction: &'a Instruction,
+}
+
+impl<'a> InstructionInfo<'a> {
+    pub fn get_mnemonic_text(&self) -> String {
+        format!("{:?}", self.get_mnemonic())
+    }
+    pub fn get_mnemonic(&self) -> Mnemonic {
+        self.mnemonic
+    }
 }
 
 pub struct IsaDatabase {
@@ -152,13 +167,16 @@ impl IsaDatabase {
         self.m_to_addr_modes.get(&_m).unwrap()
     }
 
-    fn get_instruction_info_from_opcode(&self, _op_code: usize) -> Option<InstructionInfo> {
+    pub fn get_instruction_info_from_opcode(&self, _op_code: usize) -> Option<InstructionInfo> {
         self.op_code_to_data
             .get(&_op_code)
-            .map(|(mnemonic, addr_mode, instruction)| InstructionInfo {
+            .map(|(mnemonic, addr_mode, data)| {
+                let instruction = self.m_to_addr_modes.get(mnemonic).unwrap();
+                InstructionInfo {
                 mnemonic: *mnemonic,
                 addr_mode: *addr_mode,
+                opcode_data: data,
                 instruction,
-            })
+            } })
     }
 }
