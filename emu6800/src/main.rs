@@ -45,7 +45,7 @@ fn main() {
 
     let isa = make_dbase();
 
-    let (pc, txt) = diss(machine.mem(), 0, &isa);
+    let (pc, txt) = diss(machine.mem(), 0, &isa).unwrap();
     println!("txt: {txt}");
     println!("next pc: {pc}");
 }
