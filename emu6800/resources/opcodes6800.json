@@ -27,6 +27,7 @@
       }
     },
     "Bsr": {
+      "flags_written": "",
       "addr_modes": {
         "Relative": {
           "opcode": 141,
@@ -36,6 +37,7 @@
       }
     },
     "AddA": {
+      "flags_written": "H|N|V|C|Z",
       "addr_modes": {
         "Immediate": {
           "opcode": 139,
@@ -229,6 +231,7 @@
       }
     },
     "Bcs": {
+      "flags_written": "",
       "addr_modes": {
         "Relative": {
           "opcode": 37,
@@ -273,6 +276,7 @@
       }
     },
     "Bvc": {
+      "flags_written": "",
       "addr_modes": {
         "Relative": {
           "opcode": 40,
@@ -302,6 +306,7 @@
       }
     },
     "Bne": {
+      "flags_written": "",
       "addr_modes": {
         "Relative": {
           "opcode": 38,
@@ -321,6 +326,7 @@
       }
     },
     "Ins": {
+      "flags_written": "",
       "addr_modes": {
         "Inherent": {
           "opcode": 49,
@@ -330,6 +336,7 @@
       }
     },
     "Nop": {
+      "flags_written": "",
       "addr_modes": {
         "Inherent": {
           "opcode": 1,
@@ -424,6 +431,7 @@
       }
     },
     "Rti": {
+      "flags_written": "N|Z|V|C|H|I",
       "addr_modes": {
         "Inherent": {
           "opcode": 59,
@@ -478,6 +486,7 @@
       }
     },
     "Beq": {
+      "flags_written": "",
       "addr_modes": {
         "Relative": {
           "opcode": 39,
@@ -545,6 +554,7 @@
       }
     },
     "Bls": {
+      "flags_written": "",
       "addr_modes": {
         "Relative": {
           "opcode": 35,
@@ -554,6 +564,7 @@
       }
     },
     "Des": {
+      "flags_written": "",
       "addr_modes": {
         "Inherent": {
           "opcode": 52,
@@ -563,6 +574,7 @@
       }
     },
     "Pul": {
+      "flags_written": "",
       "addr_modes": {
         "AccB": {
           "opcode": 51,
@@ -711,6 +723,7 @@
       }
     },
     "Bge": {
+      "flags_written": "",
       "addr_modes": {
         "Relative": {
           "opcode": 44,
@@ -720,6 +733,7 @@
       }
     },
     "Bgt": {
+      "flags_written": "",
       "addr_modes": {
         "Relative": {
           "opcode": 46,
@@ -729,6 +743,7 @@
       }
     },
     "Txs": {
+      "flags_written": "",
       "addr_modes": {
         "Inherent": {
           "opcode": 53,
@@ -738,6 +753,7 @@
       }
     },
     "Blt": {
+      "flags_written": "",
       "addr_modes": {
         "Relative": {
           "opcode": 45,
@@ -757,6 +773,7 @@
       }
     },
     "Jmp": {
+      "flags_written": "",
       "addr_modes": {
         "Indexed": {
           "opcode": 110,
@@ -796,6 +813,7 @@
       }
     },
     "Tpa": {
+      "flags_written": "",
       "addr_modes": {
         "Inherent": {
           "opcode": 7,
@@ -805,6 +823,7 @@
       }
     },
     "Rts": {
+      "flags_written": "",
       "addr_modes": {
         "Inherent": {
           "opcode": 57,
@@ -814,6 +833,7 @@
       }
     },
     "Bhi": {
+      "flags_written": "",
       "addr_modes": {
         "Relative": {
           "opcode": 34,
@@ -823,6 +843,7 @@
       }
     },
     "Jsr": {
+      "flags_written": "",
       "addr_modes": {
         "Extended": {
           "opcode": 189,
@@ -837,6 +858,7 @@
       }
     },
     "Psh": {
+      "flags_written": "",
       "addr_modes": {
         "AccB": {
           "opcode": 55,
@@ -861,6 +883,7 @@
       }
     },
     "Tsx": {
+      "flags_written": "",
       "addr_modes": {
         "Inherent": {
           "opcode": 48,
@@ -1037,6 +1060,7 @@
       }
     },
     "Ble": {
+      "flags_written": "",
       "addr_modes": {
         "Relative": {
           "opcode": 47,
@@ -1046,6 +1070,7 @@
       }
     },
     "Bcc": {
+      "flags_written": "",
       "addr_modes": {
         "Relative": {
           "opcode": 36,
@@ -1287,6 +1312,7 @@
       }
     },
     "Bmi": {
+      "flags_written": "",
       "addr_modes": {
         "Relative": {
           "opcode": 43,
@@ -1296,6 +1322,7 @@
       }
     },
     "Bra": {
+      "flags_written": "",
       "addr_modes": {
         "Relative": {
           "opcode": 32,
@@ -1325,6 +1352,7 @@
       }
     },
     "Bvs": {
+      "flags_written": "",
       "addr_modes": {
         "Relative": {
           "opcode": 41,
