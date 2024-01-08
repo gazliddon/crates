@@ -2,7 +2,7 @@
 #![allow(dead_code)]
 
 use cpu::{AddrModeEnum, Isa, Mnemonic, OpcodeData};
-use emu6800::cpu::{self, Regs, Machine, Instruction, Ins, StatusRegTrait, RegisterFileTrait};
+use emu6800::cpu::{self, RegisterFile, Machine, Instruction, Ins, StatusRegTrait, RegisterFileTrait};
 use emucore::{mem::MemBlock, instructions::InstructionInfoTrait};
 use std::{
     collections::{HashMap, HashSet},
@@ -24,7 +24,7 @@ fn main() {
     let ldaa_imm = &[0x86,0x80];
     mem.store_bytes(0,ldaa_imm).unwrap();
 
-    let mut regs = Regs::default();
+    let mut regs = RegisterFile::default();
     regs.sec();
     regs.inc_pc();
     let mut machine = Machine::new(mem, regs);

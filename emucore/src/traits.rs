@@ -13,7 +13,7 @@ pub trait RegEnumTrait:
     }
 }
 
-pub trait RegistersTrait<R>
+pub trait RegisterFileTrait<R>
 where
     R: RegEnumTrait,
 {

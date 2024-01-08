@@ -6,7 +6,7 @@ pub struct DebugRegisterFile<'a> {
     flags_that_will_alter: StatusReg,
     regs_read: HashSet<RegEnum>,
     regs_write: HashSet<RegEnum>,
-    regs: &'a mut Regs,
+    regs: &'a mut RegisterFile,
     flags_altered: StatusReg,
 }
 
@@ -18,7 +18,7 @@ pub enum DebugRegsErrorKind {
 
 pub struct DebugRegsError {
     kind: DebugRegsErrorKind,
-    regs: Regs,
+    regs: RegisterFile,
 }
 
 impl<'a> std::fmt::Display for DebugRegisterFile<'a> {
@@ -30,7 +30,7 @@ impl<'a> std::fmt::Display for DebugRegisterFile<'a> {
 }
 
 impl<'a> DebugRegisterFile<'a> {
-    pub fn new(regs: &'a mut Regs, altered_flags: StatusReg) -> Self {
+    pub fn new(regs: &'a mut RegisterFile, altered_flags: StatusReg) -> Self {
         Self {
             regs,
             regs_read: Default::default(),

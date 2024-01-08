@@ -1,14 +1,10 @@
 /// Registers, Flags and regiter store
 use std::{fmt::Debug, hash::Hash, str::FromStr};
-
-use bitflags::Flags;
-use emucore::traits::*;
 use serde::{Deserialize, Serialize};
-
 use super::{StatusReg, StatusRegTrait};
 
 ////////////////////////////////////////////////////////////////////////////////
-pub trait RegisterFileTrait : std::fmt::Display{
+pub trait RegisterFileTrait : std::fmt::Display {
     fn set_reg_8(&mut self, r: RegEnum, val: u8) -> &mut Self;
     fn set_reg_16(&mut self, r: RegEnum, val: u16) -> &mut Self;
     fn get_reg_8(&self, r: RegEnum) -> u8;
@@ -68,7 +64,7 @@ pub trait RegisterFileTrait : std::fmt::Display{
     }
 }
 
-impl StatusRegTrait for Regs {
+impl StatusRegTrait for RegisterFile {
     #[inline]
     fn set_n(&mut self, val: bool) -> &mut Self {
         self.set_status_reg(StatusReg::N, val)
@@ -130,7 +126,7 @@ impl StatusRegTrait for Regs {
     }
 }
 
-impl RegisterFileTrait for Regs {
+impl RegisterFileTrait for RegisterFile {
     #[inline]
     fn set_reg_8(&mut self, r: RegEnum, val: u8) -> &mut Self {
         use RegEnum::*;
@@ -216,21 +212,8 @@ impl std::fmt::Display for RegEnum {
     }
 }
 
-impl RegEnumTrait for RegEnum {
-    fn get_size_bytes(&self) -> usize {
-        match self {
-            RegEnum::A => 1,
-            RegEnum::B => 1,
-            RegEnum::X => 2,
-            RegEnum::PC => 2,
-            RegEnum::SP => 2,
-            RegEnum::SR => 1,
-        }
-    }
-}
-
 #[derive(Clone,Debug,PartialEq, Default)]
-pub struct Regs {
+pub struct RegisterFile {
     pub a: u8,
     pub b: u8,
     pub x: u16,
@@ -239,45 +222,17 @@ pub struct Regs {
     pub flags: StatusReg,
 }
 
-impl std::fmt::Display for Regs {
+impl std::fmt::Display for RegisterFile {
     // TODO file this in 
     fn fmt(&self, _f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         todo!()
     }
 }
 
-impl Regs {
+impl RegisterFile {
     fn set_status_reg(&mut self, f: StatusReg, val: bool) -> &mut Self {
         self.flags.set(f, val);
         self
     }
 }
 
-impl RegistersTrait<RegEnum> for Regs {
-    fn get(&self, r: &RegEnum) -> u64 {
-        use RegEnum::*;
-        match r {
-            A => self.a as u64,
-            B => self.b as u64,
-            X => self.x as u64,
-            PC => self.pc as u64,
-            SP => self.sp as u64,
-            SR => u64::from(self.flags.bits()),
-        }
-    }
-
-    fn set(&mut self, r: &RegEnum, v: u64) {
-        use RegEnum::*;
-        let v8 = (v & 0xff) as u8;
-        let v16 = (v & 0xffff) as u16;
-
-        match r {
-            A => self.a = v8,
-            B => self.b = v8,
-            X => self.x = v16,
-            PC => self.pc = v16,
-            SP => self.sp = v16,
-            SR => self.flags = StatusReg::from_bits(v8).unwrap(),
-        }
-    }
-}
