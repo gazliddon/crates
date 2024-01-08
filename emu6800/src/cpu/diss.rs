@@ -11,7 +11,8 @@ pub fn diss<M: MemoryIO>(mem: &M, addr: usize, isa: &IsaDatabase) -> MemResult<(
     let mn = ins.get_mnemonic_text();
     let operand = diss_operand(mem, addr + 1, &ins)?;
     let diss = format!("{mn} {operand}");
-    Ok( (addr + ins.opcode_data.size, diss) )
+    let next = ( (addr & 0xfff) as u16 ).wrapping_add(ins.opcode_data.size as u16);
+    Ok( (next as usize, diss) )
 }
 
 /// Returns operand + next ins PC
