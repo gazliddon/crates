@@ -37,7 +37,6 @@ fn main() {
     let regs = RegisterFile::default();
     let mut machine = Machine::new(mem, regs);
 
-
     let data = [
         0x86, 0x3e, 0xb7, 0xe4, 0x1d, 0x86, 0x6d, 0xb7, 0xe4, 0x1e, 0x86, 0x79, 0xb7, 0xe4, 0x1f,
         0x86, 0x00, 0xb7, 0xe4, 0x20, 0x86, 0x5e, 0xb7, 0xe4, 0x21, 0x86, 0x6d, 0xb7, 0xe4, 0x22,
@@ -48,12 +47,16 @@ fn main() {
 
     let mut pc = 0;
 
-    for _i in 0..15 {
-        let d = diss(machine.mem(), pc, &DBASE).unwrap();
-        let mem_txt = &d.mem_string;
-        let txt = &d.text;
+    loop {
+        let d = diss(machine.mem(), pc, &DBASE);
 
-        println!("{pc:04x} {mem_txt:10} {txt}");
-        pc = d.next_pc;
+        if let Ok(d) = d {
+            let cycles = d.ins.opcode_data.cycles;
+
+            println!("{pc:04x} {:19} [ {cycles} ]    {}", d.mem_string, d.text);
+            pc = d.next_pc;
+        } else {
+            break;
+        }
     }
 }

@@ -1,6 +1,7 @@
 use std::usize;
 
-use emucore::mem::{MemResult, MemoryIO};
+use emucore::mem::{MemResult, MemoryIO, MemErrorTypes};
+use itertools::MergeJoinBy;
 
 use super::{InstructionInfo, IsaDatabase};
 
@@ -13,17 +14,29 @@ pub struct Disassmbly<'a> {
     pub next_pc: usize,
 }
 
+use thiserror::Error;
+
+#[derive(Error,Debug)]
+pub enum DisError {
+    #[error(transparent)]
+    Mem(#[from] MemErrorTypes),
+    #[error("Illegal instruction {0}")]
+    IllegalInstruction(u8),
+}
+
+pub type DisResult<T> = Result<T,DisError>;
+
 pub fn diss<'a, M: MemoryIO>(
     mem: &M,
     pc: usize,
     isa: &'a IsaDatabase,
-) -> MemResult<Disassmbly<'a>> {
+) -> DisResult<Disassmbly<'a>> {
     let addr_u16 = (pc & 0xffff) as u16;
 
     let op_code = mem.inspect_byte(pc)?;
     let ins = isa
         .get_instruction_info_from_opcode(op_code as usize)
-        .unwrap();
+        .ok_or(DisError::IllegalInstruction(op_code))?;
 
     let mn = ins.get_mnemonic_text();
     let operand = diss_operand(mem, addr_u16.wrapping_add(1), &ins)?;
@@ -48,7 +61,7 @@ pub fn diss<'a, M: MemoryIO>(
 }
 
 /// Returns operand + next ins PC
-pub fn diss_operand<M: MemoryIO>(mem: &M, addr: u16, ins: &InstructionInfo) -> MemResult<String> {
+pub fn diss_operand<M: MemoryIO>(mem: &M, addr: u16, ins: &InstructionInfo) -> DisResult<String> {
     let addr_usize = addr as usize;
 
     use super::AddrModeEnum::*;
