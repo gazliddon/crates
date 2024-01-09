@@ -1,5 +1,3 @@
-use std::u8;
-
 use emucore::mem::MemResult;
 use emucore::mem::MemoryIO;
 use serde::Deserialize;
@@ -8,19 +6,7 @@ use serde::Serialize;
 use super::Machine;
 use super::RegisterFileTrait;
 
-#[derive(Debug, Copy, Clone, PartialEq, Hash, Eq, Deserialize, Serialize)]
-pub enum AddrModeEnum {
-    AccA,
-    AccB,
-    Immediate,
-    Immediate16,
-    Direct,
-    Extended,
-    Indexed,
-    Inherent,
-    Relative,
-    Illegal,
-}
+use crate::cpu_core::AddrModeEnum;
 
 pub fn u8_sign_extend(byte: u8) -> u16 {
     if (byte & 0x80) == 0x80 {

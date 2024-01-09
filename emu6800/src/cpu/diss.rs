@@ -3,7 +3,7 @@ use std::usize;
 use emucore::mem::{MemResult, MemoryIO, MemErrorTypes};
 use itertools::MergeJoinBy;
 
-use super::{InstructionInfo, IsaDatabase};
+use crate::cpu_core::{InstructionInfo, IsaDatabase};
 
 pub struct Disassmbly<'a> {
     pub text: String,
@@ -64,7 +64,7 @@ pub fn diss<'a, M: MemoryIO>(
 pub fn diss_operand<M: MemoryIO>(mem: &M, addr: u16, ins: &InstructionInfo) -> DisResult<String> {
     let addr_usize = addr as usize;
 
-    use super::AddrModeEnum::*;
+    use crate::cpu_core::AddrModeEnum::*;
     let text = match ins.addr_mode {
         AccA => "A".to_owned(),
         AccB => "B".to_owned(),

@@ -1,6 +1,7 @@
 use super::registers::*;
 use super::statusreg::*;
 use std::collections::HashSet;
+use crate::cpu_core::StatusReg;
 
 pub struct DebugRegisterFile<'a> {
     flags_that_will_alter: StatusReg,

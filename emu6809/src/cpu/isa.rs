@@ -1,1 +1,1 @@
-include!(concat!(env!("OUT_DIR"), "/isa_macros.rs"));
+include!(concat!(env!("OUT_DIR"), "/isa_macros_6809.rs"));

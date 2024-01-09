@@ -1,24 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-bitflags::bitflags! {
-    #[derive(Clone, Copy, Debug,Deserialize, Serialize, PartialEq)]
-    #[serde(transparent)]
-    pub struct StatusReg : u8
-        {
-            const H  = 1 << 5;
-            const I  = 1 << 4;
-            const N  = 1 << 3;
-            const Z  = 1 << 2;
-            const V  = 1 << 1;
-            const C = 1 << 0;
-        }
-}
-
-impl Default for StatusReg {
-    fn default() -> Self {
-        Self(Default::default())
-    }
-}
+use crate::cpu_core::StatusReg;
 
 pub trait StatusRegTrait {
 

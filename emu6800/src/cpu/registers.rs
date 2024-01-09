@@ -1,7 +1,8 @@
 /// Registers, Flags and regiter store
 use std::{fmt::Debug, hash::Hash, str::FromStr};
 use serde::{Deserialize, Serialize};
-use super::{StatusReg, StatusRegTrait};
+use crate::cpu_core::StatusReg;
+use super::StatusRegTrait;
 
 ////////////////////////////////////////////////////////////////////////////////
 pub trait RegisterFileTrait : std::fmt::Display {
