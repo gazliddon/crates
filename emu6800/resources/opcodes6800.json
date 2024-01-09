@@ -1012,17 +1012,17 @@
       "flags_written": "N|Z|V",
       "addr_modes": {
         "Direct": {
-          "opcode": 215,
+          "opcode": 151,
           "cycles": 4,
           "size": 2
         },
         "Indexed": {
-          "opcode": 231,
+          "opcode": 167,
           "cycles": 6,
           "size": 2
         },
         "Extended": {
-          "opcode": 247,
+          "opcode": 183,
           "cycles": 5,
           "size": 3
         }
