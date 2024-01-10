@@ -1,6 +1,7 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
 
+use emu6800::cpu::step;
 use emu6800::cpu_core::{AddrModeEnum, Mnemonic, Isa, IsaDatabase};
 
 use emu6800::cpu::{
@@ -11,6 +12,7 @@ use emu6800::cpu::{
 use emucore::{
     instructions::InstructionInfoTrait,
     mem::{MemBlock, MemoryIO},
+    byteorder::*,
 };
 use std::{
     collections::{HashMap, HashSet},
@@ -29,8 +31,46 @@ lazy_static::lazy_static! {
     };
 }
 
+
+fn make_machine() -> Machine<MemBlock<BigEndian>, RegisterFile> {
+    let regs = RegisterFile::default();
+    let mem: MemBlock<BigEndian> = MemBlock::new("test", false, &(0..65536));
+    let machine = Machine::new(mem, regs);
+    machine
+}
+
+fn try_step() { 
+    let mut m  = make_machine();
+    let data = [
+        0x86, 0x3e, 0xb7, 0xe4, 0x1d, 0x86, 0x6d, 0xb7, 0xe4, 0x1e, 0x86, 0x79, 0xb7, 0xe4, 0x1f,
+        0x86, 0x00, 0xb7, 0xe4, 0x20, 0x86, 0x5e, 0xb7, 0xe4, 0x21, 0x86, 0x6d, 0xb7, 0xe4, 0x22,
+        0xce, 0xf0, 0xa2, 0xff, 0xe4, 0x19, 0x7e, 0xf0, 0xbb,
+    ];
+
+    m.mem_mut().store_bytes(0, &data).unwrap();
+    m.regs.set_pc(0);
+    m.regs.sev().sei().sec();
+    println!("{}\n", m.regs);
+
+    loop {
+        let pc = m.regs.pc();
+
+        step(&mut m).unwrap();
+        println!("{}", m.regs);
+        let d = diss(m.mem(), pc as usize, &DBASE);
+        if let Ok(d) = d {
+            let cycles = d.ins.opcode_data.cycles;
+            println!("{pc:04x} [ {cycles} ]  {}",  d.text);
+        } else {
+            break;
+        }
+        println!("");
+    }
+}
+
+
 fn main() {
-    print_it();
+    try_step();
     // use std::io::Write;
 
 

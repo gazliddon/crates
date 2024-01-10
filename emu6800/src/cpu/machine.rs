@@ -34,11 +34,12 @@ where
 
     #[inline]
     pub fn inc_pc(&mut self) {
-        panic!()
+        self.regs.inc_pc();
     }
     #[inline]
     pub fn inc_inc_pc(&mut self) {
-        panic!()
+        self.regs.inc_pc();
+        self.regs.inc_pc();
     }
 
     #[inline]
@@ -56,12 +57,12 @@ where
         Ok(byte)
     }
 
-    pub fn fetch_word(&mut self) -> MemResult<u16> {
-        let pc = self.regs.pc();
-        let b = self.mem.load_word(pc as usize)?;
-        self.inc_inc_pc();
-        Ok(b)
-    }
+    // pub fn fetch_word(&mut self) -> MemResult<u16> {
+    //     let pc = self.regs.pc();
+    //     let b = self.mem.load_word(pc as usize)?;
+    //     self.inc_inc_pc();
+    //     Ok(b)
+    // }
 
     pub fn mem(&self) -> &M {
         &self.mem

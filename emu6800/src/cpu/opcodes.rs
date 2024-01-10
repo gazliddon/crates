@@ -47,7 +47,7 @@ where
                 bus: $addr{},
                 m, 
             };
-            ins.$action()
+            ins.$action()?;
         }};
     }
 
@@ -315,7 +315,7 @@ where
 
     #[inline]
     fn jmp(&mut self) -> CpuResult<()> {
-        let addr = self.m.fetch_word()?;
+        let addr = self.bus.fetch_operand_16(&mut self.m)?;
         self.m.regs.set_pc(addr);
         Ok(())
     }
@@ -457,7 +457,7 @@ where
     }
 }
 
-trait UnsignedVal {
+pub trait UnsignedVal {
     fn is_neg(&self) -> bool;
     fn bit(&self, v: u8) -> bool;
 }
@@ -469,7 +469,7 @@ impl UnsignedVal for u8 {
 
     fn bit(&self, v: u8) -> bool {
         if v < 8 {
-            self & (1 << v) == 0
+            self & (1 << v) != 0
         } else {
             false
         }
@@ -840,7 +840,7 @@ where
         &self.m.regs
     }
 
-    fn ld8(&mut self) -> CpuResult<u8> {
+    fn fetch_operand_8_fl(&mut self) -> CpuResult<u8> {
         let val = self.fetch_operand()?;
         let regs = self.regs_mut();
         regs.set_nz_from_u8(val);
@@ -848,7 +848,7 @@ where
         Ok(val)
     }
 
-    fn ld16(&mut self) -> CpuResult<u16> {
+    fn fetch_operand_16_fl(&mut self) -> CpuResult<u16> {
         let val = self.fetch_operand_16()?;
         let regs = self.regs_mut();
         regs.set_nz_from_u16(val);
@@ -858,70 +858,69 @@ where
 
     #[inline]
     fn lds(&mut self) -> CpuResult<()> {
-        let sp = self.ld16()?;
+        let sp = self.fetch_operand_16_fl()?;
         self.m.regs.set_sp(sp);
         Ok(())
     }
 
     #[inline]
     pub fn ldaa(&mut self) -> CpuResult<()> {
-        let a = self.ld8()?;
+        let a = self.fetch_operand_8_fl()?;
         self.regs_mut().set_a(a);
         Ok(())
     }
 
     #[inline]
     fn ldab(&mut self) -> CpuResult<()> {
-        let r = self.ld8()?;
+        let r = self.fetch_operand_8_fl()?;
         self.regs_mut().set_b(r);
         Ok(())
     }
 
     #[inline]
     fn ldx(&mut self) -> CpuResult<()> {
-        let r = self.ld16()?;
+        let r = self.fetch_operand_16_fl()?;
         self.regs_mut().set_x(r);
         Ok(())
     }
 
     #[inline]
-    fn st8(&mut self, val: u8) -> CpuResult<()> {
-        let regs = self.regs_mut();
-        regs.set_nz_from_u8(val);
-        regs.clv();
-        self.bus.store_byte(self.m, val)?;
+    fn st_mem_8(&mut self, val: u8) -> CpuResult<()> {
+        self.regs_mut().set_nz_from_u8(val).clv();
+        let addr = self.bus.fetch_effective_address(&mut self.m)?;
+        self.m.mem_mut().store_byte(addr as usize,val)?;
         Ok(())
     }
+
     #[inline]
-    fn st16(&mut self, val: u16) -> CpuResult<()> {
-        let regs = self.regs_mut();
-        regs.set_nz_from_u16(val);
-        regs.clv();
-        self.bus.store_word(self.m, val)?;
+    fn st_mem_16(&mut self, val: u16) -> CpuResult<()> {
+        self.regs_mut().set_nz_from_u16(val).clv();
+        let addr = self.bus.fetch_effective_address(&mut self.m)?;
+        self.m.mem_mut().store_word(addr as usize,val)?;
         Ok(())
     }
 
     #[inline]
     fn staa(&mut self) -> CpuResult<()> {
         let a = self.m.regs.a();
-        self.st8(a)
+        self.st_mem_8(a)
     }
 
     #[inline]
     fn stab(&mut self) -> CpuResult<()> {
         let b = self.m.regs.b();
-        self.st8(b)
+        self.st_mem_8(b)
     }
 
     #[inline]
     fn sts(&mut self) -> CpuResult<()> {
         let sp = self.m.regs.sp();
-        self.st16(sp)
+        self.st_mem_16(sp)
     }
     #[inline]
     fn stx(&mut self) -> CpuResult<()> {
         let x = self.m.regs.x();
-        self.st16(x)
+        self.st_mem_16(x)
     }
 }
 

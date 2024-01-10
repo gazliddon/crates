@@ -226,7 +226,7 @@ impl std::fmt::Display for RegEnum {
         write!(_f, "{self:?}")
     }
 }
-
+  
 #[derive(Clone,Debug,PartialEq, Default)]
 pub struct RegisterFile {
     pub a: u8,
@@ -240,7 +240,8 @@ pub struct RegisterFile {
 impl std::fmt::Display for RegisterFile {
     // TODO file this in 
     fn fmt(&self, _f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        todo!()
+        writeln!(_f, "A  B  X    PC   SP     F")?;
+        write!(_f, "{:02x} {:02x} {:04x} {:04x} {:04x} {:?}",self.a, self.b,self.x,self.pc,self.sp, self.flags )
     }
 }
 

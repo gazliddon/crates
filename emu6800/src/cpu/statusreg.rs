@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::cpu_core::StatusReg;
+use super::opcodes::UnsignedVal;
 
 pub trait StatusRegTrait {
 
@@ -66,7 +67,7 @@ pub trait StatusRegTrait {
     }
 
     fn set_nz_from_u8(&mut self, val: u8) -> &mut Self {
-        let n = val & 0x80 == 0x80;
+        let n = val.bit(7);
         let z = val == 0x0000;
         self.set_n(n).set_z(z)
     }
