@@ -55,6 +55,7 @@ pub trait Bus {
 pub struct AccA;
 pub struct AccB;
 pub struct Immediate;
+pub type Immediate16 = Immediate;
 pub struct Direct;
 pub struct Extended;
 pub struct Indexed;

@@ -253,7 +253,7 @@
           "cycles": 5,
           "size": 3
         },
-        "Immediate": {
+        "Immediate16": {
           "opcode": 206,
           "cycles": 3,
           "size": 3
@@ -423,7 +423,7 @@
           "cycles": 6,
           "size": 2
         },
-        "Immediate": {
+        "Immediate16": {
           "opcode": 140,
           "cycles": 3,
           "size": 3
@@ -718,7 +718,7 @@
           "cycles": 6,
           "size": 2
         },
-        "Immediate": {
+        "Immediate16": {
           "opcode": 142,
           "cycles": 3,
           "size": 3
@@ -1028,6 +1028,26 @@
         }
       }
     },
+    "StaB": {
+      "flags_written": "N|Z|V",
+      "addr_modes": {
+        "Direct": {
+          "opcode": 215,
+          "cycles": 4,
+          "size": 2
+        },
+        "Indexed": {
+          "opcode": 231,
+          "cycles": 6,
+          "size": 2
+        },
+        "Extended": {
+          "opcode": 247,
+          "cycles": 5,
+          "size": 3
+        }
+      }
+    },
     "Asl": {
       "flags_written": "N|Z|V|C",
       "addr_modes": {
@@ -1309,6 +1329,12 @@
           "size": 3
         },
         "AccA": {
+          "opcode": 79,
+          "cycles": 2,
+          "size": 1
+        },
+
+        "AccB": {
           "opcode": 95,
           "cycles": 2,
           "size": 1

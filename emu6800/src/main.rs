@@ -31,12 +31,33 @@ lazy_static::lazy_static! {
     };
 }
 
+static SND : &[u8;2048] = include_bytes!("../resources/sg.snd");
 
 fn make_machine() -> Machine<MemBlock<BigEndian>, RegisterFile> {
     let regs = RegisterFile::default();
-    let mem: MemBlock<BigEndian> = MemBlock::new("test", false, &(0..65536));
+    let mut mem: MemBlock<BigEndian> = MemBlock::new("test", false, &(0..65536));
+    mem.store_bytes(0xf800, SND).unwrap();
     let machine = Machine::new(mem, regs);
     machine
+}
+
+fn try_diss() {  
+    let m = make_machine();
+    let mut pc = 0xf800 + 1;
+    loop {
+        let d = diss(m.mem(), pc, &DBASE);
+
+        if let Ok(d) = d {
+            let cycles = d.ins.opcode_data.cycles;
+
+            println!("{pc:04x} {:19} [ {cycles} ]    {}", d.mem_string, d.text);
+            pc = d.next_pc;
+        } else {
+            println!("Uknown: {pc:04x} : {:02x}", m.mem().inspect_byte(pc as usize).unwrap());
+            break;
+        }
+    }
+
 }
 
 fn try_step() { 
@@ -70,53 +91,5 @@ fn try_step() {
 
 
 fn main() {
-    try_step();
-    // use std::io::Write;
-
-
-    // let mut out = vec![];
-    
-    // for op in 0..256 {
-    //     if let Some(ins) = DBASE.get_instruction_info_from_opcode(op) {
-    //         let mnem = format!("{:?}",ins.mnemonic).to_lowercase();
-    //         let addr_mode = format!("{:?}",ins.addr_mode);
-    //         let cycles = ins.opcode_data.cycles;
-    //         let size = ins.opcode_data.size;
-    //         let line = format!("\t\t0x{op:02x} => handle_op!({mnem}, {addr_mode}, {cycles}, {size}),");
-    //         out.push(line)
-    //     } 
-    // }
-    // let out = out.join("\n");
-
-    // println!("{}", out);
-
-    // use emucore::byteorder::BigEndian;
-
-    // let mem: MemBlock<BigEndian> = MemBlock::new("test", false, &(0..65536));
-
-    // let regs = RegisterFile::default();
-    // let mut machine = Machine::new(mem, regs);
-
-    // let data = [
-    //     0x86, 0x3e, 0xb7, 0xe4, 0x1d, 0x86, 0x6d, 0xb7, 0xe4, 0x1e, 0x86, 0x79, 0xb7, 0xe4, 0x1f,
-    //     0x86, 0x00, 0xb7, 0xe4, 0x20, 0x86, 0x5e, 0xb7, 0xe4, 0x21, 0x86, 0x6d, 0xb7, 0xe4, 0x22,
-    //     0xce, 0xf0, 0xa2, 0xff, 0xe4, 0x19, 0x7e, 0xf0, 0xbb,
-    // ];
-
-    // machine.mem_mut().store_bytes(0, &data).unwrap();
-
-    // let mut pc = 0;
-
-    // loop {
-    //     let d = diss(machine.mem(), pc, &DBASE);
-
-    //     if let Ok(d) = d {
-    //         let cycles = d.ins.opcode_data.cycles;
-
-    //         println!("{pc:04x} {:19} [ {cycles} ]    {}", d.mem_string, d.text);
-    //         pc = d.next_pc;
-    //     } else {
-    //         break;
-    //     }
-    // }
+    try_diss();
 }

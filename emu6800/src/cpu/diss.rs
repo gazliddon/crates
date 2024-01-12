@@ -77,6 +77,7 @@ pub fn diss_operand<M: MemoryIO>(mem: &M, addr: u16, ins: &InstructionInfo) -> D
             let w = mem.inspect_word(addr_usize)?;
             format!("#0x{w:04x}")
         }
+
         Direct => {
             let b = mem.inspect_byte(addr_usize)?;
             format!("<0x{b:02x}")
