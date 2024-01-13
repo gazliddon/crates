@@ -7,6 +7,7 @@ use super::Machine;
 use super::{RegisterFileTrait, StatusRegTrait};
 
 use crate::cpu_core::AddrModeEnum;
+use crate::cpu_core::calc_rel;
 
 pub fn u8_sign_extend(byte: u8) -> u16 {
     if (byte & 0x80) == 0x80 {
@@ -27,12 +28,6 @@ pub trait Bus {
     }
 
     fn get_name() -> String;
-
-    fn fetch_rel_addr<M: MemoryIO, R: RegisterFileTrait + StatusRegTrait>(
-        _m: &mut Machine<M, R>,
-    ) -> MemResult<u16> {
-        panic!("Not implemented fetch_rel_add for {}", Self::get_name())
-    }
 
     fn fetch_operand<M: MemoryIO, R: RegisterFileTrait + StatusRegTrait>(
         _m: &mut Machine<M, R>,
@@ -142,32 +137,28 @@ impl Bus for Extended {
     fn fetch_effective_address<M: MemoryIO, R: RegisterFileTrait + StatusRegTrait>(
         m: &mut Machine<M, R>,
     ) -> MemResult<u16> {
-        let operand = Immediate::fetch_operand(m)?;
+        let operand = Immediate::fetch_operand_16(m)?;
         m.mem_mut().load_word(operand as usize)
     }
 
     fn fetch_operand_16<M: MemoryIO, R: RegisterFileTrait + StatusRegTrait>(
         _m: &mut Machine<M, R>,
     ) -> MemResult<u16> {
-        let pc = _m.regs.pc();
-        let ret = _m.mem_mut().load_word(pc as usize)?;
-        _m.regs.set_pc(pc.wrapping_add(2));
-        _m.mem_mut().load_word(ret as usize)
-    }
-
-    fn fetch_operand<M: MemoryIO, R: RegisterFileTrait + StatusRegTrait>(
-        _m: &mut Machine<M, R>,
-    ) -> MemResult<u8> {
-        let pc = _m.regs.pc();
-        let ret = _m.mem_mut().load_word(pc as usize)?;
-        _m.regs.set_pc(pc.wrapping_add(1));
-        _m.mem_mut().load_byte(ret as usize)
+        let addr = Self::fetch_effective_address(_m)?;
+        _m.mem_mut().load_word(addr as usize)
     }
 }
 
 impl Bus for Direct {
     fn get_name() -> String {
         "Direct".to_owned()
+    }
+
+    fn fetch_effective_address<M: MemoryIO, R: RegisterFileTrait + StatusRegTrait>(
+        m: &mut Machine<M, R>,
+    ) -> MemResult<u16> {
+        let offset = Immediate::fetch_operand(m)? as u16;
+        Ok(offset as u16)
     }
 }
 
@@ -200,6 +191,21 @@ impl Bus for Inherent {
 impl Bus for Relative {
     fn get_name() -> String {
         "Relative".to_owned()
+    }
+
+    fn fetch_operand_16<M: MemoryIO, R: RegisterFileTrait + StatusRegTrait>(
+            m: &mut Machine<M, R>,
+        ) -> MemResult<u16> {
+        Self::fetch_effective_address(m)
+    }
+
+    fn fetch_effective_address<M: MemoryIO, R: RegisterFileTrait + StatusRegTrait>(
+            m: &mut Machine<M, R>,
+        ) -> MemResult<u16> {
+        let op = Immediate::fetch_operand(m)?;
+        let pc = m.regs.pc();
+        let dest = calc_rel(pc, op);
+        Ok(dest)
     }
 }
 impl Bus for Illegal {

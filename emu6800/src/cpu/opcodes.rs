@@ -90,7 +90,7 @@ where
 {
     #[inline]
     fn branch_cond(&mut self, cond: bool) -> CpuResult<()> {
-        let addr = A::fetch_rel_addr(self.m)?;
+        let addr = A::fetch_operand_16(self.m)?;
         if cond {
             self.m.regs.set_pc(addr);
         }
@@ -322,7 +322,7 @@ where
 
     #[inline]
     fn bsr(&mut self) -> CpuResult<()> {
-        let addr = A::fetch_rel_addr(self.m)?;
+        let addr = A::fetch_operand_16(self.m)?;
         let pc = self.m.regs.pc();
         self.m.push_word(pc)?;
         self.m.regs.set_pc(addr);

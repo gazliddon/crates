@@ -3,7 +3,7 @@ use std::usize;
 use emucore::mem::{MemResult, MemoryIO, MemErrorTypes};
 use itertools::MergeJoinBy;
 
-use crate::cpu_core::{InstructionInfo, IsaDatabase};
+use crate::cpu_core::{InstructionInfo, IsaDatabase, calc_rel};
 
 pub struct Disassmbly<'a> {
     pub text: String,
@@ -60,10 +60,6 @@ pub fn diss<'a, M: MemoryIO>(
     Ok(ret)
 }
 
-fn calc_rel(addr: u16, rel_byte: u8) -> u16 {
-    let addr = ( addr as isize ) + ((rel_byte as i8) as isize);
-    (addr & 0xffff) as u16
-}
 
 /// Returns operand + next ins PC
 pub fn diss_operand<M: MemoryIO>(mem: &M, addr: u16, ins: &InstructionInfo) -> DisResult<String> {
