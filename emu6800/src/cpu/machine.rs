@@ -1,10 +1,10 @@
-use super::RegisterFileTrait;
-use emucore::mem::{MemResult, MemoryIO};
+use super::{RegisterFileTrait, StatusRegTrait};
+use emucore::{mem::{MemResult, MemoryIO}, traits::FlagsTrait};
 
 pub struct Machine<M, R>
 where
     M: MemoryIO,
-    R: RegisterFileTrait,
+    R: RegisterFileTrait + StatusRegTrait,
 {
     pub regs: R,
     pub mem: M,
@@ -21,13 +21,21 @@ fn u8_sign_extend(byte: u8) -> u16 {
 impl<M, R> Machine<M, R>
 where
     M: MemoryIO,
-    R: RegisterFileTrait,
+    R: RegisterFileTrait + StatusRegTrait,
 {
+    pub fn reset(&mut self ) -> MemResult<()>{
+        let v = self.mem_mut().load_word(0xfffe)?;
+        self.regs.set_pc(v);
+        self.regs.sei();
+        Ok(())
+    }
+
     pub fn new(mem: M, regs: R) -> Self {
         Self {
             mem, regs
         }
     }
+
     pub fn mem_mut(&mut self) -> &mut M {
         &mut self.mem
     }

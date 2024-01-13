@@ -60,14 +60,21 @@ pub fn diss<'a, M: MemoryIO>(
     Ok(ret)
 }
 
+fn calc_rel(addr: u16, rel_byte: u8) -> u16 {
+    let addr = ( addr as isize ) + ((rel_byte as i8) as isize);
+    (addr & 0xffff) as u16
+}
+
 /// Returns operand + next ins PC
 pub fn diss_operand<M: MemoryIO>(mem: &M, addr: u16, ins: &InstructionInfo) -> DisResult<String> {
     let addr_usize = addr as usize;
 
     use crate::cpu_core::AddrModeEnum::*;
     let text = match ins.addr_mode {
-        AccA => "A".to_owned(),
-        AccB => "B".to_owned(),
+        AccA => "a".to_owned(),
+
+        AccB => "b".to_owned(),
+
         Immediate => {
             let b = mem.inspect_byte(addr_usize)?;
             format!("#0x{b:02x}")
@@ -82,6 +89,7 @@ pub fn diss_operand<M: MemoryIO>(mem: &M, addr: u16, ins: &InstructionInfo) -> D
             let b = mem.inspect_byte(addr_usize)?;
             format!("<0x{b:02x}")
         }
+
         Extended => {
             let w = mem.inspect_word(addr_usize)?;
             format!("0x{w:04x}")
@@ -96,8 +104,8 @@ pub fn diss_operand<M: MemoryIO>(mem: &M, addr: u16, ins: &InstructionInfo) -> D
 
         Relative => {
             let b = mem.inspect_byte(addr_usize)?;
-            let bs = b as i8;
-            format!("{bs:02x}")
+            let x = calc_rel(addr.wrapping_add(1), b);
+            format!("{x:04x}")
         }
 
         Illegal => "????".to_owned(),

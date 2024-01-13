@@ -1,8 +1,8 @@
 use emucore::mem::MemoryIO;
 
 use super::{Bus, RegEnum, RegisterFileTrait, StatusRegTrait};
-use super::{CpuResult, Machine};
-use crate::cpu_core::AddrModeEnum;
+use super::{CpuResult, Machine, };
+use crate::cpu_core::AddrModeEnum ;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Helpers
@@ -19,7 +19,7 @@ fn bool_as_u8(m: bool) -> u8 {
 pub struct Ins<'a, A, R, M>
 where
     A: Bus,
-    R: RegisterFileTrait,
+    R: RegisterFileTrait+ StatusRegTrait,
     M: MemoryIO,
 {
     bus: A,
@@ -61,7 +61,7 @@ where
 impl<'a, A, R, M> Ins<'a, A, R, M>
 where
     A: Bus,
-    R: RegisterFileTrait,
+    R: RegisterFileTrait + StatusRegTrait,
     M: MemoryIO,
 {
     pub fn new(bus: A, m: &'a mut Machine<M, R>) -> Self {
@@ -70,12 +70,12 @@ where
 
     #[inline]
     fn fetch_operand(&mut self) -> CpuResult<u8> {
-        let r = self.bus.fetch_operand(self.m)?;
+        let r = A::fetch_operand(self.m)?;
         Ok(r)
     }
     #[inline]
     fn fetch_operand_16(&mut self) -> CpuResult<u16> {
-        let r = self.bus.fetch_operand_16(self.m)?;
+        let r = A::fetch_operand_16(self.m)?;
         Ok(r)
     }
 }
@@ -90,7 +90,7 @@ where
 {
     #[inline]
     fn branch_cond(&mut self, cond: bool) -> CpuResult<()> {
-        let addr = self.bus.fetch_rel_addr(self.m)?;
+        let addr = A::fetch_rel_addr(self.m)?;
         if cond {
             self.m.regs.set_pc(addr);
         }
@@ -240,7 +240,7 @@ where
     #[inline]
     fn pul(&mut self) -> CpuResult<()> {
         let val = self.m.pop_byte()?;
-        self.bus.store_byte(self.m, val)?;
+        A::store_byte(self.m, val)?;
         Ok(())
     }
 
@@ -315,14 +315,14 @@ where
 
     #[inline]
     fn jmp(&mut self) -> CpuResult<()> {
-        let addr = self.bus.fetch_operand_16(&mut self.m)?;
+        let addr = A::fetch_operand_16(&mut self.m)?;
         self.m.regs.set_pc(addr);
         Ok(())
     }
 
     #[inline]
     fn bsr(&mut self) -> CpuResult<()> {
-        let addr = self.bus.fetch_rel_addr(self.m)?;
+        let addr = A::fetch_rel_addr(self.m)?;
         let pc = self.m.regs.pc();
         self.m.push_word(pc)?;
         self.m.regs.set_pc(addr);
@@ -352,7 +352,7 @@ where
 
     #[inline]
     fn jsr(&mut self) -> CpuResult<()> {
-        let addr = self.bus.fetch_operand_16(self.m)?;
+        let addr = A::fetch_operand_16(self.m)?;
         let pc = self.m.regs.pc();
         self.m.push_word(pc)?;
         self.m.regs.set_pc(addr);
@@ -401,8 +401,8 @@ where
 
     #[inline]
     fn com(&mut self) -> CpuResult<()> {
-        let val = !self.bus.fetch_operand(self.m)?;
-        self.bus.store_byte(self.m, val)?;
+        let val = !A::fetch_operand(self.m)?;
+        A::store_byte(self.m, val)?;
         let regs = self.regs_mut();
         regs.sec().clv().set_nz_from_u8(val);
         Ok(())
@@ -534,7 +534,7 @@ where
     fn neg(&mut self) -> CpuResult<()> {
         let val = self.m.fetch_byte()? as i8;
         let new_val = -val;
-        self.bus.store_byte(self.m, new_val as u8)?;
+        A::store_byte(self.m, new_val as u8)?;
         panic!()
     }
 
@@ -575,7 +575,7 @@ where
 
     #[inline]
     fn adda(&mut self) -> CpuResult<()> {
-        let op = self.bus.fetch_operand(self.m)?;
+        let op = A::fetch_operand(self.m)?;
         let a = self.m.regs.a();
         let new_a = self.do_add(false, a, op)?;
         self.m.regs.set_a(new_a);
@@ -696,7 +696,7 @@ where
     fn inc(&mut self) -> CpuResult<()> {
         let val = self.fetch_operand()?;
         let new_val = val.wrapping_add(1);
-        self.bus.store_byte(self.m, new_val)?;
+        A::store_byte(self.m, new_val)?;
         self.m.regs.set_nz_from_u8(new_val);
         self.m.regs.set_v(new_val < val);
         Ok(())
@@ -706,7 +706,7 @@ where
     fn dec(&mut self) -> CpuResult<()> {
         let val = self.fetch_operand()?;
         let new_val = val.wrapping_sub(1);
-        self.bus.store_byte(self.m, new_val)?;
+        A::store_byte(self.m, new_val)?;
         self.m.regs.set_nz_from_u8(new_val);
         self.m.regs.set_v(new_val > val);
         Ok(())
@@ -724,7 +724,7 @@ where
 {
     #[inline]
     fn post_shift(&mut self, c: bool, val: u8, new_val: u8) -> CpuResult<()> {
-        self.bus.store_byte(self.m, new_val)?;
+        A::store_byte(self.m, new_val)?;
         let v = val.is_neg() != new_val.is_neg();
         self.m.regs.set_c(c);
         self.m.regs.set_nz_from_u8(new_val);
@@ -887,7 +887,7 @@ where
     #[inline]
     fn st_mem_8(&mut self, val: u8) -> CpuResult<()> {
         self.regs_mut().set_nz_from_u8(val).clv();
-        let addr = self.bus.fetch_effective_address(&mut self.m)?;
+        let addr = A::fetch_effective_address(&mut self.m)?;
         self.m.mem_mut().store_byte(addr as usize,val)?;
         Ok(())
     }
@@ -895,7 +895,7 @@ where
     #[inline]
     fn st_mem_16(&mut self, val: u16) -> CpuResult<()> {
         self.regs_mut().set_nz_from_u16(val).clv();
-        let addr = self.bus.fetch_effective_address(&mut self.m)?;
+        let addr = A::fetch_effective_address(&mut self.m)?;
         self.m.mem_mut().store_word(addr as usize,val)?;
         Ok(())
     }
@@ -935,7 +935,7 @@ where
     fn clr(&mut self) -> CpuResult<()> {
         let regs = self.regs_mut();
         regs.cln().clc().clv().sez();
-        self.bus.store_byte(self.m, 0)?;
+        A::store_byte(self.m, 0)?;
         Ok(())
     }
 
@@ -945,7 +945,7 @@ where
         let new_val = val & operand;
         let regs = self.regs_mut();
         regs.set_nz_from_u8(new_val).clc();
-        self.bus.store_byte(self.m, new_val)?;
+        A::store_byte(self.m, new_val)?;
         Ok(())
     }
 

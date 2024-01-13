@@ -6,3 +6,6 @@ pub mod traits;
 
 pub use byteorder;
 
+// Reexport sha1
+pub use sha1;
+
