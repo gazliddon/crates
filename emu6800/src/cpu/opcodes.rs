@@ -35,34 +35,6 @@ where
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// Step
-// pub fn step<M,R>( m: &mut Machine<M,R>) -> CpuResult<()> 
-// where
-//     R: RegisterFileTrait + StatusRegTrait,
-//     M: MemoryIO,
-// {
-//     use super::addrmodes::*;
-
-//     let addr = m.regs.pc();
-//     let op_code = m.mem_mut().load_byte(addr as usize)?;
-//     m.regs.inc_pc();
-
-//     macro_rules! handle_op {
-//         ($action:ident, $addr:ident, $cycles:expr, $size:expr) => {{
-//             let mut ins = Ins{
-//                 bus: $addr{},
-//                 m, 
-//             };
-//             ins.$action()?;
-//         }};
-//     }
-
-//     let _ = crate::op_table!(op_code, { panic!("NOT IMP") });
-
-//     Ok(())
-// }
-
-////////////////////////////////////////////////////////////////////////////////
 // Utils
 impl<'a, A, R, M> Ins<'a, A, R, M>
 where

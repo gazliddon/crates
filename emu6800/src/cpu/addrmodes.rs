@@ -147,6 +147,12 @@ impl Bus for Extended {
         let addr = Self::fetch_effective_address(_m)?;
         _m.mem_mut().load_word(addr as usize)
     }
+    fn fetch_operand<M: MemoryIO, R: RegisterFileTrait + StatusRegTrait>(
+        _m: &mut Machine<M, R>,
+    ) -> MemResult<u8> {
+        let addr = Self::fetch_effective_address(_m)?;
+        _m.mem_mut().load_byte(addr as usize)
+    }
 }
 
 impl Bus for Direct {
@@ -159,6 +165,13 @@ impl Bus for Direct {
     ) -> MemResult<u16> {
         let offset = Immediate::fetch_operand(m)? as u16;
         Ok(offset as u16)
+    }
+
+    fn fetch_operand<M: MemoryIO, R: RegisterFileTrait + StatusRegTrait>(
+        _m: &mut Machine<M, R>,
+    ) -> MemResult<u8> {
+        let addr = Self::fetch_effective_address(_m)?;
+        _m.mem_mut().load_byte(addr as usize)
     }
 }
 

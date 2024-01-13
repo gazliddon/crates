@@ -1,4 +1,4 @@
-use super::{CpuResult, RegisterFileTrait, StatusRegTrait, DisResult, Disassmbly, diss};
+use super::{diss, CpuResult, DisResult, Disassmbly, RegisterFileTrait, StatusRegTrait};
 use crate::cpu::Ins;
 
 use emucore::{
@@ -14,6 +14,9 @@ where
     pub regs: R,
     pub mem: M,
     pub cycle: usize,
+    pub irq: bool,
+    pub nmi: bool,
+    pub reset: bool,
 }
 
 fn u8_sign_extend(byte: u8) -> u16 {
@@ -31,7 +34,27 @@ where
     pub fn diss<'a>(&'a self, addr: usize) -> DisResult<Disassmbly<'a>> {
         diss(self.mem(), addr)
     }
+}
 
+pub enum StepResult {
+    Reset(usize),
+    Irq(usize),
+    Nmi(usize),
+    Step {
+        pc: usize,
+        next_pc: usize,
+        cycles: usize,
+    },
+}
+
+impl StepResult {
+    pub fn new(pc: usize, next_pc: usize, cycles: usize) -> Self {
+        Self::Step {
+            pc,
+            cycles,
+            next_pc,
+        }
+    }
 }
 
 impl<M, R> Machine<M, R>
@@ -39,33 +62,100 @@ where
     M: MemoryIO,
     R: RegisterFileTrait + StatusRegTrait,
 {
-    pub fn step(&mut self) -> CpuResult<()> {
-        use super::addrmodes::*;
+    pub fn step_cycles(&mut self, cycles: usize) -> CpuResult<()> {
+        self.cycle = 0;
 
-        let addr = self.regs.pc();
-        let op_code = self.mem_mut().load_byte(addr as usize)?;
-        self.regs.inc_pc();
-
-        macro_rules! handle_op {
-            ($action:ident, $addr:ident, $cycles:expr, $size:expr) => {{
-                let mut ins = Ins {
-                    bus: $addr {},
-                    m: self,
-                };
-                ins.$action()?;
-            }};
+        loop {
+            if self.cycle >= cycles {
+                break;
+            } else {
+                self.step()?;
+            }
         }
-
-        let _ = op_table!(op_code, { panic!("NOT IMP") });
 
         Ok(())
     }
 
-    pub fn reset(&mut self) -> MemResult<()> {
-        let v = self.mem_mut().load_word(0xfffe)?;
-        self.regs.set_pc(v);
+    pub fn interrupt(&mut self, vec_addr: usize) -> CpuResult<usize> {
+        let pc = self.regs.pc();
+        let x = self.regs.x();
+        let a = self.regs.a();
+        let b = self.regs.b();
+        let sr = self.regs.sr();
+
+        self.push_word(pc)?;
+        self.push_word(x)?;
+        self.push_byte(a)?;
+        self.push_byte(b)?;
+        self.push_byte(sr)?;
+
         self.regs.sei();
-        Ok(())
+
+        let addr = self.mem_mut().load_word(vec_addr)?;
+        self.regs.set_pc(addr);
+        self.regs.sei();
+        Ok(addr.into())
+    }
+
+    pub fn step(&mut self) -> CpuResult<StepResult> {
+        use super::addrmodes::*;
+        let cycle = self.cycle;
+
+        let pc = self.regs.pc() as usize;
+
+        if self.reset {
+            self.reset = false;
+            let v = self.mem_mut().load_word(0xfffe)?;
+            self.regs.set_pc(v);
+            self.regs.sei();
+            self.cycle += 1;
+            Ok(StepResult::Reset(v.into()))
+        } else if self.nmi {
+            self.nmi = false;
+            let pc = self.interrupt(0xfffC)?;
+            self.cycle += 1;
+            Ok(StepResult::Nmi(pc))
+        } else if self.irq && !self.regs.i() {
+            let pc = self.interrupt(0xfff8)?;
+            self.irq = false;
+            self.cycle += 1;
+            Ok(StepResult::Irq(pc))
+        } else {
+            let addr = self.regs.pc();
+            let op_code = self.mem_mut().load_byte(addr as usize)?;
+            self.regs.inc_pc();
+
+            macro_rules! handle_op {
+                ($action:ident, $addr:ident, $cycles:expr, $size:expr) => {{
+                    let mut ins = Ins {
+                        bus: $addr {},
+                        m: self,
+                    };
+                    ins.$action()?;
+                    self.cycle += $cycles;
+                }};
+            }
+
+            let _ = op_table!(op_code, { panic!("NOT IMP") });
+
+            Ok(StepResult::new(
+                pc,
+                self.regs.pc().into(),
+                self.cycle - cycle,
+            ))
+        }
+    }
+
+    pub fn reset(&mut self) {
+        self.reset = true;
+    }
+
+    pub fn irq(&mut self) {
+        self.irq = true;
+    }
+
+    pub fn nmi(&mut self) {
+        self.nmi = true;
     }
 
     pub fn new(mem: M, regs: R) -> Self {
@@ -73,6 +163,9 @@ where
             mem,
             regs,
             cycle: 0,
+            irq: false,
+            reset: false,
+            nmi: false,
         }
     }
 
