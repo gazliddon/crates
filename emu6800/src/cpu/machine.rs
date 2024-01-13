@@ -1,5 +1,10 @@
-use super::{RegisterFileTrait, StatusRegTrait};
-use emucore::{mem::{MemResult, MemoryIO}, traits::FlagsTrait};
+use super::{CpuResult, RegisterFileTrait, StatusRegTrait};
+use crate::cpu::Ins;
+
+use emucore::{
+    mem::{MemResult, MemoryIO},
+    traits::FlagsTrait,
+};
 
 pub struct Machine<M, R>
 where
@@ -8,6 +13,7 @@ where
 {
     pub regs: R,
     pub mem: M,
+    pub cycle: usize,
 }
 
 fn u8_sign_extend(byte: u8) -> u16 {
@@ -23,7 +29,29 @@ where
     M: MemoryIO,
     R: RegisterFileTrait + StatusRegTrait,
 {
-    pub fn reset(&mut self ) -> MemResult<()>{
+    pub fn step(&mut self) -> CpuResult<()> {
+        use super::addrmodes::*;
+
+        let addr = self.regs.pc();
+        let op_code = self.mem_mut().load_byte(addr as usize)?;
+        self.regs.inc_pc();
+
+        macro_rules! handle_op {
+            ($action:ident, $addr:ident, $cycles:expr, $size:expr) => {{
+                let mut ins = Ins {
+                    bus: $addr {},
+                    m: self,
+                };
+                ins.$action()?;
+            }};
+        }
+
+        let _ = op_table!(op_code, { panic!("NOT IMP") });
+
+        Ok(())
+    }
+
+    pub fn reset(&mut self) -> MemResult<()> {
         let v = self.mem_mut().load_word(0xfffe)?;
         self.regs.set_pc(v);
         self.regs.sei();
@@ -32,7 +60,9 @@ where
 
     pub fn new(mem: M, regs: R) -> Self {
         Self {
-            mem, regs
+            mem,
+            regs,
+            cycle: 0,
         }
     }
 
@@ -44,6 +74,7 @@ where
     pub fn inc_pc(&mut self) {
         self.regs.inc_pc();
     }
+
     #[inline]
     pub fn inc_inc_pc(&mut self) {
         self.regs.inc_pc();

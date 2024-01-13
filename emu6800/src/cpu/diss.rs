@@ -1,9 +1,9 @@
 use std::usize;
 
-use emucore::mem::{MemResult, MemoryIO, MemErrorTypes};
+use emucore::mem::{MemErrorTypes, MemResult, MemoryIO};
 use itertools::MergeJoinBy;
 
-use crate::cpu_core::{InstructionInfo, IsaDatabase, calc_rel};
+use crate::cpu_core::{calc_rel, InstructionInfo, IsaDatabase};
 
 pub struct Disassmbly<'a> {
     pub text: String,
@@ -14,9 +14,21 @@ pub struct Disassmbly<'a> {
     pub next_pc: usize,
 }
 
+impl<'a> std::fmt::Display for Disassmbly<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let cycles = self.ins.opcode_data.cycles;
+        let pc = self.pc;
+        write!(
+            f,
+            "{pc:04x} {:19} [ {cycles} ]    {}",
+            self.mem_string, self.text
+        )
+    }
+}
+
 use thiserror::Error;
 
-#[derive(Error,Debug)]
+#[derive(Error, Debug)]
 pub enum DisError {
     #[error(transparent)]
     Mem(#[from] MemErrorTypes),
@@ -24,7 +36,7 @@ pub enum DisError {
     IllegalInstruction(u8),
 }
 
-pub type DisResult<T> = Result<T,DisError>;
+pub type DisResult<T> = Result<T, DisError>;
 
 pub fn diss<'a, M: MemoryIO>(
     mem: &M,
@@ -59,7 +71,6 @@ pub fn diss<'a, M: MemoryIO>(
 
     Ok(ret)
 }
-
 
 /// Returns operand + next ins PC
 pub fn diss_operand<M: MemoryIO>(mem: &M, addr: u16, ins: &InstructionInfo) -> DisResult<String> {

@@ -1,5 +1,6 @@
 use emucore::mem::MemoryIO;
 
+
 use super::{Bus, RegEnum, RegisterFileTrait, StatusRegTrait};
 use super::{CpuResult, Machine, };
 use crate::cpu_core::AddrModeEnum ;
@@ -22,39 +23,38 @@ where
     R: RegisterFileTrait+ StatusRegTrait,
     M: MemoryIO,
 {
-    bus: A,
-    m: &'a mut Machine<M, R>,
+    pub bus: A,
+    pub m: &'a mut Machine<M, R>,
 }
 
-include!(concat!(env!("OUT_DIR"), "/isa_macros_6800.rs"));
 
 ////////////////////////////////////////////////////////////////////////////////
 // Step
-pub fn step<M,R>( m: &mut Machine<M,R>) -> CpuResult<()> 
-where
-    R: RegisterFileTrait + StatusRegTrait,
-    M: MemoryIO,
-{
-    use super::addrmodes::*;
+// pub fn step<M,R>( m: &mut Machine<M,R>) -> CpuResult<()> 
+// where
+//     R: RegisterFileTrait + StatusRegTrait,
+//     M: MemoryIO,
+// {
+//     use super::addrmodes::*;
 
-    let addr = m.regs.pc();
-    let op_code = m.mem_mut().load_byte(addr as usize)?;
-    m.regs.inc_pc();
+//     let addr = m.regs.pc();
+//     let op_code = m.mem_mut().load_byte(addr as usize)?;
+//     m.regs.inc_pc();
 
-    macro_rules! handle_op {
-        ($action:ident, $addr:ident, $cycles:expr, $size:expr) => {{
-            let mut ins = Ins{
-                bus: $addr{},
-                m, 
-            };
-            ins.$action()?;
-        }};
-    }
+//     macro_rules! handle_op {
+//         ($action:ident, $addr:ident, $cycles:expr, $size:expr) => {{
+//             let mut ins = Ins{
+//                 bus: $addr{},
+//                 m, 
+//             };
+//             ins.$action()?;
+//         }};
+//     }
 
-    let _ = op_table!(op_code, { panic!("NOT IMP") });
+//     let _ = crate::op_table!(op_code, { panic!("NOT IMP") });
 
-    Ok(())
-}
+//     Ok(())
+// }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Utils
@@ -103,83 +103,83 @@ where
     }
 
     #[inline]
-    fn bpl(&mut self) -> CpuResult<()> {
+    pub fn bpl(&mut self) -> CpuResult<()> {
         let n = self.m.regs.n();
         self.branch_cond(!n)
     }
     #[inline]
-    fn blt(&mut self) -> CpuResult<()> {
+    pub fn blt(&mut self) -> CpuResult<()> {
         let lt = self.m.regs.lt();
         self.branch_cond(lt)
     }
     #[inline]
-    fn bmi(&mut self) -> CpuResult<()> {
+    pub fn bmi(&mut self) -> CpuResult<()> {
         let n = self.m.regs.n();
         self.branch_cond(n)
     }
 
     #[inline]
-    fn bne(&mut self) -> CpuResult<()> {
+    pub fn bne(&mut self) -> CpuResult<()> {
         let z = self.m.regs.z();
         self.branch_cond(!z)
     }
 
     #[inline]
-    fn beq(&mut self) -> CpuResult<()> {
+    pub fn beq(&mut self) -> CpuResult<()> {
         let z = self.m.regs.z();
         self.branch_cond(z)
     }
 
     #[inline]
-    fn bhi(&mut self) -> CpuResult<()> {
+    pub fn bhi(&mut self) -> CpuResult<()> {
         let hi = self.m.regs.hi();
         self.branch_cond(hi)
     }
 
     #[inline]
-    fn bgt(&mut self) -> CpuResult<()> {
+    pub fn bgt(&mut self) -> CpuResult<()> {
         let gt = self.m.regs.gt();
         self.branch_cond(gt)
     }
 
     #[inline]
-    fn ble(&mut self) -> CpuResult<()> {
+    pub fn ble(&mut self) -> CpuResult<()> {
         let le = self.m.regs.le();
         self.branch_cond(le)
     }
 
     #[inline]
-    fn bls(&mut self) -> CpuResult<()> {
+    pub fn bls(&mut self) -> CpuResult<()> {
         let ls = self.m.regs.ls();
         self.branch_cond(ls)
     }
 
     #[inline]
-    fn bge(&mut self) -> CpuResult<()> {
+    pub fn bge(&mut self) -> CpuResult<()> {
         let ge = self.m.regs.ge();
         self.branch_cond(ge)
     }
 
     #[inline]
-    fn bcs(&mut self) -> CpuResult<()> {
+    pub fn bcs(&mut self) -> CpuResult<()> {
         let c = self.m.regs.c();
         self.branch_cond(c)
     }
 
     #[inline]
-    fn bcc(&mut self) -> CpuResult<()> {
+    pub fn bcc(&mut self) -> CpuResult<()> {
         let c = self.m.regs.c();
         self.branch_cond(!c)
     }
 
     #[inline]
-    fn bvs(&mut self) -> CpuResult<()> {
+    pub fn bvs(&mut self) -> CpuResult<()> {
         let v = self.m.regs.v();
         self.branch_cond(v)
     }
 
     #[inline]
-    fn bvc(&mut self) -> CpuResult<()> {
+    pub fn bvc(&mut self) -> CpuResult<()> {
         let v = self.m.regs.v();
         self.branch_cond(!v)
     }
@@ -194,36 +194,36 @@ where
     M: MemoryIO,
 {
     #[inline]
-    fn clc(&mut self) -> CpuResult<()> {
+    pub fn clc(&mut self) -> CpuResult<()> {
         self.m.regs.clc();
         Ok(())
     }
 
     #[inline]
-    fn sec(&mut self) -> CpuResult<()> {
+    pub fn sec(&mut self) -> CpuResult<()> {
         self.m.regs.sec();
         Ok(())
     }
 
     #[inline]
-    fn clv(&mut self) -> CpuResult<()> {
+    pub fn clv(&mut self) -> CpuResult<()> {
         self.m.regs.clv();
         Ok(())
     }
 
     #[inline]
-    fn sev(&mut self) -> CpuResult<()> {
+    pub fn sev(&mut self) -> CpuResult<()> {
         self.m.regs.sev();
         Ok(())
     }
 
     #[inline]
-    fn cli(&mut self) -> CpuResult<()> {
+    pub fn cli(&mut self) -> CpuResult<()> {
         self.m.regs.cli();
         Ok(())
     }
     #[inline]
-    fn sei(&mut self) -> CpuResult<()> {
+    pub fn sei(&mut self) -> CpuResult<()> {
         self.m.regs.sei();
         Ok(())
     }
@@ -238,14 +238,14 @@ where
     M: MemoryIO,
 {
     #[inline]
-    fn pul(&mut self) -> CpuResult<()> {
+    pub fn pul(&mut self) -> CpuResult<()> {
         let val = self.m.pop_byte()?;
         A::store_byte(self.m, val)?;
         Ok(())
     }
 
     #[inline]
-    fn psh(&mut self) -> CpuResult<()> {
+    pub fn psh(&mut self) -> CpuResult<()> {
         let val = self.fetch_operand()?;
         self.m.push_byte(val)?;
         Ok(())
@@ -253,7 +253,7 @@ where
 
     #[inline]
     /// Increment stack ptr
-    fn ins(&mut self) -> CpuResult<()> {
+    pub fn ins(&mut self) -> CpuResult<()> {
         let r = self.regs_mut();
         let sp = r.sp();
         r.set_sp(sp.wrapping_add(1));
@@ -262,7 +262,7 @@ where
 
     #[inline]
     /// Decrement stack ptr
-    fn des(&mut self) -> CpuResult<()> {
+    pub fn des(&mut self) -> CpuResult<()> {
         let r = self.regs_mut();
         let sp = r.sp();
         r.set_sp(sp.wrapping_sub(1));
@@ -279,11 +279,11 @@ where
     M: MemoryIO,
 {
     #[inline]
-    fn nop(&mut self) -> CpuResult<()> {
+    pub fn nop(&mut self) -> CpuResult<()> {
         Ok(())
     }
     #[inline]
-    fn wai(&mut self) -> CpuResult<()> {
+    pub fn wai(&mut self) -> CpuResult<()> {
         panic!()
     }
 }
@@ -299,7 +299,7 @@ where
     M: MemoryIO,
 {
     #[inline]
-    fn rti(&mut self) -> CpuResult<()> {
+    pub fn rti(&mut self) -> CpuResult<()> {
         let sr = self.m.pop_byte()?;
         let b = self.m.pop_byte()?;
         let a = self.m.pop_byte()?;
@@ -314,14 +314,14 @@ where
     }
 
     #[inline]
-    fn jmp(&mut self) -> CpuResult<()> {
+    pub fn jmp(&mut self) -> CpuResult<()> {
         let addr = A::fetch_operand_16(&mut self.m)?;
         self.m.regs.set_pc(addr);
         Ok(())
     }
 
     #[inline]
-    fn bsr(&mut self) -> CpuResult<()> {
+    pub fn bsr(&mut self) -> CpuResult<()> {
         let addr = A::fetch_operand_16(self.m)?;
         let pc = self.m.regs.pc();
         self.m.push_word(pc)?;
@@ -330,7 +330,7 @@ where
     }
 
     #[inline]
-    fn swi(&mut self) -> CpuResult<()> {
+    pub fn swi(&mut self) -> CpuResult<()> {
         let pc = self.m.regs.pc();
         let x = self.m.regs.x();
         let a = self.m.regs.a();
@@ -351,7 +351,7 @@ where
     }
 
     #[inline]
-    fn jsr(&mut self) -> CpuResult<()> {
+    pub fn jsr(&mut self) -> CpuResult<()> {
         let addr = A::fetch_operand_16(self.m)?;
         let pc = self.m.regs.pc();
         self.m.push_word(pc)?;
@@ -360,7 +360,7 @@ where
     }
 
     #[inline]
-    fn rts(&mut self) -> CpuResult<()> {
+    pub fn rts(&mut self) -> CpuResult<()> {
         let addr = self.m.pop_word()?;
         self.m.regs.set_pc(addr);
         Ok(())
@@ -400,7 +400,7 @@ where
     }
 
     #[inline]
-    fn com(&mut self) -> CpuResult<()> {
+    pub fn com(&mut self) -> CpuResult<()> {
         let val = !A::fetch_operand(self.m)?;
         A::store_byte(self.m, val)?;
         let regs = self.regs_mut();
@@ -409,7 +409,7 @@ where
     }
 
     #[inline]
-    fn eora(&mut self) -> CpuResult<()> {
+    pub fn eora(&mut self) -> CpuResult<()> {
         let a = self.m.regs.get_reg_8(RegEnum::A);
         let new_a = self.eor_val(a)?;
         self.m.regs.set_reg_8(RegEnum::A, new_a);
@@ -417,7 +417,7 @@ where
     }
 
     #[inline]
-    fn eorb(&mut self) -> CpuResult<()> {
+    pub fn eorb(&mut self) -> CpuResult<()> {
         let b = self.m.regs.get_reg_8(RegEnum::B);
         let new_b = self.eor_val(b)?;
         self.m.regs.set_reg_8(RegEnum::B, new_b);
@@ -425,7 +425,7 @@ where
     }
 
     #[inline]
-    fn anda(&mut self) -> CpuResult<()> {
+    pub fn anda(&mut self) -> CpuResult<()> {
         let a = self.m.regs.get_reg_8(RegEnum::A);
         let new_a = self.and_val(a)?;
         self.m.regs.set_reg_8(RegEnum::A, new_a);
@@ -433,7 +433,7 @@ where
     }
 
     #[inline]
-    fn andb(&mut self) -> CpuResult<()> {
+    pub fn andb(&mut self) -> CpuResult<()> {
         let b = self.m.regs.get_reg_8(RegEnum::B);
         let new_b = self.and_val(b)?;
         self.m.regs.set_reg_8(RegEnum::B, new_b);
@@ -441,7 +441,7 @@ where
     }
 
     #[inline]
-    fn oraa(&mut self) -> CpuResult<()> {
+    pub fn oraa(&mut self) -> CpuResult<()> {
         let a = self.m.regs.get_reg_8(RegEnum::A);
         let new_a = self.or_val(a)?;
         self.m.regs.set_reg_8(RegEnum::A, new_a);
@@ -449,7 +449,7 @@ where
     }
 
     #[inline]
-    fn orab(&mut self) -> CpuResult<()> {
+    pub fn orab(&mut self) -> CpuResult<()> {
         let b = self.m.regs.get_reg_8(RegEnum::B);
         let new_b = self.or_val(b)?;
         self.m.regs.set_reg_8(RegEnum::B, new_b);
@@ -531,7 +531,7 @@ where
     }
 
     #[inline]
-    fn neg(&mut self) -> CpuResult<()> {
+    pub fn neg(&mut self) -> CpuResult<()> {
         let val = self.m.fetch_byte()? as i8;
         let new_val = -val;
         A::store_byte(self.m, new_val as u8)?;
@@ -539,7 +539,7 @@ where
     }
 
     #[inline]
-    fn cmpa(&mut self) -> CpuResult<()> {
+    pub fn cmpa(&mut self) -> CpuResult<()> {
         let op = self.fetch_operand()?;
         let a = self.m.regs.a();
         let _ = self.do_sub(false, a, op)?;
@@ -547,7 +547,7 @@ where
     }
 
     #[inline]
-    fn cmpb(&mut self) -> CpuResult<()> {
+    pub fn cmpb(&mut self) -> CpuResult<()> {
         let op = self.fetch_operand()?;
         let b = self.m.regs.b();
         let _ = self.do_sub(false, b, op)?;
@@ -555,7 +555,7 @@ where
     }
 
     #[inline]
-    fn addb(&mut self) -> CpuResult<()> {
+    pub fn addb(&mut self) -> CpuResult<()> {
         let op = self.fetch_operand()?;
         let b = self.m.regs.b();
         let b = self.do_add(false, b, op)?;
@@ -564,7 +564,7 @@ where
     }
 
     #[inline]
-    fn adcb(&mut self) -> CpuResult<()> {
+    pub fn adcb(&mut self) -> CpuResult<()> {
         let op = self.fetch_operand()?;
         let b = self.m.regs.b();
         let c = self.m.regs.c();
@@ -574,7 +574,7 @@ where
     }
 
     #[inline]
-    fn adda(&mut self) -> CpuResult<()> {
+    pub fn adda(&mut self) -> CpuResult<()> {
         let op = A::fetch_operand(self.m)?;
         let a = self.m.regs.a();
         let new_a = self.do_add(false, a, op)?;
@@ -582,7 +582,7 @@ where
         Ok(())
     }
     #[inline]
-    fn adca(&mut self) -> CpuResult<()> {
+    pub fn adca(&mut self) -> CpuResult<()> {
         let op = self.fetch_operand()?;
         let a = self.m.regs.a();
         let c = self.m.regs.c();
@@ -592,7 +592,7 @@ where
     }
 
     #[inline]
-    fn aba(&mut self) -> CpuResult<()> {
+    pub fn aba(&mut self) -> CpuResult<()> {
         let a = self.m.regs.a();
         let b = self.m.regs.b();
         let a = self.do_add(false, a, b)?;
@@ -601,7 +601,7 @@ where
     }
 
     #[inline]
-    fn sba(&mut self) -> CpuResult<()> {
+    pub fn sba(&mut self) -> CpuResult<()> {
         let a = self.m.regs.a();
         let b = self.m.regs.b();
         let a = self.do_sub(false, a, b)?;
@@ -610,28 +610,28 @@ where
     }
 
     #[inline]
-    fn suba(&mut self) -> CpuResult<()> {
+    pub fn suba(&mut self) -> CpuResult<()> {
         self.sub_reg(false, RegEnum::A)
     }
 
     #[inline]
-    fn subb(&mut self) -> CpuResult<()> {
+    pub fn subb(&mut self) -> CpuResult<()> {
         self.sub_reg(false, RegEnum::B)
     }
 
     #[inline]
-    fn sbca(&mut self) -> CpuResult<()> {
+    pub fn sbca(&mut self) -> CpuResult<()> {
         let c = self.m.regs.c();
         self.sub_reg(c, RegEnum::A)
     }
     #[inline]
-    fn sbcb(&mut self) -> CpuResult<()> {
+    pub fn sbcb(&mut self) -> CpuResult<()> {
         let c = self.m.regs.c();
         self.sub_reg(c, RegEnum::B)
     }
 
     #[inline]
-    fn sub_reg(&mut self, c: bool, reg: RegEnum) -> CpuResult<()> {
+    pub fn sub_reg(&mut self, c: bool, reg: RegEnum) -> CpuResult<()> {
         let op = self.fetch_operand()?;
         let r = self.m.regs.get_reg_8(reg);
         let v = self.do_sub(c, r, op)?;
@@ -640,7 +640,7 @@ where
     }
 
     #[inline]
-    fn cpx(&mut self) -> CpuResult<()> {
+    pub fn cpx(&mut self) -> CpuResult<()> {
         let op = self.fetch_operand_16()?;
         let x = self.m.regs.x();
         let new_x = x.wrapping_sub(op);
@@ -658,7 +658,7 @@ where
     }
 
     #[inline]
-    fn cba(&mut self) -> CpuResult<()> {
+    pub fn cba(&mut self) -> CpuResult<()> {
         let a = self.m.regs.a();
         let b = self.m.regs.b();
         let _ = self.do_sub(false, a, b)?;
@@ -675,7 +675,7 @@ where
     M: MemoryIO,
 {
     #[inline]
-    fn inx(&mut self) -> CpuResult<()> {
+    pub fn inx(&mut self) -> CpuResult<()> {
         let x = self.m.regs.x().wrapping_add(1);
         // dex only sets zero flag - no bpl/bmu x loops on 6800
         self.m.regs.set_z(x == 0);
@@ -684,7 +684,7 @@ where
     }
 
     #[inline]
-    fn dex(&mut self) -> CpuResult<()> {
+    pub fn dex(&mut self) -> CpuResult<()> {
         let x = self.m.regs.x().wrapping_sub(1);
         // dex only sets zero flag - no bpl/bmi x loops on 6800
         self.m.regs.set_z(x == 0);
@@ -693,7 +693,7 @@ where
     }
 
     #[inline]
-    fn inc(&mut self) -> CpuResult<()> {
+    pub fn inc(&mut self) -> CpuResult<()> {
         let val = self.fetch_operand()?;
         let new_val = val.wrapping_add(1);
         A::store_byte(self.m, new_val)?;
@@ -703,7 +703,7 @@ where
     }
 
     #[inline]
-    fn dec(&mut self) -> CpuResult<()> {
+    pub fn dec(&mut self) -> CpuResult<()> {
         let val = self.fetch_operand()?;
         let new_val = val.wrapping_sub(1);
         A::store_byte(self.m, new_val)?;
@@ -733,14 +733,14 @@ where
     }
 
     #[inline]
-    fn asr(&mut self) -> CpuResult<()> {
+    pub fn asr(&mut self) -> CpuResult<()> {
         let val = self.fetch_operand()?;
         let new_val = val.wrapping_shr(1) | if val.is_neg() { 1 << 7 } else { 0 };
         self.post_shift(val.bit(7), val, new_val)
     }
 
     #[inline]
-    fn asl(&mut self) -> CpuResult<()> {
+    pub fn asl(&mut self) -> CpuResult<()> {
         let val = self.fetch_operand()?;
         let new_val = val.wrapping_shl(1);
         let c = val.is_neg();
@@ -748,7 +748,7 @@ where
     }
 
     #[inline]
-    fn lsr(&mut self) -> CpuResult<()> {
+    pub fn lsr(&mut self) -> CpuResult<()> {
         let val = self.fetch_operand()?;
         let new_val = val.wrapping_shr(1);
         let c = val.bit(0);
@@ -756,14 +756,14 @@ where
     }
 
     #[inline]
-    fn ror(&mut self) -> CpuResult<()> {
+    pub fn ror(&mut self) -> CpuResult<()> {
         let val = self.fetch_operand()?;
         let new_val = val.wrapping_shr(1) | if self.m.regs.c() { 1 << 7 } else { 0 };
         self.post_shift(val.bit(0), val, new_val)
     }
 
     #[inline]
-    fn rol(&mut self) -> CpuResult<()> {
+    pub fn rol(&mut self) -> CpuResult<()> {
         let val = self.fetch_operand()?;
         let new_val = val.wrapping_shl(1) | if self.m.regs.c() { 1 } else { 0 };
         self.post_shift(val.bit(1), val, new_val)
@@ -779,21 +779,21 @@ where
     M: MemoryIO,
 {
     #[inline]
-    fn tpa(&mut self) -> CpuResult<()> {
+    pub fn tpa(&mut self) -> CpuResult<()> {
         let regs = self.regs_mut();
         let sr = regs.sr();
         regs.set_a(sr);
         Ok(())
     }
     #[inline]
-    fn tap(&mut self) -> CpuResult<()> {
+    pub fn tap(&mut self) -> CpuResult<()> {
         let regs = self.regs_mut();
         let a = regs.a();
         regs.set_sr(a);
         Ok(())
     }
     #[inline]
-    fn tba(&mut self) -> CpuResult<()> {
+    pub fn tba(&mut self) -> CpuResult<()> {
         let regs = &mut self.m.regs;
         let b = regs.b();
         regs.set_a(b).set_nz_from_u8(b).clv();
@@ -801,7 +801,7 @@ where
     }
 
     #[inline]
-    fn tab(&mut self) -> CpuResult<()> {
+    pub fn tab(&mut self) -> CpuResult<()> {
         let regs = &mut self.m.regs;
         let b = regs.b();
         regs.set_b(b);
@@ -810,14 +810,14 @@ where
     }
 
     #[inline]
-    fn tsx(&mut self) -> CpuResult<()> {
+    pub fn tsx(&mut self) -> CpuResult<()> {
         let regs = &mut self.m.regs;
         let sp = regs.sp();
         regs.set_x(sp);
         Ok(())
     }
     #[inline]
-    fn txs(&mut self) -> CpuResult<()> {
+    pub fn txs(&mut self) -> CpuResult<()> {
         let regs = &mut self.m.regs;
         let x = regs.x();
         regs.set_sp(x);
@@ -857,7 +857,7 @@ where
     }
 
     #[inline]
-    fn lds(&mut self) -> CpuResult<()> {
+    pub fn lds(&mut self) -> CpuResult<()> {
         let sp = self.fetch_operand_16_fl()?;
         self.m.regs.set_sp(sp);
         Ok(())
@@ -871,14 +871,14 @@ where
     }
 
     #[inline]
-    fn ldab(&mut self) -> CpuResult<()> {
+    pub fn ldab(&mut self) -> CpuResult<()> {
         let r = self.fetch_operand_8_fl()?;
         self.regs_mut().set_b(r);
         Ok(())
     }
 
     #[inline]
-    fn ldx(&mut self) -> CpuResult<()> {
+    pub fn ldx(&mut self) -> CpuResult<()> {
         let r = self.fetch_operand_16_fl()?;
         self.regs_mut().set_x(r);
         Ok(())
@@ -901,24 +901,24 @@ where
     }
 
     #[inline]
-    fn staa(&mut self) -> CpuResult<()> {
+    pub fn staa(&mut self) -> CpuResult<()> {
         let a = self.m.regs.a();
         self.st_mem_8(a)
     }
 
     #[inline]
-    fn stab(&mut self) -> CpuResult<()> {
+    pub fn stab(&mut self) -> CpuResult<()> {
         let b = self.m.regs.b();
         self.st_mem_8(b)
     }
 
     #[inline]
-    fn sts(&mut self) -> CpuResult<()> {
+    pub fn sts(&mut self) -> CpuResult<()> {
         let sp = self.m.regs.sp();
         self.st_mem_16(sp)
     }
     #[inline]
-    fn stx(&mut self) -> CpuResult<()> {
+    pub fn stx(&mut self) -> CpuResult<()> {
         let x = self.m.regs.x();
         self.st_mem_16(x)
     }
@@ -932,7 +932,7 @@ where
     M: MemoryIO,
 {
     #[inline]
-    fn clr(&mut self) -> CpuResult<()> {
+    pub fn clr(&mut self) -> CpuResult<()> {
         let regs = self.regs_mut();
         regs.cln().clc().clv().sez();
         A::store_byte(self.m, 0)?;
@@ -950,24 +950,24 @@ where
     }
 
     #[inline]
-    fn bita(&mut self) -> CpuResult<()> {
+    pub fn bita(&mut self) -> CpuResult<()> {
         let val = self.regs_mut().a();
         self.do_bit(val)
     }
 
     #[inline]
-    fn bitb(&mut self) -> CpuResult<()> {
+    pub fn bitb(&mut self) -> CpuResult<()> {
         let val = self.regs_mut().a();
         self.do_bit(val)
     }
 
     #[inline]
-    fn daa(&mut self) -> CpuResult<()> {
+    pub fn daa(&mut self) -> CpuResult<()> {
         panic!()
     }
 
     #[inline]
-    fn tst(&mut self) -> CpuResult<()> {
+    pub fn tst(&mut self) -> CpuResult<()> {
         let val = self.fetch_operand()?;
         let regs = self.regs_mut();
         regs.set_nz_from_u8(val).clv().clc();

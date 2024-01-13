@@ -1,7 +1,6 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
 
-use emu6800::cpu::step;
 use emu6800::cpu_core::{AddrModeEnum, Mnemonic, Isa, IsaDatabase};
 
 use emu6800::cpu::{
@@ -76,7 +75,7 @@ fn try_step() {
     loop {
         let pc = m.regs.pc();
 
-        step(&mut m).unwrap();
+        m.step().unwrap();
         println!("{}", m.regs);
         let d = diss(m.mem(), pc as usize, &DBASE);
         if let Ok(d) = d {
