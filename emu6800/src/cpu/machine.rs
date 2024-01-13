@@ -1,4 +1,4 @@
-use super::{CpuResult, RegisterFileTrait, StatusRegTrait};
+use super::{CpuResult, RegisterFileTrait, StatusRegTrait, DisResult, Disassmbly, diss};
 use crate::cpu::Ins;
 
 use emucore::{
@@ -22,6 +22,16 @@ fn u8_sign_extend(byte: u8) -> u16 {
     } else {
         (byte as u16) | 0xff00
     }
+}
+impl<M, R> Machine<M, R>
+where
+    M: MemoryIO,
+    R: RegisterFileTrait + StatusRegTrait,
+{
+    pub fn diss<'a>(&'a self, addr: usize) -> DisResult<Disassmbly<'a>> {
+        diss(self.mem(), addr)
+    }
+
 }
 
 impl<M, R> Machine<M, R>

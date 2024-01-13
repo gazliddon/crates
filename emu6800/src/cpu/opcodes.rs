@@ -1,10 +1,16 @@
 use emucore::mem::MemoryIO;
 
-
 use super::{Bus, RegEnum, RegisterFileTrait, StatusRegTrait};
 use super::{CpuResult, Machine, };
-use crate::cpu_core::AddrModeEnum ;
+use crate::cpu_core::{ AddrModeEnum, IsaDatabase, Isa } ;
 
+lazy_static::lazy_static! {
+    pub static ref ISA_DBASE : IsaDatabase = {
+        let txt = include_str!("../../resources/opcodes6800.json");
+        let isa: Isa = serde_json::from_str(txt).unwrap();
+        IsaDatabase::new(&isa)
+    };
+}
 ////////////////////////////////////////////////////////////////////////////////
 // Helpers
 

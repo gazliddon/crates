@@ -28,6 +28,8 @@ impl<'a> std::fmt::Display for Disassmbly<'a> {
 
 use thiserror::Error;
 
+use super::ISA_DBASE;
+
 #[derive(Error, Debug)]
 pub enum DisError {
     #[error(transparent)]
@@ -41,12 +43,11 @@ pub type DisResult<T> = Result<T, DisError>;
 pub fn diss<'a, M: MemoryIO>(
     mem: &M,
     pc: usize,
-    isa: &'a IsaDatabase,
 ) -> DisResult<Disassmbly<'a>> {
     let addr_u16 = (pc & 0xffff) as u16;
 
     let op_code = mem.inspect_byte(pc)?;
-    let ins = isa
+    let ins = ISA_DBASE
         .get_instruction_info_from_opcode(op_code as usize)
         .ok_or(DisError::IllegalInstruction(op_code))?;
 

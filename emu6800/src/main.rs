@@ -4,7 +4,7 @@
 use emu6800::cpu_core::{AddrModeEnum, Mnemonic, Isa, IsaDatabase};
 
 use emu6800::cpu::{
-    self, diss, Bus, Ins, Machine, RegisterFile, RegisterFileTrait,
+    self, Bus, Ins, Machine, RegisterFile, RegisterFileTrait,
     StatusRegTrait, decoder::print_it,
 };
 
@@ -22,14 +22,6 @@ use std::{
 use serde::{Deserialize, Serialize};
 use serde_json::{Result, Value};
 
-lazy_static::lazy_static! {
-    static ref DBASE : IsaDatabase = {
-        let txt = include_str!("../resources/opcodes6800.json");
-        let isa: Isa = serde_json::from_str(txt).unwrap();
-        IsaDatabase::new(&isa)
-    };
-}
-
 static SND : &[u8;2048] = include_bytes!("../resources/sg.snd");
 
 fn make_machine() -> Machine<MemBlock<BigEndian>, RegisterFile> {
@@ -40,11 +32,13 @@ fn make_machine() -> Machine<MemBlock<BigEndian>, RegisterFile> {
     machine
 }
 
-fn try_diss() {  
+fn try_diss() {
+
     let m = make_machine();
+
     let mut pc = 0xf800 + 1;
     loop {
-        let d = diss(m.mem(), pc, &DBASE);
+        let d = m.diss(pc);
 
         if let Ok(d) = d {
             let cycles = d.ins.opcode_data.cycles;
@@ -77,7 +71,7 @@ fn try_step() {
 
         m.step().unwrap();
         println!("{}", m.regs);
-        let d = diss(m.mem(), pc as usize, &DBASE);
+        let d = m.diss(pc as usize);
         if let Ok(d) = d {
             let cycles = d.ins.opcode_data.cycles;
             println!("{pc:04x} [ {cycles} ]  {}",  d.text);
