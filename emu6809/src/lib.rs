@@ -4,3 +4,4 @@ pub mod cpu;
 pub mod isa;
 pub mod diss;
 pub use byteorder;
+pub use emucore;

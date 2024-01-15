@@ -1,10 +1,9 @@
 use serde::{Deserialize, Serialize};
 
-use crate::cpu_core::StatusReg;
 use super::opcodes::UnsignedVal;
+use crate::cpu_core::StatusReg;
 
 pub trait StatusRegTrait {
-
     fn set_n(&mut self, val: bool) -> &mut Self;
     fn set_v(&mut self, val: bool) -> &mut Self;
     fn set_c(&mut self, val: bool) -> &mut Self;
@@ -19,56 +18,74 @@ pub trait StatusRegTrait {
     fn i(&self) -> bool;
     fn z(&self) -> bool;
 
-    fn hi(&self) -> bool {
-        panic!()
+    fn neg(&self) -> bool {
+        self.n()
     }
 
-    fn gt(&self) -> bool {
-        panic!()
-    }
-
-    fn le(&self) -> bool {
-        panic!()
+    fn eq(&self) -> bool {
+        self.z()
     }
 
     fn ls(&self) -> bool {
-        panic!()
+        self.z() || self.c()
+    }
+
+    /// less than or equal to zero
+    fn le(&self) -> bool {
+        self.z() || (self.n() != self.v())
+    }
+
+    fn lt(&self) -> bool {
+        self.n() != self.v()
+    }
+
+    fn plus(&self) -> bool {
+        !self.neg()
+    }
+
+    fn ne(&self) -> bool {
+        !self.eq()
+    }
+
+    fn hi(&self) -> bool {
+        !self.c() && !self.z()
+    }
+
+    fn gt(&self) -> bool {
+        !self.z() && (self.n() == self.v())
     }
 
     fn ge(&self) -> bool {
-        panic!()
+        self.n() == self.v()
     }
 
+    // setters
     fn cln(&mut self) -> &mut Self {
-        self.set_n(false);
-        self
+        self.set_n(false)
     }
+
     fn sen(&mut self) -> &mut Self {
-        self.set_n(true);
-        self
+        self.set_n(true)
     }
 
     fn clv(&mut self) -> &mut Self {
-        self.set_v(false);
-        self
+        self.set_v(false)
     }
+
     fn sev(&mut self) -> &mut Self {
-        self.set_v(true);
-        self
+        self.set_v(true)
     }
 
     fn clc(&mut self) -> &mut Self {
-        self.set_c(false);
-        self
+        self.set_c(false)
     }
     fn sec(&mut self) -> &mut Self {
-        self.set_c(true);
-        self
+        self.set_c(true)
     }
 
     fn set_nz_from_u8(&mut self, val: u8) -> &mut Self {
         let n = val.bit(7);
-        let z = val == 0x0000;
+        let z = val == 0;
         self.set_n(n).set_z(z)
     }
 
@@ -79,34 +96,25 @@ pub trait StatusRegTrait {
     }
 
     fn clh(&mut self) -> &mut Self {
-        self.set_h(false);
-        self
+        self.set_h(false)
     }
+
     fn seh(&mut self) -> &mut Self {
-        self.set_h(true);
-        self
+        self.set_h(true)
     }
 
     fn cli(&mut self) -> &mut Self {
-        self.set_i(false);
-        self
+        self.set_i(false)
     }
     fn sei(&mut self) -> &mut Self {
-        self.set_i(true);
-        self
+        self.set_i(true)
     }
 
     fn clz(&mut self) -> &mut Self {
-        self.set_z(false);
-        self
+        self.set_z(false)
     }
     fn sez(&mut self) -> &mut Self {
-        self.set_z(true);
-        self
-    }
-
-    fn lt(&mut self) -> bool {
-        panic!()
+        self.set_z(true)
     }
 }
 
@@ -157,4 +165,3 @@ impl StatusRegTrait for StatusReg {
         self.contains(StatusReg::Z)
     }
 }
-

@@ -1,8 +1,8 @@
 use emucore::mem::MemoryIO;
 
 use super::{Bus, RegEnum, RegisterFileTrait, StatusRegTrait};
-use super::{CpuResult, Machine, };
-use crate::cpu_core::{ AddrModeEnum, IsaDatabase, Isa } ;
+use super::{CpuResult, Machine};
+use crate::cpu_core::{AddrModeEnum, Isa, IsaDatabase};
 
 lazy_static::lazy_static! {
     pub static ref ISA_DBASE : IsaDatabase = {
@@ -26,13 +26,12 @@ fn bool_as_u8(m: bool) -> u8 {
 pub struct Ins<'a, A, R, M>
 where
     A: Bus,
-    R: RegisterFileTrait+ StatusRegTrait,
+    R: RegisterFileTrait + StatusRegTrait,
     M: MemoryIO,
 {
     pub bus: A,
     pub m: &'a mut Machine<M, R>,
 }
-
 
 ////////////////////////////////////////////////////////////////////////////////
 // Utils
@@ -293,7 +292,7 @@ where
 
     #[inline]
     pub fn jmp(&mut self) -> CpuResult<()> {
-        let addr = A::fetch_operand_16(&mut self.m)?;
+        let addr = A::fetch_effective_address(&mut self.m)?;
         self.m.regs.set_pc(addr);
         Ok(())
     }
@@ -330,7 +329,7 @@ where
 
     #[inline]
     pub fn jsr(&mut self) -> CpuResult<()> {
-        let addr = A::fetch_operand_16(self.m)?;
+        let addr = A::fetch_effective_address(self.m)?;
         let pc = self.m.regs.pc();
         self.m.push_word(pc)?;
         self.m.regs.set_pc(addr);
@@ -379,10 +378,9 @@ where
 
     #[inline]
     pub fn com(&mut self) -> CpuResult<()> {
-        let val = !A::fetch_operand(self.m)?;
-        A::store_byte(self.m, val)?;
+        let (_,new) = A::read_mod_write(self.m, |v| !v)?;
         let regs = self.regs_mut();
-        regs.sec().clv().set_nz_from_u8(val);
+        regs.sec().clv().set_nz_from_u8(new);
         Ok(())
     }
 
@@ -672,21 +670,17 @@ where
 
     #[inline]
     pub fn inc(&mut self) -> CpuResult<()> {
-        let val = self.fetch_operand()?;
-        let new_val = val.wrapping_add(1);
-        A::store_byte(self.m, new_val)?;
-        self.m.regs.set_nz_from_u8(new_val);
-        self.m.regs.set_v(new_val < val);
+        let (old,new) = A::read_mod_write(self.m, |v| v.wrapping_add(1))?;
+        self.m.regs.set_nz_from_u8(new);
+        self.m.regs.set_v(new < old);
         Ok(())
     }
 
     #[inline]
     pub fn dec(&mut self) -> CpuResult<()> {
-        let val = self.fetch_operand()?;
-        let new_val = val.wrapping_sub(1);
-        A::store_byte(self.m, new_val)?;
-        self.m.regs.set_nz_from_u8(new_val);
-        self.m.regs.set_v(new_val > val);
+        let (old,new) = A::read_mod_write(self.m, |v| v.wrapping_sub(1))?;
+        self.m.regs.set_nz_from_u8(new);
+        self.m.regs.set_v(new > old);
         Ok(())
     }
 }
@@ -866,7 +860,7 @@ where
     fn st_mem_8(&mut self, val: u8) -> CpuResult<()> {
         self.regs_mut().set_nz_from_u8(val).clv();
         let addr = A::fetch_effective_address(&mut self.m)?;
-        self.m.mem_mut().store_byte(addr as usize,val)?;
+        self.m.mem_mut().store_byte(addr as usize, val)?;
         Ok(())
     }
 
@@ -874,7 +868,7 @@ where
     fn st_mem_16(&mut self, val: u16) -> CpuResult<()> {
         self.regs_mut().set_nz_from_u16(val).clv();
         let addr = A::fetch_effective_address(&mut self.m)?;
-        self.m.mem_mut().store_word(addr as usize,val)?;
+        self.m.mem_mut().store_word(addr as usize, val)?;
         Ok(())
     }
 

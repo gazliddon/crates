@@ -1,10 +1,46 @@
 use super::{diss, CpuResult, DisResult, Disassmbly, RegisterFileTrait, StatusRegTrait};
 use crate::cpu::Ins;
+use crate::cpu_core::u8_sign_extend;
 
-use emucore::{
-    mem::{MemResult, MemoryIO},
-    traits::FlagsTrait,
-};
+use emucore::mem::{MemResult, MemoryIO};
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub enum CpuState {
+    NmiPending,
+    IrqPending,
+    ResetPending,
+    Running,
+}
+
+impl CpuState {
+    pub fn new<M, R>(m: &Machine<M, R>) -> Self
+    where
+        M: MemoryIO,
+        R: RegisterFileTrait + StatusRegTrait,
+    {
+        if m.reset {
+            CpuState::ResetPending
+        } else if m.nmi {
+            CpuState::NmiPending
+        } else if m.irq && !m.regs.i() {
+            CpuState::IrqPending
+        } else {
+            CpuState::Running
+        }
+
+    }
+    pub fn will_interrupt(&self) -> bool {
+        use CpuState::*;
+
+        match self {
+            NmiPending | IrqPending | ResetPending => true,
+            Running => false,
+        }
+    }
+    pub fn will_run(&self) -> bool {
+        !self.will_interrupt()
+    }
+}
 
 pub struct Machine<M, R>
 where
@@ -14,18 +50,13 @@ where
     pub regs: R,
     pub mem: M,
     pub cycle: usize,
-    pub irq: bool,
     pub nmi: bool,
     pub reset: bool,
+    pub irq: bool,
+    pub wai: bool,
 }
 
-fn u8_sign_extend(byte: u8) -> u16 {
-    if (byte & 0x80) == 0x80 {
-        byte as u16
-    } else {
-        (byte as u16) | 0xff00
-    }
-}
+
 impl<M, R> Machine<M, R>
 where
     M: MemoryIO,
@@ -33,6 +64,10 @@ where
 {
     pub fn diss<'a>(&'a self, addr: usize) -> DisResult<Disassmbly<'a>> {
         diss(self.mem(), addr)
+    }
+
+    pub fn get_cpu_state(&self) -> CpuState {
+        CpuState::new(self)
     }
 }
 
@@ -45,6 +80,11 @@ pub enum StepResult {
         next_pc: usize,
         cycles: usize,
     },
+}
+impl Default for StepResult {
+    fn default() -> Self {
+        Self::new(0,0,0)
+    }
 }
 
 impl StepResult {
@@ -62,19 +102,6 @@ where
     M: MemoryIO,
     R: RegisterFileTrait + StatusRegTrait,
 {
-    pub fn step_cycles(&mut self, cycles: usize) -> CpuResult<()> {
-        self.cycle = 0;
-
-        loop {
-            if self.cycle >= cycles {
-                break;
-            } else {
-                self.step()?;
-            }
-        }
-
-        Ok(())
-    }
 
     pub fn interrupt(&mut self, vec_addr: usize) -> CpuResult<usize> {
         let pc = self.regs.pc();
@@ -97,52 +124,75 @@ where
         Ok(addr.into())
     }
 
+    pub fn step_cycles(&mut self, cycles: usize) -> CpuResult<()> {
+        self.cycle = 0;
+
+        loop {
+            if self.cycle >= cycles {
+                break;
+            } else {
+                self.step()?;
+            }
+        }
+
+        Ok(())
+    }
+
     pub fn step(&mut self) -> CpuResult<StepResult> {
         use super::addrmodes::*;
         let cycle = self.cycle;
 
         let pc = self.regs.pc() as usize;
 
-        if self.reset {
-            self.reset = false;
-            let v = self.mem_mut().load_word(0xfffe)?;
-            self.regs.set_pc(v);
-            self.regs.sei();
-            self.cycle += 1;
-            Ok(StepResult::Reset(v.into()))
-        } else if self.nmi {
-            self.nmi = false;
-            let pc = self.interrupt(0xfffC)?;
-            self.cycle += 1;
-            Ok(StepResult::Nmi(pc))
-        } else if self.irq && !self.regs.i() {
-            let pc = self.interrupt(0xfff8)?;
-            self.irq = false;
-            self.cycle += 1;
-            Ok(StepResult::Irq(pc))
-        } else {
-            let addr = self.regs.pc();
-            let op_code = self.mem_mut().load_byte(addr as usize)?;
-            self.regs.inc_pc();
+        use CpuState::*;
 
-            macro_rules! handle_op {
-                ($action:ident, $addr:ident, $cycles:expr, $size:expr) => {{
-                    let mut ins = Ins {
-                        bus: $addr {},
-                        m: self,
-                    };
-                    ins.$action()?;
-                    self.cycle += $cycles;
-                }};
+        match self.get_cpu_state() {
+            NmiPending => {
+                let pc = self.interrupt(0xfffC)?;
+                self.nmi = false;
+                self.cycle += 1;
+                Ok(StepResult::Nmi(pc))
+            }
+            IrqPending => {
+                let pc = self.interrupt(0xfff8)?;
+                self.irq = false;
+                self.cycle += 1;
+                Ok(StepResult::Irq(pc))
             }
 
-            let _ = op_table!(op_code, { panic!("NOT IMP") });
+            ResetPending => {
+                self.reset = false;
+                let v = self.mem_mut().load_word(0xfffe)?;
+                self.regs.set_pc(v);
+                self.regs.sei();
+                self.cycle += 1;
+                Ok(StepResult::Reset(v.into()))
+            }
 
-            Ok(StepResult::new(
-                pc,
-                self.regs.pc().into(),
-                self.cycle - cycle,
-            ))
+            Running => {
+                let addr = self.regs.pc();
+                let op_code = self.mem_mut().load_byte(addr as usize)?;
+                self.regs.inc_pc();
+
+                macro_rules! handle_op {
+                    ($action:ident, $addr:ident, $cycles:expr, $size:expr) => {{
+                        let mut ins = Ins {
+                            bus: $addr {},
+                            m: self,
+                        };
+                        ins.$action()?;
+                        self.cycle += $cycles;
+                    }};
+                }
+
+                let _ = op_table!(op_code, { panic!("NOT IMP PC: {:04x} {:02x}", addr,op_code ) });
+
+                Ok(StepResult::new(
+                    pc,
+                    self.regs.pc().into(),
+                    self.cycle - cycle,
+                ))
+            }
         }
     }
 
@@ -166,6 +216,7 @@ where
             irq: false,
             reset: false,
             nmi: false,
+            wai: false,
         }
     }
 
@@ -199,13 +250,6 @@ where
         Ok(byte)
     }
 
-    // pub fn fetch_word(&mut self) -> MemResult<u16> {
-    //     let pc = self.regs.pc();
-    //     let b = self.mem.load_word(pc as usize)?;
-    //     self.inc_inc_pc();
-    //     Ok(b)
-    // }
-
     pub fn mem(&self) -> &M {
         &self.mem
     }
@@ -214,10 +258,20 @@ where
     // [[SP] - 1] ← [val(HI)],
     // [SP] ← [SP] - 2,
     pub fn push_word(&mut self, val: u16) -> MemResult<()> {
-        let sp = self.regs.sp().wrapping_sub(1);
-        self.mem.store_word(sp as usize, val)?;
-        self.regs.set_sp(sp.wrapping_sub(1));
-        Ok(())
+        let lo = (val & 0xff) as u8;
+        let hi = (val >> 8) as u8;
+
+        self.push_byte(lo)?;
+        self.push_byte(hi)
+    }
+
+    // [res(HI)] ← [[SP] + 1],
+    // [res(LO)] ← [[SP] + 2],
+    // [SP] ← [SP] + 2
+    pub fn pop_word(&mut self) -> MemResult<u16> {
+        let hi = self.pop_byte()?;
+        let lo = self.pop_byte()?;
+        Ok(lo as u16 | (( hi as u16 ) << 8) )
     }
 
     // [[SP]] ← [A], [SP] ← [SP] - 1
@@ -228,15 +282,6 @@ where
         Ok(())
     }
 
-    // [res(HI)] ← [[SP] + 1],
-    // [res(LO)] ← [[SP] + 2],
-    // [SP] ← [SP] + 2
-    pub fn pop_word(&mut self) -> MemResult<u16> {
-        let sp = self.regs.sp().wrapping_add(1);
-        let word = self.mem.load_word(sp as usize)?;
-        self.regs.set_sp(sp.wrapping_add(1));
-        Ok(word)
-    }
 
     //[SP] ← [SP] + 1, [A] ← [[SP]]
     pub fn pop_byte(&mut self) -> MemResult<u8> {
