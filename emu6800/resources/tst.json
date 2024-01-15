@@ -1,0 +1,46 @@
+{
+  "alu": {
+    "com": {
+      "flags_written": "N|V|C|Z"
+    }
+  },
+
+  "instructions": [
+    {
+      "mnenomic": "cmp",
+      "operand": "Extended",
+      "dest": "Operand",
+      "alu": "com",
+      "opcode": 115,
+      "cycles": 6,
+      "size": 3
+    }
+  ],
+  "Com": {
+    "flags_written": "N|V|C|Z",
+
+    "addr_modes": {
+      "Extended": {
+        "src": "",
+        "opcode": 115,
+        "cycles": 6,
+        "size": 3
+      },
+      "AccB": {
+        "opcode": 83,
+        "cycles": 2,
+        "size": 1
+      },
+      "AccA": {
+        "opcode": 67,
+        "cycles": 2,
+        "size": 1
+      },
+      "Indexed": {
+        "opcode": 99,
+        "cycles": 7,
+        "size": 2
+      }
+    }
+  }
+}

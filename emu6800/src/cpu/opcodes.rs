@@ -496,7 +496,7 @@ where
         let n = new_val.is_neg();
         let z = new_val == 0;
         let v = new_val.is_neg() != val.is_neg();
-        let c = new_val > val;
+        let c = new_val < val;
 
         self.m.regs.set_n(n);
         self.m.regs.set_z(z);

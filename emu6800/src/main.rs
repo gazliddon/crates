@@ -52,35 +52,6 @@ fn try_diss() {
 
 }
 
-fn try_step() { 
-    let mut m  = make_machine();
-    let data = [
-        0x86, 0x3e, 0xb7, 0xe4, 0x1d, 0x86, 0x6d, 0xb7, 0xe4, 0x1e, 0x86, 0x79, 0xb7, 0xe4, 0x1f,
-        0x86, 0x00, 0xb7, 0xe4, 0x20, 0x86, 0x5e, 0xb7, 0xe4, 0x21, 0x86, 0x6d, 0xb7, 0xe4, 0x22,
-        0xce, 0xf0, 0xa2, 0xff, 0xe4, 0x19, 0x7e, 0xf0, 0xbb,
-    ];
-
-    m.mem_mut().store_bytes(0, &data).unwrap();
-    m.regs.set_pc(0);
-    m.regs.sev().sei().sec();
-    println!("{}\n", m.regs);
-
-    loop {
-        let pc = m.regs.pc();
-
-        m.step().unwrap();
-        println!("{}", m.regs);
-        let d = m.diss(pc as usize);
-        if let Ok(d) = d {
-            let cycles = d.ins.opcode_data.cycles;
-            println!("{pc:04x} [ {cycles} ]  {}",  d.text);
-        } else {
-            break;
-        }
-        println!();
-    }
-}
-
 
 fn main() {
     try_diss();
