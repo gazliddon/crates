@@ -474,36 +474,27 @@ where
     R: RegisterFileTrait + StatusRegTrait,
     M: MemoryIO,
 {
-    fn do_sub(&mut self, c: bool, val: u8, op: u8) -> CpuResult<u8> {
-        let new_val = val.wrapping_sub(op).wrapping_sub(bool_as_u8(c));
-
+    fn post_math(&mut self, c: bool, new_val: u8, val : u8 ) -> CpuResult<u8> {
         let n = new_val.is_neg();
         let z = new_val == 0;
-        let v = !n;
-        let c = new_val > val;
-
+        let v = c && ( new_val.is_neg() != val.is_neg() );
         self.m.regs.set_n(n);
         self.m.regs.set_z(z);
         self.m.regs.set_v(v);
         self.m.regs.set_c(c);
-
         Ok(val)
+    }
+
+    fn do_sub(&mut self, c: bool, val: u8, op: u8) -> CpuResult<u8> {
+        let new_val = val.wrapping_sub(op).wrapping_sub(bool_as_u8(c));
+        let c = new_val > val;
+        self.post_math(c, new_val, val)
     }
 
     fn do_add(&mut self, c: bool, val: u8, op: u8) -> CpuResult<u8> {
         let new_val = val.wrapping_add(op).wrapping_add(bool_as_u8(c));
-
-        let n = new_val.is_neg();
-        let z = new_val == 0;
-        let v = new_val.is_neg() != val.is_neg();
         let c = new_val < val;
-
-        self.m.regs.set_n(n);
-        self.m.regs.set_z(z);
-        self.m.regs.set_v(v);
-        self.m.regs.set_c(c);
-
-        Ok(val)
+        self.post_math(c, new_val, val)
     }
 
     #[inline]
@@ -597,13 +588,11 @@ where
 
     #[inline]
     pub fn sbca(&mut self) -> CpuResult<()> {
-        let c = self.m.regs.c();
-        self.sub_reg(c, RegEnum::A)
+        self.sub_reg(self.m.regs.c(), RegEnum::A)
     }
     #[inline]
     pub fn sbcb(&mut self) -> CpuResult<()> {
-        let c = self.m.regs.c();
-        self.sub_reg(c, RegEnum::B)
+        self.sub_reg(self.m.regs.c(), RegEnum::B)
     }
 
     #[inline]

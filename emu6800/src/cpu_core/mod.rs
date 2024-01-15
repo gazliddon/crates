@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+#![allow(unused_imports)]
 mod isa_writer;
 mod instructions;
 mod mnemonics;

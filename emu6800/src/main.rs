@@ -1,26 +1,12 @@
-#![allow(unused_imports)]
-#![allow(dead_code)]
-
-use emu6800::cpu_core::{AddrModeEnum, Mnemonic, Isa, IsaDatabase};
-
 use emu6800::cpu::{
-    self, Bus, Ins, Machine, RegisterFile, RegisterFileTrait,
-    StatusRegTrait, decoder::print_it,
+    Machine, RegisterFile, 
 };
 
 use emucore::{
-    instructions::InstructionInfoTrait,
     mem::{MemBlock, MemoryIO},
     byteorder::*,
 };
-use std::{
-    collections::{HashMap, HashSet},
-    fmt::format,
-    str::FromStr, io::BufWriter,
-};
 
-use serde::{Deserialize, Serialize};
-use serde_json::{Result, Value};
 
 static SND : &[u8;2048] = include_bytes!("../resources/sg.snd");
 
