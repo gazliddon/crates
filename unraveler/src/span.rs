@@ -163,7 +163,7 @@ where
 
     fn match_kind(&self, k: I::Kind) -> bool {
         self.as_slice()
-            .get(0)
+            .first()
             .map(|i| i.is_kind(i.get_kind()))
             .unwrap_or(false)
     }
