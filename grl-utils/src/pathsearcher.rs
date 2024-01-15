@@ -63,6 +63,6 @@ impl PathSearcher for Paths {
             return Ok(file_name.to_path_buf());
         }
 
-        Err(FileError::FileNotFound(file_name.to_path_buf().into(), tried))
+        Err(FileError::FileNotFound(file_name.to_path_buf(), tried))
     }
 }

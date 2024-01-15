@@ -473,7 +473,7 @@ where
     I: Collection + Clone + Copy,
     E: ParseError<I>,
 {
-    move |i: I| p.parse(i).and_then(|e| mapper(e))
+    move |i: I| p.parse(i).and_then(mapper)
 }
 
 pub fn match_span<P, I, O, E>(mut p: P) -> impl FnMut(I) -> Result<(I, (I, O)), E> + Copy + Clone

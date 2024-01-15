@@ -26,8 +26,6 @@ pub fn gen_instruction_str() -> String{
         } 
     }
 
-    let out = out.join("\n");
-
-    out
+    out.join("\n")
 }
 

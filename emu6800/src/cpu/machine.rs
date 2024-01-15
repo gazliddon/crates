@@ -62,7 +62,7 @@ where
     M: MemoryIO,
     R: RegisterFileTrait + StatusRegTrait,
 {
-    pub fn diss<'a>(&'a self, addr: usize) -> DisResult<Disassmbly<'a>> {
+    pub fn diss<'a>(&self, addr: usize) -> DisResult<Disassmbly<'a>> {
         diss(self.mem(), addr)
     }
 
@@ -148,7 +148,7 @@ where
 
         match self.get_cpu_state() {
             NmiPending => {
-                let pc = self.interrupt(0xfffC)?;
+                let pc = self.interrupt(0xfffc)?;
                 self.nmi = false;
                 self.cycle += 1;
                 Ok(StepResult::Nmi(pc))
@@ -185,7 +185,7 @@ where
                     }};
                 }
 
-                let _ = op_table!(op_code, { panic!("NOT IMP PC: {:04x} {:02x}", addr,op_code ) });
+                op_table!(op_code, { panic!("NOT IMP PC: {:04x} {:02x}", addr,op_code ) });
 
                 Ok(StepResult::new(
                     pc,

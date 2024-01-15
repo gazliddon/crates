@@ -28,8 +28,7 @@ fn make_machine() -> Machine<MemBlock<BigEndian>, RegisterFile> {
     let regs = RegisterFile::default();
     let mut mem: MemBlock<BigEndian> = MemBlock::new("test", false, &(0..65536));
     mem.store_bytes(0xf800, SND).unwrap();
-    let machine = Machine::new(mem, regs);
-    machine
+    Machine::new(mem, regs)
 }
 
 fn try_diss() {
@@ -46,7 +45,7 @@ fn try_diss() {
             println!("{pc:04x} {:19} [ {cycles} ]    {}", d.mem_string, d.text);
             pc = d.next_pc;
         } else {
-            println!("Uknown: {pc:04x} : {:02x}", m.mem().inspect_byte(pc as usize).unwrap());
+            println!("Uknown: {pc:04x} : {:02x}", m.mem().inspect_byte(pc ).unwrap());
             break;
         }
     }
@@ -78,7 +77,7 @@ fn try_step() {
         } else {
             break;
         }
-        println!("");
+        println!();
     }
 }
 

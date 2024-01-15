@@ -6,8 +6,8 @@ use serde::Serialize;
 use super::Machine;
 use super::{RegisterFileTrait, StatusRegTrait};
 
-use crate::cpu_core::AddrModeEnum;
 use crate::cpu_core::calc_rel;
+use crate::cpu_core::AddrModeEnum;
 
 pub fn u8_sign_extend(byte: u8) -> u16 {
     if (byte & 0x80) == 0x80 {
@@ -57,11 +57,10 @@ pub trait Bus {
 
     fn read_mod_write<M: MemoryIO, R: RegisterFileTrait + StatusRegTrait, F>(
         _m: &mut Machine<M, R>,
-        _f: F
-    ) -> MemResult<(u8,u8)> 
-        where
-            F: Fn(u8) -> u8
-
+        _f: F,
+    ) -> MemResult<(u8, u8)>
+    where
+        F: Fn(u8) -> u8,
     {
         panic!("Not implemented read_mod_write for {}", Self::get_name())
     }
@@ -85,16 +84,15 @@ impl Bus for AccA {
 
     fn read_mod_write<M: MemoryIO, R: RegisterFileTrait + StatusRegTrait, F>(
         m: &mut Machine<M, R>,
-        f: F
-    ) -> MemResult<(u8,u8)> 
-        where
-            F: Fn(u8) -> u8
-
+        f: F,
+    ) -> MemResult<(u8, u8)>
+    where
+        F: Fn(u8) -> u8,
     {
         let old = Self::fetch_operand(m)?;
         let new = f(old);
         Self::store_byte(m, new)?;
-        Ok((old,new))
+        Ok((old, new))
     }
 
     fn fetch_operand<M: MemoryIO, R: RegisterFileTrait + StatusRegTrait>(
@@ -119,18 +117,16 @@ impl Bus for AccB {
 
     fn read_mod_write<M: MemoryIO, R: RegisterFileTrait + StatusRegTrait, F>(
         m: &mut Machine<M, R>,
-        f: F
-    ) -> MemResult<(u8,u8)> 
-        where
-            F: Fn(u8) -> u8
-
+        f: F,
+    ) -> MemResult<(u8, u8)>
+    where
+        F: Fn(u8) -> u8,
     {
         let old = Self::fetch_operand(m)?;
         let new = f(old);
-        Self::store_byte(m,new)?;
-        Ok((old,new))
+        Self::store_byte(m, new)?;
+        Ok((old, new))
     }
-
 
     fn fetch_operand<M: MemoryIO, R: RegisterFileTrait + StatusRegTrait>(
         _m: &mut Machine<M, R>,
@@ -181,21 +177,19 @@ impl Bus for Extended {
         Immediate::fetch_operand_16(m)
     }
 
-
     fn read_mod_write<M: MemoryIO, R: RegisterFileTrait + StatusRegTrait, F>(
         m: &mut Machine<M, R>,
-        f: F
-    ) -> MemResult<(u8,u8)> 
-        where
-            F: Fn(u8) -> u8
-
+        f: F,
+    ) -> MemResult<(u8, u8)>
+    where
+        F: Fn(u8) -> u8,
     {
         let addr = Self::fetch_effective_address(m)?;
         let mem = m.mem_mut();
         let old = mem.load_byte(addr as usize)?;
         let new = f(old);
         mem.store_byte(addr.into(), new)?;
-        Ok((old,new))
+        Ok((old, new))
     }
 
     fn fetch_operand_16<M: MemoryIO, R: RegisterFileTrait + StatusRegTrait>(
@@ -213,9 +207,9 @@ impl Bus for Extended {
     }
 
     fn store_byte<M: MemoryIO, R: RegisterFileTrait + StatusRegTrait>(
-            m: &mut Machine<M, R>,
-            val: u8,
-        ) -> MemResult<()> {
+        m: &mut Machine<M, R>,
+        val: u8,
+    ) -> MemResult<()> {
         let addr = Self::fetch_effective_address(m)?;
         m.mem_mut().store_byte(addr.into(), val)
     }
@@ -229,8 +223,7 @@ impl Bus for Direct {
     fn fetch_effective_address<M: MemoryIO, R: RegisterFileTrait + StatusRegTrait>(
         m: &mut Machine<M, R>,
     ) -> MemResult<u16> {
-        let offset = Immediate::fetch_operand(m)? as u16;
-        Ok(offset as u16)
+        Immediate::fetch_operand(m).map(|b| b as u16)
     }
     fn fetch_operand_16<M: MemoryIO, R: RegisterFileTrait + StatusRegTrait>(
         _m: &mut Machine<M, R>,
@@ -261,19 +254,18 @@ impl Bus for Indexed {
     }
 
     fn fetch_operand<M: MemoryIO, R: RegisterFileTrait + StatusRegTrait>(
-            m: &mut Machine<M, R>,
-        ) -> MemResult<u8> {
+        m: &mut Machine<M, R>,
+    ) -> MemResult<u8> {
         let addr = Self::fetch_effective_address(m)?;
         m.mem_mut().load_byte(addr.into())
     }
 
     fn fetch_operand_16<M: MemoryIO, R: RegisterFileTrait + StatusRegTrait>(
-            m: &mut Machine<M, R>,
-        ) -> MemResult<u16> {
+        m: &mut Machine<M, R>,
+    ) -> MemResult<u16> {
         let addr = Self::fetch_effective_address(m)?;
         m.mem_mut().load_word(addr.into())
     }
-
 
     fn store_byte<M: MemoryIO, R: RegisterFileTrait + StatusRegTrait>(
         m: &mut Machine<M, R>,
@@ -294,14 +286,14 @@ impl Bus for Relative {
     }
 
     fn fetch_operand_16<M: MemoryIO, R: RegisterFileTrait + StatusRegTrait>(
-            m: &mut Machine<M, R>,
-        ) -> MemResult<u16> {
+        m: &mut Machine<M, R>,
+    ) -> MemResult<u16> {
         Self::fetch_effective_address(m)
     }
 
     fn fetch_effective_address<M: MemoryIO, R: RegisterFileTrait + StatusRegTrait>(
-            m: &mut Machine<M, R>,
-        ) -> MemResult<u16> {
+        m: &mut Machine<M, R>,
+    ) -> MemResult<u16> {
         let op = Immediate::fetch_operand(m)?;
         let pc = m.regs.pc();
         let dest = calc_rel(pc, op);

@@ -17,7 +17,7 @@ pub enum RegEnum {
 }
 
 bitflags::bitflags! {
-    #[derive(Clone, Copy, Debug,Deserialize, Serialize, PartialEq)]
+    #[derive(Clone, Copy, Debug,Deserialize, Serialize, PartialEq, Default)]
     #[serde(transparent)]
     pub struct StatusReg : u8
         {
@@ -28,12 +28,6 @@ bitflags::bitflags! {
             const V  = 1 << 1;
             const C = 1 << 0;
         }
-}
-
-impl Default for StatusReg {
-    fn default() -> Self {
-        Self(Default::default())
-    }
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Hash, Eq, Deserialize, Serialize)]

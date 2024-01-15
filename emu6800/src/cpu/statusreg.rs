@@ -18,10 +18,6 @@ pub trait StatusRegTrait {
     fn i(&self) -> bool;
     fn z(&self) -> bool;
 
-    fn neg(&self) -> bool {
-        self.n()
-    }
-
     fn eq(&self) -> bool {
         self.z()
     }
@@ -30,17 +26,12 @@ pub trait StatusRegTrait {
         self.z() || self.c()
     }
 
-    /// less than or equal to zero
     fn le(&self) -> bool {
         self.z() || (self.n() != self.v())
     }
 
     fn lt(&self) -> bool {
         self.n() != self.v()
-    }
-
-    fn plus(&self) -> bool {
-        !self.neg()
     }
 
     fn ne(&self) -> bool {

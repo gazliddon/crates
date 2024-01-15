@@ -292,7 +292,7 @@ where
 
     #[inline]
     pub fn jmp(&mut self) -> CpuResult<()> {
-        let addr = A::fetch_effective_address(&mut self.m)?;
+        let addr = A::fetch_effective_address(self.m)?;
         self.m.regs.set_pc(addr);
         Ok(())
     }
@@ -378,7 +378,7 @@ where
 
     #[inline]
     pub fn com(&mut self) -> CpuResult<()> {
-        let (_,new) = A::read_mod_write(self.m, |v| !v)?;
+        let (_, new) = A::read_mod_write(self.m, |v| !v)?;
         let regs = self.regs_mut();
         regs.sec().clv().set_nz_from_u8(new);
         Ok(())
@@ -670,7 +670,7 @@ where
 
     #[inline]
     pub fn inc(&mut self) -> CpuResult<()> {
-        let (old,new) = A::read_mod_write(self.m, |v| v.wrapping_add(1))?;
+        let (old, new) = A::read_mod_write(self.m, |v| v.wrapping_add(1))?;
         self.m.regs.set_nz_from_u8(new);
         self.m.regs.set_v(new < old);
         Ok(())
@@ -678,7 +678,7 @@ where
 
     #[inline]
     pub fn dec(&mut self) -> CpuResult<()> {
-        let (old,new) = A::read_mod_write(self.m, |v| v.wrapping_sub(1))?;
+        let (old, new) = A::read_mod_write(self.m, |v| v.wrapping_sub(1))?;
         self.m.regs.set_nz_from_u8(new);
         self.m.regs.set_v(new > old);
         Ok(())
@@ -859,7 +859,7 @@ where
     #[inline]
     fn st_mem_8(&mut self, val: u8) -> CpuResult<()> {
         self.regs_mut().set_nz_from_u8(val).clv();
-        let addr = A::fetch_effective_address(&mut self.m)?;
+        let addr = A::fetch_effective_address(self.m)?;
         self.m.mem_mut().store_byte(addr as usize, val)?;
         Ok(())
     }
@@ -867,7 +867,7 @@ where
     #[inline]
     fn st_mem_16(&mut self, val: u16) -> CpuResult<()> {
         self.regs_mut().set_nz_from_u16(val).clv();
-        let addr = A::fetch_effective_address(&mut self.m)?;
+        let addr = A::fetch_effective_address(self.m)?;
         self.m.mem_mut().store_word(addr as usize, val)?;
         Ok(())
     }
