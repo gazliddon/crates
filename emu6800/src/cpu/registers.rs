@@ -227,7 +227,7 @@ impl std::fmt::Display for RegEnum {
     }
 }
   
-#[derive(Clone,Debug,PartialEq, Default)]
+#[derive(Clone,Debug,PartialEq, Default, Copy)]
 pub struct RegisterFile {
     pub a: u8,
     pub b: u8,

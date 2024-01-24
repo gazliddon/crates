@@ -27,7 +27,6 @@ impl CpuState {
         } else {
             CpuState::Running
         }
-
     }
     pub fn will_interrupt(&self) -> bool {
         use CpuState::*;
@@ -62,6 +61,8 @@ where
     M: MemoryIO,
     R: RegisterFileTrait + StatusRegTrait,
 {
+    pub fn get_state(&self) {
+    }
     pub fn diss<'a>(&self, addr: usize) -> DisResult<Disassmbly<'a>> {
         diss(self.mem(), addr)
     }
@@ -83,7 +84,7 @@ pub enum StepResult {
 }
 impl Default for StepResult {
     fn default() -> Self {
-        Self::new(0,0,0)
+        Self::new(0, 0, 0)
     }
 }
 
@@ -102,7 +103,6 @@ where
     M: MemoryIO,
     R: RegisterFileTrait + StatusRegTrait,
 {
-
     pub fn interrupt(&mut self, vec_addr: usize) -> CpuResult<usize> {
         let pc = self.regs.pc();
         let x = self.regs.x();
@@ -139,6 +139,11 @@ where
     }
 
     pub fn step(&mut self) -> CpuResult<StepResult> {
+        const IRQ_VEC: usize = 0xfff8;
+        const SWI_VEC: usize = 0xfffa;
+        const NMI_VEC: usize = 0xfffc;
+        const RESET_VEC: usize = 0xfffe;
+
         use super::addrmodes::*;
         let cycle = self.cycle;
 
@@ -148,13 +153,13 @@ where
 
         match self.get_cpu_state() {
             NmiPending => {
-                let pc = self.interrupt(0xfffc)?;
+                let pc = self.interrupt(NMI_VEC)?;
                 self.nmi = false;
                 self.cycle += 1;
                 Ok(StepResult::Nmi(pc))
             }
             IrqPending => {
-                let pc = self.interrupt(0xfff8)?;
+                let pc = self.interrupt(IRQ_VEC)?;
                 self.irq = false;
                 self.cycle += 1;
                 Ok(StepResult::Irq(pc))
@@ -162,7 +167,7 @@ where
 
             ResetPending => {
                 self.reset = false;
-                let v = self.mem_mut().load_word(0xfffe)?;
+                let v = self.mem_mut().load_word(RESET_VEC)?;
                 self.regs.set_pc(v);
                 self.regs.sei();
                 self.cycle += 1;
@@ -185,7 +190,9 @@ where
                     }};
                 }
 
-                op_table!(op_code, { panic!("NOT IMP PC: {:04x} {:02x}", addr,op_code ) });
+                op_table!(op_code, {
+                    panic!("NOT IMP PC: {:04x} {:02x}", addr, op_code)
+                });
 
                 Ok(StepResult::new(
                     pc,
@@ -271,7 +278,7 @@ where
     pub fn pop_word(&mut self) -> MemResult<u16> {
         let hi = self.pop_byte()?;
         let lo = self.pop_byte()?;
-        Ok(lo as u16 | (( hi as u16 ) << 8) )
+        Ok(lo as u16 | ((hi as u16) << 8))
     }
 
     // [[SP]] ← [A], [SP] ← [SP] - 1
@@ -281,7 +288,6 @@ where
         self.regs.set_sp(sp.wrapping_sub(1));
         Ok(())
     }
-
 
     //[SP] ← [SP] + 1, [A] ← [[SP]]
     pub fn pop_byte(&mut self) -> MemResult<u8> {
