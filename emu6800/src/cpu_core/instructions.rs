@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use super::Mnemonic;
+use std::str::FromStr;
 
 use std::collections::{ HashMap, HashSet };
 #[derive(
@@ -34,7 +35,7 @@ bitflags::bitflags! {
 pub enum AddrModeEnum {
     AccA,
     AccB,
-    Immediate,
+    Immediate8,
     Immediate16,
     Direct,
     Extended,
@@ -54,7 +55,17 @@ pub struct Instruction {
     pub addr_modes: HashMap<AddrModeEnum, OpcodeData>,
 }
 
-#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+impl Instruction {
+    pub fn get_opcode_data(&self, _amode: AddrModeEnum) -> Option<&OpcodeData> {
+        self.addr_modes.get(&_amode)
+    }
+
+    pub fn supports(&self, amode: AddrModeEnum) -> bool {
+        self.get_opcode_data(amode).is_some()
+    }
+}
+
+#[derive(Default, Serialize, Deserialize, Debug, Clone, PartialEq)]
 /// Data for an individual opcode
 pub struct OpcodeData {
     #[serde(default)]
@@ -64,6 +75,29 @@ pub struct OpcodeData {
     pub opcode: usize,
     pub cycles: usize,
     pub size: usize,
+}
+
+impl FromStr for RegEnum {
+    type Err = ();
+    fn from_str(txt: &str) -> Result<Self, Self::Err> {
+        let x = txt.to_ascii_lowercase();
+
+        match x.as_str() {
+            "a" => Ok(RegEnum::A),
+            "b" => Ok(RegEnum::B),
+            "x" => Ok(RegEnum::X),
+            "pc" => Ok(RegEnum::PC),
+            "sp" => Ok(RegEnum::SP),
+            "sr" => Ok(RegEnum::SR),
+            _ => Err(()),
+        }
+    }
+}
+
+impl std::fmt::Display for RegEnum {
+    fn fmt(&self, _f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(_f, "{self:?}")
+    }
 }
 
 #[derive(Default, Serialize, Deserialize, Debug, Clone)]

@@ -1,8 +1,9 @@
 use emucore::mem::MemoryIO;
 
-use super::{Bus, RegEnum, RegisterFileTrait, StatusRegTrait};
+use super::{Bus, RegisterFileTrait, StatusRegTrait};
 use super::{CpuResult, Machine};
-use crate::cpu_core::{AddrModeEnum, Isa, IsaDatabase};
+use crate::cpu::{AccA, AccB};
+use crate::cpu_core::{AddrModeEnum, Isa, IsaDatabase, RegEnum};
 
 lazy_static::lazy_static! {
     pub static ref ISA_DBASE : IsaDatabase = {
@@ -375,13 +376,29 @@ where
         self.m.regs.clv();
         Ok(res)
     }
+    #[inline]
+    pub fn post_com(&mut self, new: u8) -> CpuResult<()> {
+        let regs = self.regs_mut();
+        regs.sec().clv().set_nz_from_u8(new);
+        Ok(())
+    }
 
     #[inline]
     pub fn com(&mut self) -> CpuResult<()> {
         let (_, new) = A::read_mod_write(self.m, |v| !v)?;
-        let regs = self.regs_mut();
-        regs.sec().clv().set_nz_from_u8(new);
-        Ok(())
+        self.post_com(new)
+    }
+
+    #[inline]
+    pub fn coma(&mut self) -> CpuResult<()> {
+        let (_, new) = AccA::read_mod_write(self.m, |v| !v)?;
+        self.post_com(new)
+    }
+
+    #[inline]
+    pub fn comb(&mut self) -> CpuResult<()> {
+        let (_, new) = AccB::read_mod_write(self.m, |v| !v)?;
+        self.post_com(new)
     }
 
     #[inline]
@@ -474,10 +491,10 @@ where
     R: RegisterFileTrait + StatusRegTrait,
     M: MemoryIO,
 {
-    fn post_math(&mut self, c: bool, new_val: u8, val : u8 ) -> CpuResult<u8> {
+    fn post_math(&mut self, c: bool, new_val: u8, val: u8) -> CpuResult<u8> {
         let n = new_val.is_neg();
         let z = new_val == 0;
-        let v = c && ( new_val.is_neg() != val.is_neg() );
+        let v = c && (new_val.is_neg() != val.is_neg());
         self.m.regs.set_n(n);
         self.m.regs.set_z(z);
         self.m.regs.set_v(v);
@@ -499,9 +516,20 @@ where
 
     #[inline]
     pub fn neg(&mut self) -> CpuResult<()> {
-        let val = self.m.fetch_byte()? as i8;
-        let new_val = -val;
-        A::store_byte(self.m, new_val as u8)?;
+        let (_, new) = A::read_mod_write(self.m, |v| (-(v as i8)) as u8)?;
+        A::store_byte(self.m, new as u8)?;
+        panic!()
+    }
+    #[inline]
+    pub fn nega(&mut self) -> CpuResult<()> {
+        let (_, new) = AccA::read_mod_write(self.m, |v| (-(v as i8)) as u8)?;
+        A::store_byte(self.m, new as u8)?;
+        panic!()
+    }
+    #[inline]
+    pub fn negb(&mut self) -> CpuResult<()> {
+        let (_, new) = AccB::read_mod_write(self.m, |v| (-(v as i8)) as u8)?;
+        A::store_byte(self.m, new as u8)?;
         panic!()
     }
 
@@ -656,13 +684,28 @@ where
         self.m.regs.set_x(x);
         Ok(())
     }
+    #[inline]
+    pub fn post_inc(&mut self, old: u8, new: u8) -> CpuResult<()> {
+        self.m.regs.set_nz_from_u8(new);
+        self.m.regs.set_v(new < old);
+        Ok(())
+    }
 
     #[inline]
     pub fn inc(&mut self) -> CpuResult<()> {
         let (old, new) = A::read_mod_write(self.m, |v| v.wrapping_add(1))?;
-        self.m.regs.set_nz_from_u8(new);
-        self.m.regs.set_v(new < old);
-        Ok(())
+        self.post_inc(old, new)
+    }
+
+    #[inline]
+    pub fn inca(&mut self) -> CpuResult<()> {
+        let (old, new) = AccA::read_mod_write(self.m, |v| v.wrapping_add(1))?;
+        self.post_inc(old, new)
+    }
+    #[inline]
+    pub fn incb(&mut self) -> CpuResult<()> {
+        let (old, new) = AccB::read_mod_write(self.m, |v| v.wrapping_add(1))?;
+        self.post_inc(old, new)
     }
 
     #[inline]
@@ -671,6 +714,14 @@ where
         self.m.regs.set_nz_from_u8(new);
         self.m.regs.set_v(new > old);
         Ok(())
+    }
+    #[inline]
+    pub fn deca(&mut self) -> CpuResult<()> {
+        self.dec()
+    }
+    #[inline]
+    pub fn decb(&mut self) -> CpuResult<()> {
+        self.dec()
     }
 }
 
@@ -693,10 +744,28 @@ where
         Ok(())
     }
 
+    pub fn do_asr<X: Bus>(&mut self) -> CpuResult<(u8, u8)> {
+        let ret = X::read_mod_write(self.m, |val| {
+            val.wrapping_shr(1) | if val.is_neg() { 1 << 7 } else { 0 }
+        })?;
+
+        Ok(ret)
+    }
+
     #[inline]
     pub fn asr(&mut self) -> CpuResult<()> {
-        let val = self.fetch_operand()?;
-        let new_val = val.wrapping_shr(1) | if val.is_neg() { 1 << 7 } else { 0 };
+        let (val,new_val) = self.do_asr::<A>()?;
+        self.post_shift(val.bit(7), val, new_val)
+    }
+    #[inline]
+    pub fn asra(&mut self) -> CpuResult<()> {
+        let (val,new_val) = self.do_asr::<AccA>()?;
+        self.post_shift(val.bit(7), val, new_val)
+    }
+
+    #[inline]
+    pub fn asrb(&mut self) -> CpuResult<()> {
+        let (val,new_val) = self.do_asr::<AccB>()?;
         self.post_shift(val.bit(7), val, new_val)
     }
 
@@ -709,11 +778,31 @@ where
     }
 
     #[inline]
+    pub fn asla(&mut self) -> CpuResult<()> {
+        self.asl()
+    }
+
+    #[inline]
+    pub fn aslb(&mut self) -> CpuResult<()> {
+        self.asl()
+    }
+
+    #[inline]
     pub fn lsr(&mut self) -> CpuResult<()> {
         let val = self.fetch_operand()?;
         let new_val = val.wrapping_shr(1);
         let c = val.bit(0);
         self.post_shift(c, val, new_val)
+    }
+
+    #[inline]
+    pub fn lsra(&mut self) -> CpuResult<()> {
+        self.lsr()
+    }
+
+    #[inline]
+    pub fn lsrb(&mut self) -> CpuResult<()> {
+        self.lsr()
     }
 
     #[inline]
@@ -723,11 +812,25 @@ where
         self.post_shift(val.bit(0), val, new_val)
     }
 
+    pub fn rora(&mut self) -> CpuResult<()> {
+        self.ror()
+    }
+
+    pub fn rorb(&mut self) -> CpuResult<()> {
+        self.ror()
+    }
+
     #[inline]
     pub fn rol(&mut self) -> CpuResult<()> {
         let val = self.fetch_operand()?;
         let new_val = val.wrapping_shl(1) | if self.m.regs.c() { 1 } else { 0 };
         self.post_shift(val.bit(1), val, new_val)
+    }
+    pub fn rola(&mut self) -> CpuResult<()> {
+        self.rol()
+    }
+    pub fn rolb(&mut self) -> CpuResult<()> {
+        self.rol()
     }
 }
 
@@ -899,6 +1002,14 @@ where
         A::store_byte(self.m, 0)?;
         Ok(())
     }
+    #[inline]
+    pub fn clra(&mut self) -> CpuResult<()> {
+        self.clr()
+    }
+    #[inline]
+    pub fn clrb(&mut self) -> CpuResult<()> {
+        self.clr()
+    }
 
     #[inline]
     fn do_bit(&mut self, val: u8) -> CpuResult<()> {
@@ -928,10 +1039,24 @@ where
     }
 
     #[inline]
-    pub fn tst(&mut self) -> CpuResult<()> {
-        let val = self.fetch_operand()?;
+    pub fn post_tst(&mut self, val: u8) -> CpuResult<()> {
         let regs = self.regs_mut();
         regs.set_nz_from_u8(val).clv().clc();
         Ok(())
+    }
+    #[inline]
+    pub fn tst(&mut self) -> CpuResult<()> {
+        let val = self.fetch_operand()?;
+        self.post_tst(val)
+    }
+    #[inline]
+    pub fn tsta(&mut self) -> CpuResult<()> {
+        let val = AccA::fetch_operand(self.m)?;
+        self.post_tst(val)
+    }
+    #[inline]
+    pub fn tstb(&mut self) -> CpuResult<()> {
+        let val = AccB::fetch_operand(self.m)?;
+        self.post_tst(val)
     }
 }

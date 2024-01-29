@@ -83,7 +83,7 @@ pub fn diss_operand<M: MemoryIO>(mem: &M, addr: u16, ins: &InstructionInfo) -> D
 
         AccB => "b".to_owned(),
 
-        Immediate => {
+        Immediate8 => {
             let b = mem.inspect_byte(addr_usize)?;
             format!("#0x{b:02x}")
         }

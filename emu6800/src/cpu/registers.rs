@@ -1,8 +1,9 @@
 /// Registers, Flags and regiter store
 use std::{fmt::Debug, hash::Hash, str::FromStr};
 use serde::{Deserialize, Serialize};
-use crate::cpu_core::StatusReg;
+use crate::cpu_core::{ StatusReg, RegEnum };
 use super::StatusRegTrait;
+
 
 ////////////////////////////////////////////////////////////////////////////////
 pub trait RegisterFileTrait : std::fmt::Display {
@@ -190,43 +191,6 @@ impl RegisterFileTrait for RegisterFile {
 
 }
 
-#[derive(
-    Copy, Debug, Clone, Hash, Ord, Eq, PartialEq, PartialOrd, Default, Serialize, Deserialize,
-)]
-
-pub enum RegEnum {
-    #[default]
-    A,
-    B,
-    X,
-    PC,
-    SP,
-    SR,
-}
-
-impl FromStr for RegEnum {
-    type Err = ();
-    fn from_str(txt: &str) -> Result<Self, Self::Err> {
-        let x = txt.to_ascii_lowercase();
-
-        match x.as_str() {
-            "a" => Ok(RegEnum::A),
-            "b" => Ok(RegEnum::B),
-            "x" => Ok(RegEnum::X),
-            "*" | "pc" => Ok(RegEnum::PC),
-            "sp" => Ok(RegEnum::SP),
-            "SR" => Ok(RegEnum::SR),
-            _ => Err(()),
-        }
-    }
-}
-
-impl std::fmt::Display for RegEnum {
-    fn fmt(&self, _f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(_f, "{self:?}")
-    }
-}
-  
 #[derive(Clone,Debug,PartialEq, Default, Copy)]
 pub struct RegisterFile {
     pub a: u8,

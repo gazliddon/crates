@@ -4,7 +4,7 @@
 use super::{ IsaDatabase, Isa };
 
 lazy_static::lazy_static! {
-    static ref DBASE : IsaDatabase = {
+    pub static ref DBASE : IsaDatabase = {
         let txt = include_str!("../../resources/opcodes6800.json");
         let isa: Isa = serde_json::from_str(txt).unwrap();
         IsaDatabase::new(&isa)

@@ -68,8 +68,8 @@ pub trait Bus {
 
 pub struct AccA;
 pub struct AccB;
-pub struct Immediate;
-pub type Immediate16 = Immediate;
+pub struct Immediate8;
+pub type Immediate16 = Immediate8;
 pub struct Direct;
 pub struct Extended;
 pub struct Indexed;
@@ -143,7 +143,7 @@ impl Bus for AccB {
     }
 }
 
-impl Bus for Immediate {
+impl Bus for Immediate8 {
     fn get_name() -> String {
         "Immediate".to_owned()
     }
@@ -174,7 +174,7 @@ impl Bus for Extended {
     fn fetch_effective_address<M: MemoryIO, R: RegisterFileTrait + StatusRegTrait>(
         m: &mut Machine<M, R>,
     ) -> MemResult<u16> {
-        Immediate::fetch_operand_16(m)
+        Immediate8::fetch_operand_16(m)
     }
 
     fn read_mod_write<M: MemoryIO, R: RegisterFileTrait + StatusRegTrait, F>(
@@ -223,7 +223,7 @@ impl Bus for Direct {
     fn fetch_effective_address<M: MemoryIO, R: RegisterFileTrait + StatusRegTrait>(
         m: &mut Machine<M, R>,
     ) -> MemResult<u16> {
-        Immediate::fetch_operand(m).map(|b| b as u16)
+        Immediate8::fetch_operand(m).map(|b| b as u16)
     }
     fn fetch_operand_16<M: MemoryIO, R: RegisterFileTrait + StatusRegTrait>(
         _m: &mut Machine<M, R>,
@@ -248,7 +248,7 @@ impl Bus for Indexed {
     fn fetch_effective_address<M: MemoryIO, R: RegisterFileTrait + StatusRegTrait>(
         m: &mut Machine<M, R>,
     ) -> MemResult<u16> {
-        let offset = Immediate::fetch_operand(m)? as u16;
+        let offset = Immediate8::fetch_operand(m)? as u16;
         let dst = m.regs.x().wrapping_add(offset);
         Ok(dst)
     }
@@ -294,7 +294,7 @@ impl Bus for Relative {
     fn fetch_effective_address<M: MemoryIO, R: RegisterFileTrait + StatusRegTrait>(
         m: &mut Machine<M, R>,
     ) -> MemResult<u16> {
-        let op = Immediate::fetch_operand(m)?;
+        let op = Immediate8::fetch_operand(m)?;
         let pc = m.regs.pc();
         let dest = calc_rel(pc, op);
         Ok(dest)
