@@ -33,8 +33,6 @@ bitflags::bitflags! {
 
 #[derive(Debug, Copy, Clone, PartialEq, Hash, Eq, Deserialize, Serialize)]
 pub enum AddrModeEnum {
-    AccA,
-    AccB,
     Immediate8,
     Immediate16,
     Direct,

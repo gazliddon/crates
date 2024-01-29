@@ -79,9 +79,6 @@ pub fn diss_operand<M: MemoryIO>(mem: &M, addr: u16, ins: &InstructionInfo) -> D
 
     use crate::cpu_core::AddrModeEnum::*;
     let text = match ins.addr_mode {
-        AccA => "a".to_owned(),
-
-        AccB => "b".to_owned(),
 
         Immediate8 => {
             let b = mem.inspect_byte(addr_usize)?;

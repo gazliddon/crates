@@ -215,16 +215,30 @@ where
     R: RegisterFileTrait + StatusRegTrait,
     M: MemoryIO,
 {
+
     #[inline]
-    pub fn pul(&mut self) -> CpuResult<()> {
+    pub fn pula(&mut self) -> CpuResult<()> {
         let val = self.m.pop_byte()?;
-        A::store_byte(self.m, val)?;
+        self.m.regs.set_a(val);
         Ok(())
     }
 
     #[inline]
-    pub fn psh(&mut self) -> CpuResult<()> {
-        let val = self.fetch_operand()?;
+    pub fn pulb(&mut self) -> CpuResult<()> {
+        let val = self.m.pop_byte()?;
+        self.m.regs.set_b(val);
+        Ok(())
+    }
+
+    #[inline]
+    pub fn psha(&mut self) -> CpuResult<()> {
+        let val = self.m.regs.a();
+        self.m.push_byte(val)?;
+        Ok(())
+    }
+    #[inline]
+    pub fn pshb(&mut self) -> CpuResult<()> {
+        let val = self.m.regs.b();
         self.m.push_byte(val)?;
         Ok(())
     }

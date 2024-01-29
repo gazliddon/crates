@@ -598,16 +598,21 @@
         }
       }
     },
-    "Pul": {
+    "PulA": {
       "flags_written": "",
       "addr_modes": {
-        "AccB": {
-          "opcode": 51,
+        "Inherent": {
+          "opcode": 50,
           "cycles": 4,
           "size": 1
-        },
-        "AccA": {
-          "opcode": 50,
+        }
+      }
+    },
+    "PulB": {
+      "flags_written": "",
+      "addr_modes": {
+        "Inherent": {
+          "opcode": 51,
           "cycles": 4,
           "size": 1
         }
@@ -894,15 +899,22 @@
         }
       }
     },
-    "Psh": {
+
+    "PshB": {
       "flags_written": "",
       "addr_modes": {
-        "AccB": {
+        "Inherent": {
           "opcode": 55,
           "cycles": 4,
           "size": 1
-        },
-        "AccA": {
+        }
+      }
+    },
+
+    "PshA": {
+      "flags_written": "",
+      "addr_modes": {
+        "Inherent": {
           "opcode": 54,
           "cycles": 4,
           "size": 1
