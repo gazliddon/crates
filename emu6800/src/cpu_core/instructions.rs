@@ -31,7 +31,7 @@ bitflags::bitflags! {
         }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Hash, Eq, Deserialize, Serialize)]
+#[derive(Debug, Copy, Clone, PartialEq, Hash, Eq, Deserialize, Serialize, Default)]
 pub enum AddrModeEnum {
     Immediate8,
     Immediate16,
@@ -40,6 +40,7 @@ pub enum AddrModeEnum {
     Indexed,
     Inherent,
     Relative,
+    #[default]
     Illegal,
 }
 

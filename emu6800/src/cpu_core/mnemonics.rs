@@ -5,6 +5,7 @@ use strum::{ EnumString, EnumIter };
     Clone, Copy, Deserialize, Serialize, Debug, EnumString, Hash, PartialEq, PartialOrd, Eq, Default,
     EnumIter,
 )]
+
 pub enum Mnemonic {
     Aba,
     AdcA,

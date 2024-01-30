@@ -1,4 +1,5 @@
 use emucore::mem::MemoryIO;
+use emucore::sha1::digest::typenum::operator_aliases;
 
 use super::{Bus, RegisterFileTrait, StatusRegTrait};
 use super::{CpuResult, Machine};
@@ -90,6 +91,7 @@ where
         let lt = self.m.regs.lt();
         self.branch_cond(lt)
     }
+
     #[inline]
     pub fn bmi(&mut self) -> CpuResult<()> {
         let n = self.m.regs.n();
@@ -215,7 +217,6 @@ where
     R: RegisterFileTrait + StatusRegTrait,
     M: MemoryIO,
 {
-
     #[inline]
     pub fn pula(&mut self) -> CpuResult<()> {
         let val = self.m.pop_byte()?;
@@ -298,9 +299,12 @@ where
         let x = self.m.pop_word()?;
         let pc = self.m.pop_word()?;
 
-        let regs = self.regs_mut();
-
-        regs.set_sr(sr).set_a(a).set_b(b).set_x(x).set_pc(pc);
+        self.regs_mut()
+            .set_sr(sr)
+            .set_a(a)
+            .set_b(b)
+            .set_x(x)
+            .set_pc(pc);
 
         Ok(())
     }
@@ -368,32 +372,16 @@ where
     M: MemoryIO,
 {
     #[inline]
-    fn eor_val(&mut self, val: u8) -> CpuResult<u8> {
-        let operand = self.m.fetch_byte()?;
-        let res = val ^ operand;
-        self.m.regs.set_nz_from_u8(res);
-        self.m.regs.clv();
-        Ok(res)
+    fn do_logic<REGBUS: Bus, F: Fn(u8, u8) -> u8>(&mut self, f: F) -> CpuResult<()> {
+        let val = self.fetch_operand()?;
+        let (_, res) = REGBUS::read_mod_write(self.m, |op| f(val, op))?;
+        self.set_nz_from_u8(res).clv();
+        Ok(())
     }
 
-    fn and_val(&mut self, val: u8) -> CpuResult<u8> {
-        let operand = self.m.fetch_byte()?;
-        let res = val & operand;
-        self.m.regs.set_nz_from_u8(res);
-        self.m.regs.clv();
-        Ok(res)
-    }
-
-    fn or_val(&mut self, val: u8) -> CpuResult<u8> {
-        let res = val | self.m.fetch_byte()?;
-        self.m.regs.set_nz_from_u8(res);
-        self.m.regs.clv();
-        Ok(res)
-    }
     #[inline]
     pub fn post_com(&mut self, new: u8) -> CpuResult<()> {
-        let regs = self.regs_mut();
-        regs.sec().clv().set_nz_from_u8(new);
+        self.set_nz_from_u8(new).clc().clv();
         Ok(())
     }
 
@@ -417,50 +405,32 @@ where
 
     #[inline]
     pub fn eora(&mut self) -> CpuResult<()> {
-        let a = self.m.regs.get_reg_8(RegEnum::A);
-        let new_a = self.eor_val(a)?;
-        self.m.regs.set_reg_8(RegEnum::A, new_a);
-        Ok(())
+        self.do_logic::<AccA, _>(|a, b| a ^ b)
     }
 
     #[inline]
     pub fn eorb(&mut self) -> CpuResult<()> {
-        let b = self.m.regs.get_reg_8(RegEnum::B);
-        let new_b = self.eor_val(b)?;
-        self.m.regs.set_reg_8(RegEnum::B, new_b);
-        Ok(())
+        self.do_logic::<AccB, _>(|a, b| a ^ b)
     }
 
     #[inline]
     pub fn anda(&mut self) -> CpuResult<()> {
-        let a = self.m.regs.get_reg_8(RegEnum::A);
-        let new_a = self.and_val(a)?;
-        self.m.regs.set_reg_8(RegEnum::A, new_a);
-        Ok(())
+        self.do_logic::<AccA, _>(|a, b| a & b)
     }
 
     #[inline]
     pub fn andb(&mut self) -> CpuResult<()> {
-        let b = self.m.regs.get_reg_8(RegEnum::B);
-        let new_b = self.and_val(b)?;
-        self.m.regs.set_reg_8(RegEnum::B, new_b);
-        Ok(())
+        self.do_logic::<AccB, _>(|a, b| a & b)
     }
 
     #[inline]
     pub fn oraa(&mut self) -> CpuResult<()> {
-        let a = self.m.regs.get_reg_8(RegEnum::A);
-        let new_a = self.or_val(a)?;
-        self.m.regs.set_reg_8(RegEnum::A, new_a);
-        Ok(())
+        self.do_logic::<AccA, _>(|a, b| a | b)
     }
 
     #[inline]
     pub fn orab(&mut self) -> CpuResult<()> {
-        let b = self.m.regs.get_reg_8(RegEnum::B);
-        let new_b = self.or_val(b)?;
-        self.m.regs.set_reg_8(RegEnum::B, new_b);
-        Ok(())
+        self.do_logic::<AccB, _>(|a, b| a | b)
     }
 }
 
@@ -534,6 +504,7 @@ where
         A::store_byte(self.m, new as u8)?;
         panic!()
     }
+
     #[inline]
     pub fn nega(&mut self) -> CpuResult<()> {
         let (_, new) = AccA::read_mod_write(self.m, |v| (-(v as i8)) as u8)?;
@@ -768,18 +739,18 @@ where
 
     #[inline]
     pub fn asr(&mut self) -> CpuResult<()> {
-        let (val,new_val) = self.do_asr::<A>()?;
+        let (val, new_val) = self.do_asr::<A>()?;
         self.post_shift(val.bit(7), val, new_val)
     }
     #[inline]
     pub fn asra(&mut self) -> CpuResult<()> {
-        let (val,new_val) = self.do_asr::<AccA>()?;
+        let (val, new_val) = self.do_asr::<AccA>()?;
         self.post_shift(val.bit(7), val, new_val)
     }
 
     #[inline]
     pub fn asrb(&mut self) -> CpuResult<()> {
-        let (val,new_val) = self.do_asr::<AccB>()?;
+        let (val, new_val) = self.do_asr::<AccB>()?;
         self.post_shift(val.bit(7), val, new_val)
     }
 
@@ -920,17 +891,13 @@ where
 
     fn fetch_operand_8_fl(&mut self) -> CpuResult<u8> {
         let val = self.fetch_operand()?;
-        let regs = self.regs_mut();
-        regs.set_nz_from_u8(val);
-        regs.clc();
+        self.set_nz_from_u8(val).clc();
         Ok(val)
     }
 
     fn fetch_operand_16_fl(&mut self) -> CpuResult<u16> {
         let val = self.fetch_operand_16()?;
-        let regs = self.regs_mut();
-        regs.set_nz_from_u16(val);
-        regs.clc();
+        self.set_nz_from_u16(val).clc();
         Ok(val)
     }
 
@@ -1010,41 +977,56 @@ where
     M: MemoryIO,
 {
     #[inline]
-    pub fn clr(&mut self) -> CpuResult<()> {
+    fn set_nz_from_u8(&mut self, val: u8) -> &mut R {
         let regs = self.regs_mut();
-        regs.cln().clc().clv().sez();
-        A::store_byte(self.m, 0)?;
-        Ok(())
-    }
-    #[inline]
-    pub fn clra(&mut self) -> CpuResult<()> {
-        self.clr()
-    }
-    #[inline]
-    pub fn clrb(&mut self) -> CpuResult<()> {
-        self.clr()
+        regs.set_nz_from_u8(val);
+        regs
     }
 
     #[inline]
-    fn do_bit(&mut self, val: u8) -> CpuResult<()> {
-        let operand = self.fetch_operand()?;
-        let new_val = val & operand;
+    fn set_nz_from_u16(&mut self, val: u16) -> &mut R {
         let regs = self.regs_mut();
-        regs.set_nz_from_u8(new_val).clc();
-        A::store_byte(self.m, new_val)?;
+        regs.set_nz_from_u16(val);
+        regs
+    }
+
+    #[inline]
+    pub fn do_clr<X: Bus>(&mut self) -> CpuResult<()> {
+        let regs = self.regs_mut();
+        regs.cln().clc().clv().sez();
+        X::store_byte(self.m, 0)?;
         Ok(())
+    }
+
+    #[inline]
+    pub fn clr(&mut self) -> CpuResult<()> {
+        self.do_clr::<A>()
+    }
+
+    #[inline]
+    pub fn clra(&mut self) -> CpuResult<()> {
+        self.do_clr::<AccA>()
+    }
+
+    #[inline]
+    pub fn clrb(&mut self) -> CpuResult<()> {
+        self.do_clr::<AccB>()
     }
 
     #[inline]
     pub fn bita(&mut self) -> CpuResult<()> {
-        let val = self.regs_mut().a();
-        self.do_bit(val)
+        let op = self.fetch_operand()?;
+        let (_, new) = AccA::read_mod_write(self.m, |val| val & op)?;
+        self.set_nz_from_u8(new).clc();
+        Ok(())
     }
 
     #[inline]
     pub fn bitb(&mut self) -> CpuResult<()> {
-        let val = self.regs_mut().a();
-        self.do_bit(val)
+        let op = self.fetch_operand()?;
+        let (_, new) = AccB::read_mod_write(self.m, |val| val & op)?;
+        self.set_nz_from_u8(new).clc();
+        Ok(())
     }
 
     #[inline]
@@ -1054,23 +1036,24 @@ where
 
     #[inline]
     pub fn post_tst(&mut self, val: u8) -> CpuResult<()> {
-        let regs = self.regs_mut();
-        regs.set_nz_from_u8(val).clv().clc();
+        self.set_nz_from_u8(val).clv().clc();
         Ok(())
     }
+
     #[inline]
     pub fn tst(&mut self) -> CpuResult<()> {
         let val = self.fetch_operand()?;
         self.post_tst(val)
     }
+
     #[inline]
     pub fn tsta(&mut self) -> CpuResult<()> {
-        let val = AccA::fetch_operand(self.m)?;
+        let val = self.m.regs.a();
         self.post_tst(val)
     }
     #[inline]
     pub fn tstb(&mut self) -> CpuResult<()> {
-        let val = AccB::fetch_operand(self.m)?;
+        let val = self.m.regs.b();
         self.post_tst(val)
     }
 }
