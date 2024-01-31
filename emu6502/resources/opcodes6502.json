@@ -1,0 +1,330 @@
+{
+  "instructions": {
+    "SBC": {
+      "flags_written": "",
+
+      "addr_modes": {
+        "Immediate": { "size": 0, "opcode": "??", "cycles": 0 },
+        "ZeroPage": { "size": 0, "opcode": "??", "cycles": 0 },
+        "ZeroPageX": { "size": 0, "opcode": "??", "cycles": 0 },
+        "Absolute": { "size": 0, "opcode": "??", "cycles": 0 },
+        "AbsoluteX": { "size": 0, "opcode": "??", "cycles": 0 },
+        "AbsoluteY": { "size": 0, "opcode": "??", "cycles": 0 },
+        "IndX": { "size": 0, "opcode": "??", "cycles": 0 },
+        "IndY": { "size": 0, "opcode": "??", "cycles": 0 }
+      }
+    },
+
+    "STA": {
+      "flags_written": "",
+      "addr_modes": {
+        "Immediate": { "size": 0, "opcode": "??", "cycles": 0 },
+        "ZeroPage": { "size": 0, "opcode": "??", "cycles": 0 },
+        "ZeroPageX": { "size": 0, "opcode": "??", "cycles": 0 },
+        "Absolute": { "size": 0, "opcode": "??", "cycles": 0 },
+        "AbsoluteX": { "size": 0, "opcode": "??", "cycles": 0 },
+        "AbsoluteY": { "size": 0, "opcode": "??", "cycles": 0 },
+        "IndX": { "size": 0, "opcode": "??", "cycles": 0 },
+        "IndY": { "size": 0, "opcode": "??", "cycles": 0 }
+      }
+    },
+    "ADC": {
+      "flags": "+++--+",
+
+      "addr_modes": {
+        "Immediate": { "size": 0, "opcode": "??", "cycles": 0 },
+        "ZeroPage": { "size": 0, "opcode": "??", "cycles": 0 },
+        "ZeroPageX": { "size": 0, "opcode": "??", "cycles": 0 },
+        "Absolute": { "size": 0, "opcode": "??", "cycles": 0 },
+        "AbsoluteX": { "size": 0, "opcode": "??", "cycles": 0 },
+        "AbsoluteY": { "size": 0, "opcode": "??", "cycles": 0 },
+        "IndX": { "size": 0, "opcode": "??", "cycles": 0 },
+        "IndY": { "size": 0, "opcode": "??", "cycles": 0 }
+      }
+    },
+    "AND": {
+      "flags_written": "",
+      "addr_modes": {
+        "Immediate": { "size": 0, "opcode": "??", "cycles": 0 },
+        "ZeroPage": { "size": 0, "opcode": "??", "cycles": 0 },
+        "ZeroPageX": { "size": 0, "opcode": "??", "cycles": 0 },
+        "Absolute": { "size": 0, "opcode": "??", "cycles": 0 },
+        "AbsoluteX": { "size": 0, "opcode": "??", "cycles": 0 },
+        "AbsoluteY": { "size": 0, "opcode": "??", "cycles": 0 },
+        "IndX": { "size": 0, "opcode": "??", "cycles": 0 },
+        "IndY": { "size": 0, "opcode": "??", "cycles": 0 }
+      }
+    },
+    "CMP": {
+      "flags_written": "",
+      "addr_modes": {
+        "Immediate": { "size": 0, "opcode": "??", "cycles": 0 },
+        "ZeroPage": { "size": 0, "opcode": "??", "cycles": 0 },
+        "ZeroPageX": { "size": 0, "opcode": "??", "cycles": 0 },
+        "Absolute": { "size": 0, "opcode": "??", "cycles": 0 },
+        "AbsoluteX": { "size": 0, "opcode": "??", "cycles": 0 },
+        "AbsoluteY": { "size": 0, "opcode": "??", "cycles": 0 },
+        "IndX": { "size": 0, "opcode": "??", "cycles": 0 },
+        "IndY": { "size": 0, "opcode": "??", "cycles": 0 }
+      }
+    },
+    "EOR": {
+      "flags_written": "",
+      "addr_modes": {
+        "Immediate": { "size": 0, "opcode": "??", "cycles": 0 },
+        "ZeroPage": { "size": 0, "opcode": "??", "cycles": 0 },
+        "ZeroPageX": { "size": 0, "opcode": "??", "cycles": 0 },
+        "Absolute": { "size": 0, "opcode": "??", "cycles": 0 },
+        "AbsoluteX": { "size": 0, "opcode": "??", "cycles": 0 },
+        "AbsoluteY": { "size": 0, "opcode": "??", "cycles": 0 },
+        "IndX": { "size": 0, "opcode": "??", "cycles": 0 },
+        "IndY": { "size": 0, "opcode": "??", "cycles": 0 }
+      }
+    },
+    "LDA": {
+      "flags_written": "",
+      "addr_modes": {
+        "Immediate": { "size": 0, "opcode": "??", "cycles": 0 },
+        "ZeroPage": { "size": 0, "opcode": "??", "cycles": 0 },
+        "ZeroPageX": { "size": 0, "opcode": "??", "cycles": 0 },
+        "Absolute": { "size": 0, "opcode": "??", "cycles": 0 },
+        "AbsoluteX": { "size": 0, "opcode": "??", "cycles": 0 },
+        "AbsoluteY": { "size": 0, "opcode": "??", "cycles": 0 },
+        "IndX": { "size": 0, "opcode": "??", "cycles": 0 },
+        "IndY": { "size": 0, "opcode": "??", "cycles": 0 }
+      }
+    },
+    "ORA": {
+      "flags_written": "",
+      "addr_modes": {
+        "Immediate": { "size": 0, "opcode": "??", "cycles": 0 },
+        "ZeroPage": { "size": 0, "opcode": "??", "cycles": 0 },
+        "ZeroPageX": { "size": 0, "opcode": "??", "cycles": 0 },
+        "Absolute": { "size": 0, "opcode": "??", "cycles": 0 },
+        "AbsoluteX": { "size": 0, "opcode": "??", "cycles": 0 },
+        "AbsoluteY": { "size": 0, "opcode": "??", "cycles": 0 },
+        "IndX": { "size": 0, "opcode": "??", "cycles": 0 },
+        "IndY": { "size": 0, "opcode": "??", "cycles": 0 }
+      }
+    },
+
+    "CPX": {
+      "addr_modes": {
+        "Immediate": { "size": 0, "opcode": "??", "cycles": 0 },
+        "ZeroPage": { "size": 0, "opcode": "??", "cycles": 0 },
+        "Absolute": { "size": 0, "opcode": "??", "cycles": 0 }
+      }
+    },
+
+    "CPY": {
+      "addr_modes": {
+        "Immediate": { "size": 0, "opcode": "??", "cycles": 0 },
+        "ZeroPage": { "size": 0, "opcode": "??", "cycles": 0 },
+        "Absolute": { "size": 0, "opcode": "??", "cycles": 0 }
+      }
+    },
+
+    "ASL": {},
+    "BIT": {},
+    "DEC": {},
+    "INC": {},
+    "LDX": {},
+    "LDY": {},
+    "LSR": {},
+    "ROL": {},
+    "ROR": {},
+    "STX": {},
+    "STY": {},
+
+    "BPL": {
+      "addr_modes": {
+        "Relative": { "size": 2, "opcode": "10", "cycles": 2 }
+      }
+    },
+
+    "BVC": {
+      "addr_modes": {
+        "Relative": { "size": 2, "opcode": "50", "cycles": 2 }
+      }
+    },
+
+    "BVS": {
+      "addr_modes": {
+        "Relative": { "size": 2, "opcode": "70", "cycles": 2 }
+      }
+    },
+    "BMI": {
+      "addr_modes": {
+        "Relative": { "size": 2, "opcode": "??", "cycles": 2 }
+      }
+    },
+    "BNE": {
+      "addr_modes": {
+        "Relative": { "size": 2, "opcode": "??", "cycles": 2 }
+      }
+    },
+
+    "BCC": {
+      "addr_modes": {
+        "Relative": { "size": 2, "opcode": "90", "cycles": 2 }
+      }
+    },
+    "BCS": {
+      "addr_modes": {
+        "Relative": { "size": 2, "opcode": "b0", "cycles": 2 }
+      }
+    },
+    "BEQ": {
+      "addr_modes": {
+        "Relative": { "size": 2, "opcode": "f0", "cycles": 2 }
+      }
+    },
+
+    "JMP": {
+      "addr_modes": {
+        "Abs": { "size": 3, "opcode": "4c", "cycles": 3 },
+        "Indirect": { "size": 3, "opcode": "6c", "cycles": 5 }
+      }
+    },
+    "JSR": {
+      "addr_modes": {
+        "Abs": { "size": 3, "opcode": "20", "cycles": 6 }
+      }
+    },
+
+    "BRK": {
+      "addr_modes": {
+        "Inherent": { "size": 1, "opcode": "0", "cycles": 7 }
+      }
+    },
+
+    "CLC": {
+      "addr_modes": {
+        "Inherent": { "size": 1, "opcode": "18", "cycles": 2 }
+      }
+    },
+    "CLD": {
+      "flags": "----0-",
+      "addr_modes": {
+        "Inherent": { "size": 1, "opcode": "db", "cycles": 2 }
+      }
+    },
+    "CLI": {
+      "addr_modes": {
+        "Inherent": { "size": 1, "opcode": "58", "cycles": 2 }
+      }
+    },
+    "CLV": {
+      "addr_modes": {
+        "Inherent": { "size": 1, "opcode": "b8", "cycles": 2 }
+      }
+    },
+
+    "SEC": {
+      "addr_modes": {
+        "Inherent": { "size": 1, "opcode": "38", "cycles": 2 }
+      }
+    },
+    "SED": {
+      "addr_modes": {
+        "Inherent": { "size": 1, "opcode": "f8", "cycles": 2 }
+      }
+    },
+    "SEI": {
+      "addr_modes": {
+        "Inherent": { "size": 1, "opcode": "78", "cycles": 2 }
+      }
+    },
+
+    "RTI": {
+      "addr_modes": {
+        "Inherent": { "size": 1, "opcode": "??", "cycles": 0 }
+      }
+    },
+    "RTS": {
+      "addr_modes": {
+        "Inherent": { "size": 1, "opcode": "??", "cycles": 0 }
+      }
+    },
+
+    "PHA": {
+      "addr_modes": {
+        "Inherent": { "size": 1, "opcode": "48", "cycles": 3 }
+      }
+    },
+
+    "PHP": {
+      "addr_modes": {
+        "Inherent": { "size": 1, "opcode": "8", "cycles": 3 }
+      }
+    },
+
+    "PLA": {
+      "addr_modes": {
+        "Inherent": { "size": 1, "opcode": "68", "cycles": 4 }
+      }
+    },
+    "PLP": {
+      "addr_modes": {
+        "Inherent": { "size": 1, "opcode": "28", "cycles": 4 }
+      }
+    },
+
+    "NOP": {
+      "addr_modes": {
+        "Inherent": { "size": 1, "opcode": "ea", "cycles": 2 }
+      }
+    },
+
+    "INX": {
+      "addr_modes": {
+        "Inherent": { "size": 1, "opcode": "e8", "cycles": 2 }
+      }
+    },
+    "INY": {
+      "addr_modes": {
+        "Inherent": { "size": 1, "opcode": "c8", "cycles": 2 }
+      }
+    },
+    "TAX": {
+      "addr_modes": {
+        "Inherent": { "size": 1, "opcode": "aa", "cycles": 2 }
+      }
+    },
+    "TAY": {
+      "addr_modes": {
+        "Inherent": { "size": 1, "opcode": "a8", "cycles": 2 }
+      }
+    },
+    "TSX": {
+      "addr_modes": {
+        "Inherent": { "size": 1, "opcode": "ba", "cycles": 2 }
+      }
+    },
+    "TXA": {
+      "addr_modes": {
+        "Inherent": { "size": 1, "opcode": "8a", "cycles": 2 }
+      }
+    },
+    "TXS": {
+      "addr_modes": {
+        "Inherent": { "size": 1, "opcode": "9a", "cycles": 2 }
+      }
+    },
+    "TYA": {
+      "addr_modes": {
+        "Inherent": { "size": 1, "opcode": "98", "cycles": 2 }
+      }
+    },
+    "DEX": {
+      "addr_modes": {
+        "Inherent": { "size": 1, "opcode": "ca", "cycles": 2 }
+      }
+    },
+    "DEY": {
+      "addr_modes": {
+        "Inherent": { "size": 1, "opcode": "88", "cycles": 2 }
+      }
+    }
+  }
+}
