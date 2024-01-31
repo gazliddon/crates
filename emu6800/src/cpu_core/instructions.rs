@@ -31,7 +31,9 @@ bitflags::bitflags! {
         }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Hash, Eq, Deserialize, Serialize, Default)]
+use strum::Display;
+
+#[derive(Debug, Copy, Clone, PartialEq, Hash, Eq, Deserialize, Serialize, Default, Display)]
 pub enum AddrModeEnum {
     Immediate8,
     Immediate16,
