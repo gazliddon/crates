@@ -1,204 +1,330 @@
 {
+  "flag_order": "NZCIDV",
+
+  "addr_modes": {
+    "ZeroPage": { "size": 2 },
+    "ZeroPageX": { "size": 2 },
+    "ZeroPageY": { "size": 2 },
+    "Absolute": { "size": 3 },
+    "AbsoluteX": { "size": 3 },
+    "AbsoluteY": { "size": 3 },
+    "IndX": { "size": 2 },
+    "IndY": { "size": 2 }
+  },
+
   "instructions": {
     "SBC": {
-      "flags_written": "",
-
+      "flags": "+++--+",
       "addr_modes": {
-        "Immediate": { "size": 0, "opcode": "??", "cycles": 0 },
-        "ZeroPage": { "size": 0, "opcode": "??", "cycles": 0 },
-        "ZeroPageX": { "size": 0, "opcode": "??", "cycles": 0 },
-        "Absolute": { "size": 0, "opcode": "??", "cycles": 0 },
-        "AbsoluteX": { "size": 0, "opcode": "??", "cycles": 0 },
-        "AbsoluteY": { "size": 0, "opcode": "??", "cycles": 0 },
-        "IndX": { "size": 0, "opcode": "??", "cycles": 0 },
-        "IndY": { "size": 0, "opcode": "??", "cycles": 0 }
+        "Immediate": { "size": 2, "opcode": "e9", "cycles": 2 },
+        "ZeroPage": { "size": 2, "opcode": "e5", "cycles": 3 },
+        "ZeroPageX": { "size": 2, "opcode": "f5", "cycles": 4 },
+        "Absolute": { "size": 3, "opcode": "ed", "cycles": 4 },
+        "AbsoluteX": { "size": 3, "opcode": "fd", "cycles": 4 },
+        "AbsoluteY": { "size": 3, "opcode": "f9", "cycles": 4 },
+        "IndX": { "size": 2, "opcode": "e1", "cycles": 6 },
+        "IndY": { "size": 2, "opcode": "f1", "cycles": 5 }
+      }
+    },
+
+    "ADC": {
+      "flags": "+++--+",
+      "addr_modes": {
+        "Immediate": { "size": 2, "opcode": "69", "cycles": 2 },
+        "ZeroPage": { "size": 2, "opcode": "65", "cycles": 3 },
+        "ZeroPageX": { "size": 2, "opcode": "75", "cycles": 4 },
+        "Absolute": { "size": 3, "opcode": "6d", "cycles": 4 },
+        "AbsoluteX": { "size": 3, "opcode": "7d", "cycles": 4 },
+        "AbsoluteY": { "size": 3, "opcode": "79", "cycles": 4 },
+        "IndX": { "size": 2, "opcode": "71", "cycles": 6 },
+        "IndY": { "size": 2, "opcode": "61", "cycles": 5 }
+      }
+    },
+
+    "AND": {
+      "flags": "++----",
+      "addr_modes": {
+        "Immediate": { "size": 2, "opcode": "29", "cycles": 2 },
+        "ZeroPage": { "size": 2, "opcode": "25", "cycles": 3 },
+        "ZeroPageX": { "size": 2, "opcode": "35", "cycles": 4 },
+        "Absolute": { "size": 3, "opcode": "2d", "cycles": 4 },
+        "AbsoluteX": { "size": 3, "opcode": "3d", "cycles": 4 },
+        "AbsoluteY": { "size": 3, "opcode": "39", "cycles": 4 },
+        "IndX": { "size": 2, "opcode": "21", "cycles": 6 },
+        "IndY": { "size": 2, "opcode": "31", "cycles": 5 }
+      }
+    },
+
+    "CMP": {
+      "flags": "",
+      "addr_modes": {
+        "Immediate": { "size": 2, "opcode": "c9", "cycles": 2 },
+        "ZeroPage": { "size": 2, "opcode": "c5", "cycles": 3 },
+        "ZeroPageX": { "size": 2, "opcode": "d5", "cycles": 4 },
+        "Absolute": { "size": 3, "opcode": "cd", "cycles": 4 },
+        "AbsoluteX": { "size": 3, "opcode": "dd", "cycles": 4 },
+        "AbsoluteY": { "size": 3, "opcode": "d9", "cycles": 4 },
+        "IndX": { "size": 2, "opcode": "c1", "cycles": 6 },
+        "IndY": { "size": 2, "opcode": "c1", "cycles": 5 }
+      }
+    },
+
+    "EOR": {
+      "flags": "++----",
+      "addr_modes": {
+        "Immediate": { "size": 2, "opcode": "49", "cycles": 2 },
+        "ZeroPage": { "size": 2, "opcode": "45", "cycles": 3 },
+        "ZeroPageX": { "size": 2, "opcode": "55", "cycles": 4 },
+        "Absolute": { "size": 3, "opcode": "4d", "cycles": 4 },
+        "AbsoluteX": { "size": 3, "opcode": "5d", "cycles": 4 },
+        "AbsoluteY": { "size": 3, "opcode": "59", "cycles": 4 },
+        "IndX": { "size": 2, "opcode": "41", "cycles": 6 },
+        "IndY": { "size": 2, "opcode": "51", "cycles": 5 }
+      }
+    },
+
+    "LDA": {
+      "flags": "++----",
+      "addr_modes": {
+        "Immediate": { "size": 2, "opcode": "a9", "cycles": 2 },
+        "ZeroPage": { "size": 2, "opcode": "a5", "cycles": 3 },
+        "ZeroPageX": { "size": 2, "opcode": "b5", "cycles": 4 },
+        "Absolute": { "size": 3, "opcode": "ad", "cycles": 4 },
+        "AbsoluteX": { "size": 3, "opcode": "8d", "cycles": 4 },
+        "AbsoluteY": { "size": 3, "opcode": "b9", "cycles": 4 },
+        "IndX": { "size": 2, "opcode": "a1", "cycles": 6 },
+        "IndY": { "size": 2, "opcode": "b1", "cycles": 5 }
+      }
+    },
+    "ORA": {
+      "flags": "++----",
+      "addr_modes": {
+        "Immediate": { "size": 2, "opcode": "09", "cycles": 2 },
+        "ZeroPage": { "size": 2, "opcode": "05", "cycles": 3 },
+        "ZeroPageX": { "size": 2, "opcode": "15", "cycles": 4 },
+        "Absolute": { "size": 3, "opcode": "0d", "cycles": 4 },
+        "AbsoluteX": { "size": 3, "opcode": "1d", "cycles": 4 },
+        "AbsoluteY": { "size": 3, "opcode": "19", "cycles": 4 },
+        "IndX": { "size": 2, "opcode": "01", "cycles": 6 },
+        "IndY": { "size": 2, "opcode": "11", "cycles": 5 }
       }
     },
 
     "STA": {
-      "flags_written": "",
+      "flags": "------",
       "addr_modes": {
-        "Immediate": { "size": 0, "opcode": "??", "cycles": 0 },
-        "ZeroPage": { "size": 0, "opcode": "??", "cycles": 0 },
-        "ZeroPageX": { "size": 0, "opcode": "??", "cycles": 0 },
-        "Absolute": { "size": 0, "opcode": "??", "cycles": 0 },
-        "AbsoluteX": { "size": 0, "opcode": "??", "cycles": 0 },
-        "AbsoluteY": { "size": 0, "opcode": "??", "cycles": 0 },
-        "IndX": { "size": 0, "opcode": "??", "cycles": 0 },
-        "IndY": { "size": 0, "opcode": "??", "cycles": 0 }
-      }
-    },
-    "ADC": {
-      "flags": "+++--+",
-
-      "addr_modes": {
-        "Immediate": { "size": 0, "opcode": "??", "cycles": 0 },
-        "ZeroPage": { "size": 0, "opcode": "??", "cycles": 0 },
-        "ZeroPageX": { "size": 0, "opcode": "??", "cycles": 0 },
-        "Absolute": { "size": 0, "opcode": "??", "cycles": 0 },
-        "AbsoluteX": { "size": 0, "opcode": "??", "cycles": 0 },
-        "AbsoluteY": { "size": 0, "opcode": "??", "cycles": 0 },
-        "IndX": { "size": 0, "opcode": "??", "cycles": 0 },
-        "IndY": { "size": 0, "opcode": "??", "cycles": 0 }
-      }
-    },
-    "AND": {
-      "flags_written": "",
-      "addr_modes": {
-        "Immediate": { "size": 0, "opcode": "??", "cycles": 0 },
-        "ZeroPage": { "size": 0, "opcode": "??", "cycles": 0 },
-        "ZeroPageX": { "size": 0, "opcode": "??", "cycles": 0 },
-        "Absolute": { "size": 0, "opcode": "??", "cycles": 0 },
-        "AbsoluteX": { "size": 0, "opcode": "??", "cycles": 0 },
-        "AbsoluteY": { "size": 0, "opcode": "??", "cycles": 0 },
-        "IndX": { "size": 0, "opcode": "??", "cycles": 0 },
-        "IndY": { "size": 0, "opcode": "??", "cycles": 0 }
-      }
-    },
-    "CMP": {
-      "flags_written": "",
-      "addr_modes": {
-        "Immediate": { "size": 0, "opcode": "??", "cycles": 0 },
-        "ZeroPage": { "size": 0, "opcode": "??", "cycles": 0 },
-        "ZeroPageX": { "size": 0, "opcode": "??", "cycles": 0 },
-        "Absolute": { "size": 0, "opcode": "??", "cycles": 0 },
-        "AbsoluteX": { "size": 0, "opcode": "??", "cycles": 0 },
-        "AbsoluteY": { "size": 0, "opcode": "??", "cycles": 0 },
-        "IndX": { "size": 0, "opcode": "??", "cycles": 0 },
-        "IndY": { "size": 0, "opcode": "??", "cycles": 0 }
-      }
-    },
-    "EOR": {
-      "flags_written": "",
-      "addr_modes": {
-        "Immediate": { "size": 0, "opcode": "??", "cycles": 0 },
-        "ZeroPage": { "size": 0, "opcode": "??", "cycles": 0 },
-        "ZeroPageX": { "size": 0, "opcode": "??", "cycles": 0 },
-        "Absolute": { "size": 0, "opcode": "??", "cycles": 0 },
-        "AbsoluteX": { "size": 0, "opcode": "??", "cycles": 0 },
-        "AbsoluteY": { "size": 0, "opcode": "??", "cycles": 0 },
-        "IndX": { "size": 0, "opcode": "??", "cycles": 0 },
-        "IndY": { "size": 0, "opcode": "??", "cycles": 0 }
-      }
-    },
-    "LDA": {
-      "flags_written": "",
-      "addr_modes": {
-        "Immediate": { "size": 0, "opcode": "??", "cycles": 0 },
-        "ZeroPage": { "size": 0, "opcode": "??", "cycles": 0 },
-        "ZeroPageX": { "size": 0, "opcode": "??", "cycles": 0 },
-        "Absolute": { "size": 0, "opcode": "??", "cycles": 0 },
-        "AbsoluteX": { "size": 0, "opcode": "??", "cycles": 0 },
-        "AbsoluteY": { "size": 0, "opcode": "??", "cycles": 0 },
-        "IndX": { "size": 0, "opcode": "??", "cycles": 0 },
-        "IndY": { "size": 0, "opcode": "??", "cycles": 0 }
-      }
-    },
-    "ORA": {
-      "flags_written": "",
-      "addr_modes": {
-        "Immediate": { "size": 0, "opcode": "??", "cycles": 0 },
-        "ZeroPage": { "size": 0, "opcode": "??", "cycles": 0 },
-        "ZeroPageX": { "size": 0, "opcode": "??", "cycles": 0 },
-        "Absolute": { "size": 0, "opcode": "??", "cycles": 0 },
-        "AbsoluteX": { "size": 0, "opcode": "??", "cycles": 0 },
-        "AbsoluteY": { "size": 0, "opcode": "??", "cycles": 0 },
-        "IndX": { "size": 0, "opcode": "??", "cycles": 0 },
-        "IndY": { "size": 0, "opcode": "??", "cycles": 0 }
+        "ZeroPage": { "size": 0, "opcode": "85", "cycles": 3 },
+        "ZeroPageX": { "size": 0, "opcode": "95", "cycles": 4 },
+        "Absolute": { "size": 0, "opcode": "8d", "cycles": 4 },
+        "AbsoluteX": { "size": 0, "opcode": "9d", "cycles": 5 },
+        "AbsoluteY": { "size": 0, "opcode": "99", "cycles": 5 },
+        "IndX": { "size": 0, "opcode": "81", "cycles": 6 },
+        "IndY": { "size": 0, "opcode": "91", "cycles": 6 }
       }
     },
 
     "CPX": {
+      "flags": "+++---",
       "addr_modes": {
-        "Immediate": { "size": 0, "opcode": "??", "cycles": 0 },
-        "ZeroPage": { "size": 0, "opcode": "??", "cycles": 0 },
-        "Absolute": { "size": 0, "opcode": "??", "cycles": 0 }
+        "Immediate": { "size": 2, "opcode": "e0", "cycles": 2 },
+        "ZeroPage": { "size": 2, "opcode": "e4", "cycles": 4 },
+        "Absolute": { "size": 3, "opcode": "ec", "cycles": 4 }
       }
     },
 
     "CPY": {
+      "flags": "+++---",
       "addr_modes": {
-        "Immediate": { "size": 0, "opcode": "??", "cycles": 0 },
-        "ZeroPage": { "size": 0, "opcode": "??", "cycles": 0 },
-        "Absolute": { "size": 0, "opcode": "??", "cycles": 0 }
+        "Immediate": { "size": 2, "opcode": "c0", "cycles": 2 },
+        "ZeroPage": { "size": 3, "opcode": "c4", "cycles": 4 },
+        "Absolute": { "size": 3, "opcode": "cc", "cycles": 4 }
       }
     },
 
-    "ASL": {},
-    "BIT": {},
-    "DEC": {},
-    "INC": {},
-    "LDX": {},
-    "LDY": {},
-    "LSR": {},
-    "ROL": {},
-    "ROR": {},
-    "STX": {},
-    "STY": {},
+    "ASL": {
+      "flags": "+++---",
+      "addr_modes": {
+        "Immediate": { "size": 1, "opcode": "0a", "cycles": 2 },
+        "ZeroPage": { "size": 2, "opcode": "06", "cycles": 5 },
+        "ZeroPageX": { "size": 2, "opcode": "16", "cycles": 5 },
+        "Absolute": { "size": 3, "opcode": "0e", "cycles": 6 },
+        "AbsoluteX": { "size": 3, "opcode": "1e", "cycles": 7 }
+      }
+    },
+
+    "LSR": {
+      "flags": "0++---",
+      "addr_modes": {
+        "Immediate": { "size": 1, "opcode": "4a", "cycles": 2 },
+        "ZeroPage": { "size": 2, "opcode": "46", "cycles": 5 },
+        "ZeroPageX": { "size": 2, "opcode": "56", "cycles": 5 },
+        "Absolute": { "size": 3, "opcode": "4e", "cycles": 6 },
+        "AbsoluteX": { "size": 3, "opcode": "5e", "cycles": 7 }
+      }
+    },
+    "ROL": {
+      "flags": "+++---",
+      "addr_modes": {
+        "Immediate": { "size": 1, "opcode": "2a", "cycles": 2 },
+        "ZeroPage": { "size": 2, "opcode": "26", "cycles": 5 },
+        "ZeroPageX": { "size": 2, "opcode": "36", "cycles": 5 },
+        "Absolute": { "size": 3, "opcode": "2e", "cycles": 6 },
+        "AbsoluteX": { "size": 3, "opcode": "3e", "cycles": 7 }
+      }
+    },
+
+    "ROR": {
+      "flags": "+++---",
+      "addr_modes": {
+        "Immediate": { "size": 1, "opcode": "6a", "cycles": 2 },
+        "ZeroPage": { "size": 2, "opcode": "66", "cycles": 5 },
+        "ZeroPageX": { "size": 2, "opcode": "76", "cycles": 5 },
+        "Absolute": { "size": 3, "opcode": "2e", "cycles": 6 },
+        "AbsoluteX": { "size": 3, "opcode": "3e", "cycles": 7 }
+      }
+    },
+
+    "DEC": {
+      "flags": "++----",
+      "addr_modes": {
+        "ZeroPage": { "size": 2, "opcode": "c6", "cycles": 5 },
+        "ZeroPageX": { "size": 2, "opcode": "d6", "cycles": 6 },
+        "Absolute": { "size": 3, "opcode": "ce", "cycles": 6 },
+        "AbsoluteX": { "size": 3, "opcode": "de", "cycles": 7 }
+      }
+    },
+
+    "INC": {
+      "flags": "++----",
+      "addr_modes": {
+        "ZeroPage": { "size": 2, "opcode": "e6", "cycles": 5 },
+        "ZeroPageX": { "size": 2, "opcode": "f6", "cycles": 6 },
+        "Absolute": { "size": 3, "opcode": "ee", "cycles": 6 },
+        "AbsoluteX": { "size": 3, "opcode": "fe", "cycles": 7 }
+      }
+    },
+
+    "BIT": {
+      "flags": "++---+",
+      "addr_modes": {
+        "ZeroPage": { "size": 2, "opcode": "24", "cycles": 3 },
+        "Absolute": { "size": 3, "opcode": "2c", "cycles": 4 }
+      }
+    },
+
+    "LDX": {
+      "flags": "++----",
+      "addr_modes": {
+        "Immediate": { "size": 2, "opcode": "a2", "cycles": 2 },
+        "ZeroPage": { "size": 2, "opcode": "a6", "cycles": 3 },
+        "ZeroPageY": { "size": 3, "opcode": "b6", "cycles": 4 },
+        "Absolute": { "size": 3, "opcode": "ae", "cycles": 4 },
+        "AbsoluteY": { "size": 3, "opcode": "be", "cycles": 4 }
+      }
+    },
+    "LDY": {
+      "flags": "++----",
+      "addr_modes": {
+        "Immediate": { "size": 2, "opcode": "a0", "cycles": 2 },
+        "ZeroPage": { "size": 2, "opcode": "a4", "cycles": 3 },
+        "ZeroPageX": { "size": 3, "opcode": "b4", "cycles": 4 },
+        "Absolute": { "size": 3, "opcode": "ac", "cycles": 4 },
+        "AbsoluteX": { "size": 3, "opcode": "bc", "cycles": 4 }
+      }
+    },
+
+    "STX": {
+      "flags": "------",
+      "addr_modes": {
+        "ZeroPage": { "size": 2, "opcode": "86", "cycles": 3 },
+        "ZeroPageY": { "size": 2, "opcode": "96", "cycles": 4 },
+        "Absolute": { "size": 3, "opcode": "8e", "cycles": 4 }
+      }
+    },
+    "STY": {
+      "flags": "------",
+      "addr_modes": {
+        "ZeroPage": { "size": 2, "opcode": "84", "cycles": 3 },
+        "ZeroPageX": { "size": 3, "opcode": "94", "cycles": 4 },
+        "Absolute": { "size": 3, "opcode": "8e", "cycles": 4 }
+      }
+    },
 
     "BPL": {
+      "flags": "------",
       "addr_modes": {
         "Relative": { "size": 2, "opcode": "10", "cycles": 2 }
       }
     },
 
     "BVC": {
+      "flags": "------",
       "addr_modes": {
         "Relative": { "size": 2, "opcode": "50", "cycles": 2 }
       }
     },
 
     "BVS": {
+      "flags": "------",
       "addr_modes": {
         "Relative": { "size": 2, "opcode": "70", "cycles": 2 }
       }
     },
     "BMI": {
+      "flags": "------",
       "addr_modes": {
-        "Relative": { "size": 2, "opcode": "??", "cycles": 2 }
+        "Relative": { "size": 2, "opcode": "30", "cycles": 2 }
       }
     },
     "BNE": {
+      "flags": "------",
       "addr_modes": {
-        "Relative": { "size": 2, "opcode": "??", "cycles": 2 }
+        "Relative": { "size": 2, "opcode": "d0", "cycles": 2 }
       }
     },
 
     "BCC": {
+      "flags": "------",
       "addr_modes": {
         "Relative": { "size": 2, "opcode": "90", "cycles": 2 }
       }
     },
     "BCS": {
+      "flags": "------",
       "addr_modes": {
         "Relative": { "size": 2, "opcode": "b0", "cycles": 2 }
       }
     },
     "BEQ": {
+      "flags": "------",
       "addr_modes": {
         "Relative": { "size": 2, "opcode": "f0", "cycles": 2 }
       }
     },
 
     "JMP": {
+      "flags": "------",
       "addr_modes": {
         "Abs": { "size": 3, "opcode": "4c", "cycles": 3 },
         "Indirect": { "size": 3, "opcode": "6c", "cycles": 5 }
       }
     },
     "JSR": {
+      "flags": "------",
       "addr_modes": {
         "Abs": { "size": 3, "opcode": "20", "cycles": 6 }
       }
     },
 
     "BRK": {
+      "flags": "---0--",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "0", "cycles": 7 }
       }
     },
 
     "CLC": {
+      "flags": "--0---",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "18", "cycles": 2 }
       }
@@ -210,118 +336,140 @@
       }
     },
     "CLI": {
+      "flags": "---0--",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "58", "cycles": 2 }
       }
     },
     "CLV": {
+      "flags": "-----0",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "b8", "cycles": 2 }
       }
     },
 
     "SEC": {
+      "flags": "--1---",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "38", "cycles": 2 }
       }
     },
     "SED": {
+      "flags": "----1-",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "f8", "cycles": 2 }
       }
     },
     "SEI": {
+      "flags": "---1--",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "78", "cycles": 2 }
       }
     },
 
     "RTI": {
+      "flags": "++++++",
       "addr_modes": {
-        "Inherent": { "size": 1, "opcode": "??", "cycles": 0 }
+        "Inherent": { "size": 1, "opcode": "40", "cycles": 6 }
       }
     },
     "RTS": {
+      "flags": "------",
       "addr_modes": {
-        "Inherent": { "size": 1, "opcode": "??", "cycles": 0 }
+        "Inherent": { "size": 1, "opcode": "60", "cycles": 6 }
       }
     },
 
     "PHA": {
+      "flags": "------",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "48", "cycles": 3 }
       }
     },
 
     "PHP": {
+      "flags": "------",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "8", "cycles": 3 }
       }
     },
 
     "PLA": {
+      "flags": "++----",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "68", "cycles": 4 }
       }
     },
     "PLP": {
+      "flags": "++++++",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "28", "cycles": 4 }
       }
     },
 
     "NOP": {
+      "flags": "------",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "ea", "cycles": 2 }
       }
     },
 
     "INX": {
+      "flags": "++----",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "e8", "cycles": 2 }
       }
     },
     "INY": {
+      "flags": "++----",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "c8", "cycles": 2 }
       }
     },
     "TAX": {
+      "flags": "++----",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "aa", "cycles": 2 }
       }
     },
     "TAY": {
+      "flags": "++----",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "a8", "cycles": 2 }
       }
     },
     "TSX": {
+      "flags": "++----",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "ba", "cycles": 2 }
       }
     },
     "TXA": {
+      "flags": "++----",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "8a", "cycles": 2 }
       }
     },
     "TXS": {
+      "flags": "------",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "9a", "cycles": 2 }
       }
     },
     "TYA": {
+      "flags": "++----",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "98", "cycles": 2 }
       }
     },
     "DEX": {
+      "flags": "++----",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "ca", "cycles": 2 }
       }
     },
     "DEY": {
+      "flags": "++----",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "88", "cycles": 2 }
       }
