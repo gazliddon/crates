@@ -11,15 +11,17 @@ mod sourcefile;
 mod sourcefiles;
 mod sourceinfo;
 mod sourcestore;
+mod textcoords;
 mod textedit;
 
 pub use error::*;
+pub use textedit::*;
 pub use position::*;
 pub use sourcefile::*;
 pub use sourcefiles::*;
 pub use sourceinfo::*;
 pub use sourcestore::*;
-pub use textedit::*;
+pub use textcoords::*;
 
 // Re-exports
 pub use grl_utils;

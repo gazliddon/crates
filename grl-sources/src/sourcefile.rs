@@ -5,6 +5,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
+/// SourceFile is a wrapper around TextFile, it contains the file path and the file_id
 #[derive(Clone, PartialEq)]
 pub struct SourceFile {
     pub file_id: AsmSource,

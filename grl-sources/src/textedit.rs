@@ -1,44 +1,23 @@
 #![deny(unused_imports)]
 use thiserror::Error;
 
-/// cartesian position in a text file
-/// line and character are both zero based
-#[derive(Clone, Debug, Copy)]
-pub struct TextPos {
-    line: u32,
-    col: u32,
-}
-
-impl TextPos {
-    pub fn new(line: usize, col: usize) -> Self {
-        Self { line: line as u32, col: col as u32 }
-    }
-    pub fn col(&self) -> usize {
-        self.col as usize
-    }
-    pub fn line(&self) -> usize {
-        self.line as usize
-    }
-}
+use super::TextCoords;
 
 /// Contains information for an edit to the in memrory text file
 /// start..end is half open, end = the character after the last char to edit
 #[derive(Debug)]
 pub struct TextEdit<'a> {
-    pub start: TextPos,
-    pub end: TextPos,
-    pub range: std::ops::Range<TextPos>,
+    pub start: TextCoords,
+    pub end: TextCoords,
     pub text: &'a str,
 }
 
 impl<'a> TextEdit<'a> {
-    pub fn from_pos(start: TextPos, end: TextPos, text: &'a str) -> Self {
-        let range = start..end;
+    pub fn from_pos(start: TextCoords, end: TextCoords, text: &'a str) -> Self {
         Self {
             start,
             end,
             text,
-            range,
         }
     }
 
@@ -49,8 +28,8 @@ impl<'a> TextEdit<'a> {
         char_end: usize,
         txt: &'a str,
     ) -> Self {
-        let start = TextPos::new(line_start, char_start);
-        let end = TextPos::new(line_end, char_end);
+        let start = TextCoords::new(line_start, char_start);
+        let end = TextCoords::new(line_end, char_end);
         TextEdit::from_pos(start, end, txt)
     }
 }
@@ -112,7 +91,6 @@ fn get_range(whole_buffer: &str, part: &str) -> std::ops::Range<usize> {
     let end = start + part.len();
     start..end
 }
-
 #[derive(Clone, PartialEq)]
 pub struct TextFile {
     pub source: String,
@@ -176,9 +154,9 @@ impl TextFile {
         ret
     }
 
-    pub fn text_range(&self) -> std::ops::Range<TextPos> {
-        let start = TextPos::new(0, 0);
-        let end = TextPos::new(self.num_of_lines(), 0);
+    pub fn text_range(&self) -> std::ops::Range<TextCoords> {
+        let start = TextCoords::new(0, 0);
+        let end = TextCoords::new(self.num_of_lines(), 0);
         start..end
     }
 
@@ -204,7 +182,7 @@ impl TextFile {
             .ok_or_else(|| EditErrorKind::LineOutOfRange(line, self.num_of_lines()))
     }
 
-    pub fn start_pos_to_index(&self, pos: &TextPos) -> EditResult<usize> {
+    pub fn start_pos_to_index(&self, pos: &TextCoords) -> EditResult<usize> {
         let line_r = self.get_line_range(pos.line())?;
         let ret = line_r.start + pos.col();
 
@@ -217,7 +195,7 @@ impl TextFile {
         }
     }
 
-    fn end_pos_to_index(&self, pos: &TextPos) -> EditResult<usize> {
+    fn end_pos_to_index(&self, pos: &TextCoords) -> EditResult<usize> {
         if pos.line() == self.num_of_lines() && pos.col() == 0 {
             Ok(self.source.len())
         } else {
@@ -239,7 +217,7 @@ impl TextFile {
     }
 
     /// Take an offset into the file and return a line / character position
-    pub fn offset_to_text_pos(&self, offset: usize) -> EditResult<TextPos> {
+    pub fn offset_to_text_pos(&self, offset: usize) -> EditResult<TextCoords> {
         let source_len = self.source.len();
 
         if offset >= source_len {
@@ -248,7 +226,7 @@ impl TextFile {
             for (line, l) in self.line_offsets.iter().enumerate() {
                 if l.contains(&offset) {
                     let col = offset - l.start;
-                    return Ok(TextPos::new(line,col));
+                    return Ok(TextCoords::new(line,col));
                 }
             }
 
@@ -259,22 +237,6 @@ impl TextFile {
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-// Implement these traits so I can use TextPos in std::ops::Range
-impl PartialEq for TextPos {
-    fn eq(&self, other: &Self) -> bool {
-        self.line == other.line && self.col == other.col
-    }
-}
-
-impl PartialOrd for TextPos {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        match self.line.partial_cmp(&other.line) {
-            Some(core::cmp::Ordering::Equal) => {}
-            ord => return ord,
-        }
-        self.col.partial_cmp(&other.col)
-    }
-}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 

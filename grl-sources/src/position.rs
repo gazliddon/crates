@@ -5,14 +5,16 @@ impl std::fmt::Display for Position {
         write!(f, "({}:{})", self.line, self.col)
     }
 }
-
+/// AsmSource is a unique identifier a chunk of sourcode
 #[derive(Default,Clone, PartialEq, Eq, Debug, Copy, Hash)]
 pub enum AsmSource {
    #[default] 
     FromStr,
     FileId(u64),
 }
-
+/// Position is a location in a source file
+/// It incorporates a range of characters and is badly named
+/// TODO Rename this to TextSpanlLocation
 #[derive(Debug, PartialEq, Eq, Clone, Hash, Copy)]
 pub struct Position {
     src: AsmSource,
@@ -21,6 +23,8 @@ pub struct Position {
     offset : u32,
     len: u32,
 }
+
+pub type TextSpanLocation = Position;
 
 impl Position {
     pub fn src(&self) -> AsmSource {
@@ -49,6 +53,7 @@ impl Position {
     pub fn line(&self) -> usize {
         self.line as usize
     }
+
     pub fn col(&self) -> usize {
         self.col as usize
     }
@@ -57,6 +62,7 @@ impl Position {
         self.offset as usize .. ( self.offset+self.len ) as usize
     }
 
+    /// Does this position overlap with another position
     pub fn overlaps(&self, p: &Position) -> bool {
         let range = self.range();
         let p_range = p.range();
