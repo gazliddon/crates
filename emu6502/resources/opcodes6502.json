@@ -56,7 +56,7 @@
     },
 
     "CMP": {
-      "flags": "",
+      "flags": "+++--+",
       "addr_modes": {
         "Immediate": { "size": 2, "opcode": "c9", "cycles": 2 },
         "ZeroPage": { "size": 2, "opcode": "c5", "cycles": 3 },
@@ -305,14 +305,14 @@
     "JMP": {
       "flags": "------",
       "addr_modes": {
-        "Abs": { "size": 3, "opcode": "4c", "cycles": 3 },
+        "Absolute": { "size": 3, "opcode": "4c", "cycles": 3 },
         "Indirect": { "size": 3, "opcode": "6c", "cycles": 5 }
       }
     },
     "JSR": {
       "flags": "------",
       "addr_modes": {
-        "Abs": { "size": 3, "opcode": "20", "cycles": 6 }
+        "Absolute": { "size": 3, "opcode": "20", "cycles": 6 }
       }
     },
 

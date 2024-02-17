@@ -3,6 +3,7 @@ use super::Mnemonic;
 use std::str::FromStr;
 
 use std::collections::{ HashMap, HashSet };
+
 #[derive(
     Copy, Debug, Clone, Hash, Ord, Eq, PartialEq, PartialOrd, Default, Serialize, Deserialize,
 )]
