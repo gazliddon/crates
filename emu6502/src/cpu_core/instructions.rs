@@ -1,5 +1,7 @@
-use super::{ FlagMod, AddrModeEnum, from_text };
+use super::{  AddrModeEnum, from_text };
 use serde::{ Deserialize, Deserializer, de::Error };
+
+use emucore::flagmods::FlagMod;
 
 use std::collections::HashMap;
 

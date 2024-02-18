@@ -8,8 +8,8 @@
     "Absolute": { "size": 3 },
     "AbsoluteX": { "size": 3 },
     "AbsoluteY": { "size": 3 },
-    "IndX": { "size": 2 },
-    "IndY": { "size": 2 }
+    "IndirectX": { "size": 2 },
+    "IndirectY": { "size": 2 }
   },
 
   "instructions": {
@@ -22,8 +22,8 @@
         "Absolute": { "size": 3, "opcode": "ed", "cycles": 4 },
         "AbsoluteX": { "size": 3, "opcode": "fd", "cycles": 4 },
         "AbsoluteY": { "size": 3, "opcode": "f9", "cycles": 4 },
-        "IndX": { "size": 2, "opcode": "e1", "cycles": 6 },
-        "IndY": { "size": 2, "opcode": "f1", "cycles": 5 }
+        "IndirectX": { "size": 2, "opcode": "e1", "cycles": 6 },
+        "IndirectY": { "size": 2, "opcode": "f1", "cycles": 5 }
       }
     },
 
@@ -36,8 +36,8 @@
         "Absolute": { "size": 3, "opcode": "6d", "cycles": 4 },
         "AbsoluteX": { "size": 3, "opcode": "7d", "cycles": 4 },
         "AbsoluteY": { "size": 3, "opcode": "79", "cycles": 4 },
-        "IndX": { "size": 2, "opcode": "71", "cycles": 6 },
-        "IndY": { "size": 2, "opcode": "61", "cycles": 5 }
+        "IndirectX": { "size": 2, "opcode": "71", "cycles": 6 },
+        "IndirectY": { "size": 2, "opcode": "61", "cycles": 5 }
       }
     },
 
@@ -50,8 +50,8 @@
         "Absolute": { "size": 3, "opcode": "2d", "cycles": 4 },
         "AbsoluteX": { "size": 3, "opcode": "3d", "cycles": 4 },
         "AbsoluteY": { "size": 3, "opcode": "39", "cycles": 4 },
-        "IndX": { "size": 2, "opcode": "21", "cycles": 6 },
-        "IndY": { "size": 2, "opcode": "31", "cycles": 5 }
+        "IndirectX": { "size": 2, "opcode": "21", "cycles": 6 },
+        "IndirectY": { "size": 2, "opcode": "31", "cycles": 5 }
       }
     },
 
@@ -64,8 +64,8 @@
         "Absolute": { "size": 3, "opcode": "cd", "cycles": 4 },
         "AbsoluteX": { "size": 3, "opcode": "dd", "cycles": 4 },
         "AbsoluteY": { "size": 3, "opcode": "d9", "cycles": 4 },
-        "IndX": { "size": 2, "opcode": "c1", "cycles": 6 },
-        "IndY": { "size": 2, "opcode": "c1", "cycles": 5 }
+        "IndirectX": { "size": 2, "opcode": "c1", "cycles": 6 },
+        "IndirectY": { "size": 2, "opcode": "c1", "cycles": 5 }
       }
     },
 
@@ -78,8 +78,8 @@
         "Absolute": { "size": 3, "opcode": "4d", "cycles": 4 },
         "AbsoluteX": { "size": 3, "opcode": "5d", "cycles": 4 },
         "AbsoluteY": { "size": 3, "opcode": "59", "cycles": 4 },
-        "IndX": { "size": 2, "opcode": "41", "cycles": 6 },
-        "IndY": { "size": 2, "opcode": "51", "cycles": 5 }
+        "IndirectX": { "size": 2, "opcode": "41", "cycles": 6 },
+        "IndirectY": { "size": 2, "opcode": "51", "cycles": 5 }
       }
     },
 
@@ -92,8 +92,8 @@
         "Absolute": { "size": 3, "opcode": "ad", "cycles": 4 },
         "AbsoluteX": { "size": 3, "opcode": "8d", "cycles": 4 },
         "AbsoluteY": { "size": 3, "opcode": "b9", "cycles": 4 },
-        "IndX": { "size": 2, "opcode": "a1", "cycles": 6 },
-        "IndY": { "size": 2, "opcode": "b1", "cycles": 5 }
+        "IndirectX": { "size": 2, "opcode": "a1", "cycles": 6 },
+        "IndirectY": { "size": 2, "opcode": "b1", "cycles": 5 }
       }
     },
     "ORA": {
@@ -105,8 +105,8 @@
         "Absolute": { "size": 3, "opcode": "0d", "cycles": 4 },
         "AbsoluteX": { "size": 3, "opcode": "1d", "cycles": 4 },
         "AbsoluteY": { "size": 3, "opcode": "19", "cycles": 4 },
-        "IndX": { "size": 2, "opcode": "01", "cycles": 6 },
-        "IndY": { "size": 2, "opcode": "11", "cycles": 5 }
+        "IndirectX": { "size": 2, "opcode": "01", "cycles": 6 },
+        "IndirectY": { "size": 2, "opcode": "11", "cycles": 5 }
       }
     },
 
@@ -118,8 +118,8 @@
         "Absolute": { "size": 0, "opcode": "8d", "cycles": 4 },
         "AbsoluteX": { "size": 0, "opcode": "9d", "cycles": 5 },
         "AbsoluteY": { "size": 0, "opcode": "99", "cycles": 5 },
-        "IndX": { "size": 0, "opcode": "81", "cycles": 6 },
-        "IndY": { "size": 0, "opcode": "91", "cycles": 6 }
+        "IndirectX": { "size": 0, "opcode": "81", "cycles": 6 },
+        "IndirectY": { "size": 0, "opcode": "91", "cycles": 6 }
       }
     },
 

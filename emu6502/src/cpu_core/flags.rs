@@ -1,4 +1,9 @@
 use serde::{Deserialize, Deserializer, Serialize};
+use emucore::flagmods::{ FlagMods, FlagMod };
+
+// TODO: Can any of these be made generic and put into emu_core
+// FlagMod can
+// construction of FlagsMods needs attention
 
 bitflags::bitflags! {
     #[derive(Clone, Copy, Debug,Deserialize, Serialize, PartialEq, Default)]
@@ -15,26 +20,14 @@ bitflags::bitflags! {
         }
 }
 
-/// Represents how a flag is modified by an instruction
-#[derive(Debug, Copy, Clone, PartialEq, Hash, Eq, Deserialize, Serialize, Default)]
-pub enum FlagMod {
-    #[default]
-    Unaltered,
-    One,
-    Zero,
-    Altered,
+pub fn text_6_to_flag_mods(txt: &str) -> FlagMods {
+    let ret: FlagMods = add_missing_bits(txt).into();
+    ret
 }
-/// Converts a char
-impl From<char> for FlagMod {
-    fn from(val: char) -> Self {
-        match val {
-            '-' => FlagMod::Unaltered,
-            '1' => FlagMod::One,
-            '0' => FlagMod::Zero,
-            '+' => FlagMod::Altered,
-            _ => panic!("What the hell is this {val}"),
-        }
-    }
+
+pub fn flag_mods_to_text_6(fmods: FlagMods) -> String {
+    let txt: String = fmods.into();
+    remove_unwanted_bits(&txt)
 }
 
 pub fn from_text<'de, D>(deserializer: D) -> Result<[FlagMod; 8], D::Error>
@@ -42,20 +35,32 @@ where
     D: Deserializer<'de>,
 {
     let s: &str = Deserialize::deserialize(deserializer)?;
-    let ret = create_flag_changes(s);
-    Ok(ret)
+    let ret: FlagMods = add_missing_bits(s).into();
+    Ok(ret.mods().clone())
 }
 
-/// Parses a string showing flag alterations
-fn create_flag_changes(txt: &str) -> [FlagMod; 8] {
-    println!("input : {txt}");
+fn remove_unwanted_bits(txt: &str) -> String {
+    format!("{}{}", &txt[..2], &txt[4..])
+}
+
+fn add_missing_bits(txt: &str) -> String {
     assert!(txt.len() == 6);
-    // make an 8 bit flag
-    let b67 = &txt[5..];
-    let b04 = &txt[..5];
-    let txt = format!("{}--{}",b04,b67);
-    println!("{:?}", txt);
-    let ret = txt.chars().map(|x| FlagMod::from(x as char)).collect::<Vec<_>>();
-    println!("{:?}", ret);
-    ret.try_into().unwrap()
+    let b67 = &txt[0..2];
+    let b03 = &txt[2..];
+    format!("{}--{}", b67, b03)
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    use pretty_assertions::assert_eq;
+
+    #[test]
+    fn test_flagsmods() {
+        let txt = "11111-";
+        let fmods = text_6_to_flag_mods(txt);
+        let txt2 = flag_mods_to_text_6(fmods);
+        assert_eq!(txt2, txt);
+    }
 }

@@ -11,8 +11,8 @@ pub enum AddrModeEnum {
     Absolute,
     AbsoluteX,
     AbsoluteY,
-    IndX,
-    IndY,
+    IndirectX,
+    IndirectY,
     Relative,
     Indirect,
     #[default]
