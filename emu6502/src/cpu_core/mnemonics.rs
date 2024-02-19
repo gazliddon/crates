@@ -57,6 +57,7 @@ pub enum Mnemonic {
   Tsx,
   Txa,
   Txs,
-  Tya
+  Tya,
+  Illegal,
 }
 
