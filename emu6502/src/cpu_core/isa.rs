@@ -1,22 +1,13 @@
-use super::{ Instructions, Mnemonic, AddrModeEnum, Instruction};
+use super::{ Instructions, Mnemonic,  Instruction, OpcodeInfo};
 
 pub struct Isa {
     pub instructions: Instructions,
     pub opcode_to_mnemonic: [Mnemonic; 256],
-    pub opcode_to_instruction_info: [Option<InstructionInfo>; 256],
-}
-
-#[derive(Debug, Clone, Copy)]
-pub struct InstructionInfo {
-    pub opcode: u8,
-    pub mnemonic: Mnemonic,
-    pub addr_mode: AddrModeEnum,
-    pub cycles: u8,
-    pub size: u8,
+    pub opcode_to_instruction_info: [Option<OpcodeInfo>; 256],
 }
 
 impl Isa {
-    pub fn get_instruction_info<'a>(&'a self, opcode: u8) -> Option<&'a InstructionInfo> {
+    pub fn get_instruction_info(&self, opcode: u8) -> Option<&OpcodeInfo> {
         self.opcode_to_instruction_info[opcode as usize].as_ref()
     }
 
@@ -24,28 +15,22 @@ impl Isa {
         self.instructions.instructions.get(&m)
     }
 
-    pub fn new(ins: Instructions) -> Self {
+    pub fn new(instructions: Instructions) -> Self {
         let mut opcodes = [Mnemonic::Illegal; 256];
         let mut opcode_to_instruction_info = [None; 256];
 
-        for (mn, ins) in ins.instructions.iter() {
+        for (mn, ins) in instructions.instructions.iter() {
             for (amode, opdata) in ins.addr_modes.iter() {
                 let op_code = opdata.opcode as usize;
+                let ins = instructions.get_opcode_info(*mn, *amode);
+                opcode_to_instruction_info[op_code] = ins;
                 opcodes[op_code] = *mn;
-                let ins = InstructionInfo {
-                    opcode: opdata.opcode,
-                    mnemonic: *mn,
-                    addr_mode: *amode,
-                    cycles: opdata.cycles,
-                    size: opdata.size,
-                };
-                opcode_to_instruction_info[op_code] = Some(ins);
             }
         }
 
         Isa {
             opcode_to_instruction_info,
-            instructions: ins,
+            instructions,
             opcode_to_mnemonic: opcodes,
         }
     }

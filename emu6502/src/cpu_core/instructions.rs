@@ -15,7 +15,7 @@ pub struct Instruction {
 }
 
 /// Information about one particular instruction
-#[derive(Default, Deserialize, Debug, Clone)]
+#[derive(Default, Deserialize, Debug, Clone, Copy)]
 pub struct OpcodeData {
     #[serde(deserialize_with = "from_hex")]
     pub opcode: u8,
@@ -39,3 +39,37 @@ pub struct Instructions {
     pub instructions: HashMap<Mnemonic, Instruction>,
 }
 
+#[derive(Debug, Copy, Clone)]
+pub struct OpcodeInfo {
+    pub addr_mode : AddrModeEnum,
+    pub opcode_data: OpcodeData,
+    pub menmonic: Mnemonic,
+}
+
+impl Instructions {
+    pub fn get_opcode_info(&self, m: Mnemonic, a: AddrModeEnum) -> Option<OpcodeInfo> {
+        let i = self.instructions.get(&m)?;
+        let od = i.addr_modes.get(&a)?;
+        Some(OpcodeInfo {
+            addr_mode: a,
+            opcode_data: *od,
+            menmonic: m,
+        })
+
+    }
+
+    pub fn get_opcode_info_from_opcode(&self, opcode: u8) -> Option<OpcodeInfo> {
+        for (m, i) in self.instructions.iter() {
+            for (a, od) in i.addr_modes.iter() {
+            if od.opcode == opcode {
+                return Some(OpcodeInfo {
+                    addr_mode: *a,
+                    opcode_data: *od,
+                    menmonic: *m,
+                });
+            }
+            }
+        }
+        None
+    }
+}
