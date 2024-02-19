@@ -37,7 +37,7 @@ impl From<char> for FlagMod {
 
 /// A collection of 8 FlagMods
 /// and masks representing each mod type
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Copy, Clone)]
 pub struct FlagMods {
     mods: [FlagMod; 8],
     pub alter_mask: u8,
@@ -50,6 +50,7 @@ impl FlagMods {
     pub fn mods(&self) -> &[FlagMod; 8] {
         &self.mods
     }
+
     pub fn from_mods(mods: [FlagMod; 8]) -> Self {
         use FlagMod::*;
         FlagMods {
