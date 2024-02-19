@@ -1,6 +1,6 @@
 use serde::{ Serialize,Deserialize };
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy,Hash, Serialize, Deserialize, strum::Display)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy,Hash, Serialize, Deserialize, strum::Display, Default)]
 pub enum Mnemonic {
   Adc,
   And,
@@ -58,6 +58,7 @@ pub enum Mnemonic {
   Txa,
   Txs,
   Tya,
+#[default]
   Illegal,
 }
 

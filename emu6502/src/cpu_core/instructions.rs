@@ -1,8 +1,7 @@
-use super::{from_text, AddrModeEnum, Mnemonic};
+use super::{from_text, AddrModeEnum, Mnemonic, InstructionKind};
 use serde::{de::Error, Deserialize, Deserializer};
 
 use emucore::flagmods::FlagMods;
-
 use std::collections::HashMap;
 
 /// All of the information for all of the address modes
@@ -11,6 +10,8 @@ use std::collections::HashMap;
 pub struct Instruction {
     #[serde(deserialize_with = "from_text")]
     pub flags: FlagMods,
+    #[serde(default)]
+    pub kind: InstructionKind,
     pub addr_modes: HashMap<AddrModeEnum, OpcodeData>,
 }
 
