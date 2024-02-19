@@ -13,7 +13,7 @@
   },
 
   "instructions": {
-    "SBC": {
+    "Sbc": {
       "flags": "+++--+",
       "addr_modes": {
         "Immediate": { "size": 2, "opcode": "e9", "cycles": 2 },
@@ -27,7 +27,7 @@
       }
     },
 
-    "ADC": {
+    "Adc": {
       "flags": "+++--+",
       "addr_modes": {
         "Immediate": { "size": 2, "opcode": "69", "cycles": 2 },
@@ -41,7 +41,7 @@
       }
     },
 
-    "AND": {
+    "And": {
       "flags": "++----",
       "addr_modes": {
         "Immediate": { "size": 2, "opcode": "29", "cycles": 2 },
@@ -55,7 +55,7 @@
       }
     },
 
-    "CMP": {
+    "Cmp": {
       "flags": "+++--+",
       "addr_modes": {
         "Immediate": { "size": 2, "opcode": "c9", "cycles": 2 },
@@ -69,7 +69,7 @@
       }
     },
 
-    "EOR": {
+    "Eor": {
       "flags": "++----",
       "addr_modes": {
         "Immediate": { "size": 2, "opcode": "49", "cycles": 2 },
@@ -83,7 +83,7 @@
       }
     },
 
-    "LDA": {
+    "Lda": {
       "flags": "++----",
       "addr_modes": {
         "Immediate": { "size": 2, "opcode": "a9", "cycles": 2 },
@@ -96,7 +96,7 @@
         "IndirectY": { "size": 2, "opcode": "b1", "cycles": 5 }
       }
     },
-    "ORA": {
+    "Ora": {
       "flags": "++----",
       "addr_modes": {
         "Immediate": { "size": 2, "opcode": "09", "cycles": 2 },
@@ -110,7 +110,7 @@
       }
     },
 
-    "STA": {
+    "Sta": {
       "flags": "------",
       "addr_modes": {
         "ZeroPage": { "size": 0, "opcode": "85", "cycles": 3 },
@@ -123,7 +123,7 @@
       }
     },
 
-    "CPX": {
+    "Cpx": {
       "flags": "+++---",
       "addr_modes": {
         "Immediate": { "size": 2, "opcode": "e0", "cycles": 2 },
@@ -132,7 +132,7 @@
       }
     },
 
-    "CPY": {
+    "Cpy": {
       "flags": "+++---",
       "addr_modes": {
         "Immediate": { "size": 2, "opcode": "c0", "cycles": 2 },
@@ -141,7 +141,7 @@
       }
     },
 
-    "ASL": {
+    "Asl": {
       "flags": "+++---",
       "addr_modes": {
         "Immediate": { "size": 1, "opcode": "0a", "cycles": 2 },
@@ -152,7 +152,7 @@
       }
     },
 
-    "LSR": {
+    "Lsr": {
       "flags": "0++---",
       "addr_modes": {
         "Immediate": { "size": 1, "opcode": "4a", "cycles": 2 },
@@ -162,7 +162,7 @@
         "AbsoluteX": { "size": 3, "opcode": "5e", "cycles": 7 }
       }
     },
-    "ROL": {
+    "Rol": {
       "flags": "+++---",
       "addr_modes": {
         "Immediate": { "size": 1, "opcode": "2a", "cycles": 2 },
@@ -173,7 +173,7 @@
       }
     },
 
-    "ROR": {
+    "Ror": {
       "flags": "+++---",
       "addr_modes": {
         "Immediate": { "size": 1, "opcode": "6a", "cycles": 2 },
@@ -184,7 +184,7 @@
       }
     },
 
-    "DEC": {
+    "Dec": {
       "flags": "++----",
       "addr_modes": {
         "ZeroPage": { "size": 2, "opcode": "c6", "cycles": 5 },
@@ -194,7 +194,7 @@
       }
     },
 
-    "INC": {
+    "Inc": {
       "flags": "++----",
       "addr_modes": {
         "ZeroPage": { "size": 2, "opcode": "e6", "cycles": 5 },
@@ -204,7 +204,7 @@
       }
     },
 
-    "BIT": {
+    "Bit": {
       "flags": "++---+",
       "addr_modes": {
         "ZeroPage": { "size": 2, "opcode": "24", "cycles": 3 },
@@ -212,7 +212,7 @@
       }
     },
 
-    "LDX": {
+    "Ldx": {
       "flags": "++----",
       "addr_modes": {
         "Immediate": { "size": 2, "opcode": "a2", "cycles": 2 },
@@ -222,7 +222,7 @@
         "AbsoluteY": { "size": 3, "opcode": "be", "cycles": 4 }
       }
     },
-    "LDY": {
+    "Ldy": {
       "flags": "++----",
       "addr_modes": {
         "Immediate": { "size": 2, "opcode": "a0", "cycles": 2 },
@@ -233,7 +233,7 @@
       }
     },
 
-    "STX": {
+    "Stx": {
       "flags": "------",
       "addr_modes": {
         "ZeroPage": { "size": 2, "opcode": "86", "cycles": 3 },
@@ -241,7 +241,7 @@
         "Absolute": { "size": 3, "opcode": "8e", "cycles": 4 }
       }
     },
-    "STY": {
+    "Sty": {
       "flags": "------",
       "addr_modes": {
         "ZeroPage": { "size": 2, "opcode": "84", "cycles": 3 },
@@ -250,225 +250,225 @@
       }
     },
 
-    "BPL": {
+    "Bpl": {
       "flags": "------",
       "addr_modes": {
         "Relative": { "size": 2, "opcode": "10", "cycles": 2 }
       }
     },
 
-    "BVC": {
+    "Bvc": {
       "flags": "------",
       "addr_modes": {
         "Relative": { "size": 2, "opcode": "50", "cycles": 2 }
       }
     },
 
-    "BVS": {
+    "Bvs": {
       "flags": "------",
       "addr_modes": {
         "Relative": { "size": 2, "opcode": "70", "cycles": 2 }
       }
     },
-    "BMI": {
+    "Bmi": {
       "flags": "------",
       "addr_modes": {
         "Relative": { "size": 2, "opcode": "30", "cycles": 2 }
       }
     },
-    "BNE": {
+    "Bne": {
       "flags": "------",
       "addr_modes": {
         "Relative": { "size": 2, "opcode": "d0", "cycles": 2 }
       }
     },
 
-    "BCC": {
+    "Bcc": {
       "flags": "------",
       "addr_modes": {
         "Relative": { "size": 2, "opcode": "90", "cycles": 2 }
       }
     },
-    "BCS": {
+    "Bcs": {
       "flags": "------",
       "addr_modes": {
         "Relative": { "size": 2, "opcode": "b0", "cycles": 2 }
       }
     },
-    "BEQ": {
+    "Beq": {
       "flags": "------",
       "addr_modes": {
         "Relative": { "size": 2, "opcode": "f0", "cycles": 2 }
       }
     },
 
-    "JMP": {
+    "Jmp": {
       "flags": "------",
       "addr_modes": {
         "Absolute": { "size": 3, "opcode": "4c", "cycles": 3 },
         "Indirect": { "size": 3, "opcode": "6c", "cycles": 5 }
       }
     },
-    "JSR": {
+    "Jsr": {
       "flags": "------",
       "addr_modes": {
         "Absolute": { "size": 3, "opcode": "20", "cycles": 6 }
       }
     },
 
-    "BRK": {
+    "Brk": {
       "flags": "---0--",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "0", "cycles": 7 }
       }
     },
 
-    "CLC": {
+    "Clc": {
       "flags": "--0---",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "18", "cycles": 2 }
       }
     },
-    "CLD": {
+    "Cld": {
       "flags": "----0-",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "db", "cycles": 2 }
       }
     },
-    "CLI": {
+    "Cli": {
       "flags": "---0--",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "58", "cycles": 2 }
       }
     },
-    "CLV": {
+    "Clv": {
       "flags": "-----0",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "b8", "cycles": 2 }
       }
     },
 
-    "SEC": {
+    "Sec": {
       "flags": "--1---",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "38", "cycles": 2 }
       }
     },
-    "SED": {
+    "Sed": {
       "flags": "----1-",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "f8", "cycles": 2 }
       }
     },
-    "SEI": {
+    "Sei": {
       "flags": "---1--",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "78", "cycles": 2 }
       }
     },
 
-    "RTI": {
+    "Rti": {
       "flags": "++++++",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "40", "cycles": 6 }
       }
     },
-    "RTS": {
+    "Rts": {
       "flags": "------",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "60", "cycles": 6 }
       }
     },
 
-    "PHA": {
+    "Pha": {
       "flags": "------",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "48", "cycles": 3 }
       }
     },
 
-    "PHP": {
+    "Php": {
       "flags": "------",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "8", "cycles": 3 }
       }
     },
 
-    "PLA": {
+    "Pla": {
       "flags": "++----",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "68", "cycles": 4 }
       }
     },
-    "PLP": {
+    "Plp": {
       "flags": "++++++",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "28", "cycles": 4 }
       }
     },
 
-    "NOP": {
+    "Nop": {
       "flags": "------",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "ea", "cycles": 2 }
       }
     },
 
-    "INX": {
+    "Inx": {
       "flags": "++----",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "e8", "cycles": 2 }
       }
     },
-    "INY": {
+    "Iny": {
       "flags": "++----",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "c8", "cycles": 2 }
       }
     },
-    "TAX": {
+    "Tax": {
       "flags": "++----",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "aa", "cycles": 2 }
       }
     },
-    "TAY": {
+    "Tay": {
       "flags": "++----",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "a8", "cycles": 2 }
       }
     },
-    "TSX": {
+    "Tsx": {
       "flags": "++----",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "ba", "cycles": 2 }
       }
     },
-    "TXA": {
+    "Txa": {
       "flags": "++----",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "8a", "cycles": 2 }
       }
     },
-    "TXS": {
+    "Txs": {
       "flags": "------",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "9a", "cycles": 2 }
       }
     },
-    "TYA": {
+    "Tya": {
       "flags": "++----",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "98", "cycles": 2 }
       }
     },
-    "DEX": {
+    "Dex": {
       "flags": "++----",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "ca", "cycles": 2 }
       }
     },
-    "DEY": {
+    "Dey": {
       "flags": "++----",
       "addr_modes": {
         "Inherent": { "size": 1, "opcode": "88", "cycles": 2 }

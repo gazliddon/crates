@@ -7,5 +7,5 @@ fn main() {
 
     let x : Instructions = serde_json::from_str(program).unwrap();
 
-    println!("{:?}", x);
+    println!("{:#?}", x);
 }

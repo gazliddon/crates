@@ -1,5 +1,5 @@
 use serde::{Deserialize, Deserializer, Serialize};
-use emucore::flagmods::{ FlagMods, FlagMod };
+use emucore::flagmods::FlagMods;
 
 // TODO: Can any of these be made generic and put into emu_core
 // FlagMod can
@@ -30,13 +30,13 @@ pub fn flag_mods_to_text_6(fmods: FlagMods) -> String {
     remove_unwanted_bits(&txt)
 }
 
-pub fn from_text<'de, D>(deserializer: D) -> Result<[FlagMod; 8], D::Error>
+pub fn from_text<'de, D>(deserializer: D) -> Result<FlagMods, D::Error>
 where
     D: Deserializer<'de>,
 {
     let s: &str = Deserialize::deserialize(deserializer)?;
     let ret: FlagMods = add_missing_bits(s).into();
-    Ok(ret.mods().clone())
+    Ok(ret)
 }
 
 fn remove_unwanted_bits(txt: &str) -> String {
