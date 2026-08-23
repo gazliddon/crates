@@ -1,8 +1,0 @@
-[package]
-name = "stargate-emu"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-emu6809 = { path = "../emu6809" }
-emucore = { path = "../emucore" }
