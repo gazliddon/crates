@@ -1,6 +1,0 @@
-﻿Soft reset
-[:pia_2] Warning! No CA1 read handler. Assuming pin not connected
-[:pia_2] Warning! No CA2 read handler. Assuming pin not connected
-[:pia_2] Error! no CB1 read handler. Three-state pin is undefined
-[:pia_2] Error! Three-state pin is undefined
-[:pia_2] Warning! No port CB2 write handler. Previous value has been lost!

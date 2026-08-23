@@ -1,3 +1,8 @@
 target
 Cargo.lock
 .DS_Store
+error.log
+cfg/
+nvram/
+snap/
+*.wav
