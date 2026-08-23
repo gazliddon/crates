@@ -126,7 +126,9 @@ These rules come from `lua/plugins/markdownlint.json`,
   `programme` only in non-computing senses. Hardware identifiers
   (`color_registers`, `Center Coin`) keep their schematic spelling.
 - **Spell checking**: harper-ls checks docs. Technical terms (register
-  names, game names, domain jargon) belong in the harper workspace
-  dictionary at `~/.harper-dictionary.txt` (harper resolves this setup's
-  workspace root to the home dir). Add words with the `HarperAddToWSDict`
-  code action instead of editing prose around them.
+  names, game names, domain jargon) belong in the per-project workspace
+  dictionary at the repo root — `.harper-dictionary.txt` (harper roots at
+  the nearest `.git` or `gazm.toml`). Personal/global words go in the user
+  dictionary (`~/Library/Application Support/harper-ls/dictionary.txt`).
+  Add words with the `HarperAddToWSDict` code action instead of editing
+  prose around them.
