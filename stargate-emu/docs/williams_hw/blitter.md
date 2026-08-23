@@ -7,10 +7,10 @@ framebuffer model, registers, control bits, recipes, and 6809 examples.
 Stargate and Defender have **no blitter**; this page applies to Robotron
 and the other B1/B2 games (Joust, Sinistar, Splat).
 
-## 1. The Framebuffer (read this first)
+## 1. The Framebuffer (Read This First)
 
 The screen is a **column-major bitmap**, not a tilemap. Think of video RAM
-as 256 byte-columns, each 256 bytes tall:
+as 256 byte-columns; every column is 256 bytes tall:
 
 ```text
 byte address of (pixel_x, pixel_y) = (pixel_x / 2) * 256 + pixel_y
@@ -24,7 +24,7 @@ byte address of (pixel_x, pixel_y) = (pixel_x / 2) * 256 + pixel_y
   visible 6-297); the framebuffer addressing scheme goes to 256 columns
   but only about 38K of video RAM is populated. Keep video blits below
   `$9800`.
-- The display scans column 0..N for each row; the CPU writes absolute
+- The display scans columns 0 to N for each row; the CPU writes absolute
   byte addresses.
 
 Consequences that surprise new programmers:
@@ -69,8 +69,8 @@ w bytes is 2w pixels.
 | 4   | SOLID           | Write mask byte (CA01) instead of src   |
 | 3   | FG_ONLY         | Zero source nibbles are transparent     |
 | 2   | SLOW            | Double the blit time                    |
-| 1   | DST_STRIDE_256  | Dest advances in framebuffer layout     |
-| 0   | SRC_STRIDE_256  | Source advances in framebuffer layout   |
+| 1   | DST_STRIDE_256  | Dest advances per framebuffer column    |
+| 0   | SRC_STRIDE_256  | Source advances per framebuffer column  |
 
 Writing CA00 performs the blit synchronously: the blitter steals bus
 cycles and the CPU stalls until it is done.
@@ -109,17 +109,17 @@ nibble whether to keep or replace it, then writes:
 
 - A nibble is **kept** (not written) when: its NO_EVEN/NO_ODD bit is
   set, **or** FG_ONLY is set and the source nibble is zero.
-- Otherwise the nibble is **replaced**: with the source nibble, or with
+- Otherwise, the nibble is **replaced**: with the source nibble, or with
   the CA01 nibble when SOLID is set.
 
-So the four common looks:
+The four common looks:
 
 | Control bits             | Result                          |
 |--------------------------|---------------------------------|
 | `0x02` (DST_STRIDE)      | opaque copy (zeros included)    |
 | `0x0A` + FG_ONLY         | transparent copy (0 = clear)    |
 | `0x12` SOLID             | fill rectangle with CA01 colour |
-| `0x1A` SOLID + FG_ONLY   | draw mask colour where src != 0 |
+| `0x1A` SOLID + FG_ONLY   | Draw mask colour where src != 0 |
 
 ## 6. Placing Sprites on Odd X
 
@@ -141,7 +141,7 @@ Byte-aligned blits can only start at even pixel positions. For odd x:
 
 ## 7. 6809 Examples
 
-### Example 1: copy a 16x16 sprite from ROM art to (64, 32)
+### Example 1: Copy a 16x16 Sprite from ROM Art to (64, 32)
 
 Art: 16 contiguous bytes per row, zero nibbles = transparent. Screen
 position (64, 32): dest column 32, row 32.
@@ -163,7 +163,7 @@ position (64, 32): dest column 32, row 32.
         STA     $CA00           ; go (CPU stalls until done)
 ```
 
-### Example 2: fill an 8x8 region with solid colour 3
+### Example 2: Fill an 8x8 Region with Solid Colour 3
 
 ```asm
         LDA     #$33            ; mask byte: both pixels = colour 3
@@ -179,7 +179,7 @@ position (64, 32): dest column 32, row 32.
         STA     $CA00
 ```
 
-### Example 3: the same sprite on an odd X (65, 32)
+### Example 3: The Same Sprite on an Odd X (65, 32)
 
 Dest column becomes `(65 - 1) / 2 = 32`, and we add SHIFT:
 
@@ -220,7 +220,7 @@ dirty-region redraws.
   hardware treats as 1 — plan for it.
 - **Source banking**: source reads follow the CPU map. If art lives in
   the low ROM (0000-8FFF), select the ROM bank (`C900` bit 0 = 1) before
-  the blit, then switch back to video RAM to draw with the CPU.
+  the blit, then return to video RAM to draw with the CPU.
 - **No polling**: the blit is synchronous; there is nothing to check.
   Just write CA00 and continue.
 - **Keep video content below `$9800`** (visible region); blits beyond
@@ -237,6 +237,7 @@ dirty-region redraws.
 - MAME `src/mame/midway/williams_v.cpp` — `blitter_w`, `blitter_core`,
   `blit_pixel`, `blitter_init`
 - MAME `src/mame/midway/williams.cpp` — header comment block (blitter
-  register summary), `williams_b1` config
-- MAME `src/mame/midway/williams.h` — `WMS_BLITTER_CONTROLBYTE_*` defines
+  register summary), the `williams_b1` machine configuration
+- MAME `src/mame/midway/williams.h` — `WMS_BLITTER_CONTROLBYTE_*`
+  definitions
 - See also [[robotron]] and [[base|Williams Base Platform]]
