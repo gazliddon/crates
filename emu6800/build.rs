@@ -1,5 +1,5 @@
 #![allow(dead_code)]
-#[path="src/cpu_core/mod.rs"]
+#[path = "src/cpu_core/mod.rs"]
 mod cpu_core;
 
 use std::env;
@@ -8,12 +8,12 @@ use std::io::Write;
 use std::path::Path;
 
 fn make_string(body: String) -> String {
-        let header = r#"#[macro_export]
+    let header = r#"#[macro_export]
 macro_rules! op_table {
     ($op:expr, $fail:block) => {
         match $op {"#;
 
-        let footer = r#"
+    let footer = r#"
             _ => $fail
         }
     }
@@ -29,4 +29,3 @@ fn main() {
     let mut f = File::create(dest_path).unwrap();
     f.write_all(out.as_bytes()).unwrap();
 }
-

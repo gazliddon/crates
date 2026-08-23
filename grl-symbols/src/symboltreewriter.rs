@@ -49,23 +49,26 @@ where
         self.current_scope_id
     }
 
-    pub fn get_scope_fqn(&self) -> String {
+    pub fn get_scope_fqn(&self) -> Result<String, SymbolError> {
         self.sym_tree.get_fqn_from_id(self.current_scope_id)
     }
 
     pub fn set_scope_from_id(&mut self, id: SCOPEID) -> Result<(), SymbolError> {
+        if !self.sym_tree.scope_exists(id) {
+            return Err(SymbolError::InvalidScope);
+        }
         self.current_scope_id = id;
         Ok(())
     }
 
     /// enters the child scope below the current_scope
     /// If it doesn't exist then create it
-    pub fn create_or_set_scope(&mut self, name: &str) -> SCOPEID {
+    pub fn create_or_set_scope(&mut self, name: &str) -> Result<SCOPEID, SymbolError> {
         let new_scope_node_id = self
             .sym_tree
-            .create_or_get_scope_for_parent(name, self.current_scope_id);
+            .create_or_get_scope_for_parent(name, self.current_scope_id)?;
         self.current_scope_id = new_scope_node_id;
-        new_scope_node_id
+        Ok(new_scope_node_id)
     }
 
     pub fn add_reference_symbol(

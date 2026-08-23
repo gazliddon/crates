@@ -1,0 +1,10 @@
+[package]
+name = "wms-sound"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+emu6800 = { path = "../emu6800" }
+emucore = { path = "../emucore" }
+rodio = { version = "0.22.2", default-features = false, features = ["playback"] }
+sha1 = "0.10"

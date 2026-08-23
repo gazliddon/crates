@@ -7,7 +7,6 @@ type ESymbolNodeRef<'a, SCOPEID, SYMID> = ego_tree::NodeRef<'a, SymbolTable<SCOP
 type ESymbolNodeId = ego_tree::NodeId;
 type ESymbolNodeMut<'a, SCOPEID, SYMID> = ego_tree::NodeMut<'a, SymbolTable<SCOPEID, SYMID>>;
 
-
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub(crate) struct Tree<SCOPEID, SYMID>
 where
@@ -16,16 +15,25 @@ where
 {
     tree: ego_tree::Tree<SymbolTable<SCOPEID, SYMID>>,
     scope_id_to_node_id: HashMap<SCOPEID, ESymbolNodeId>,
+    child_scope_ids: HashMap<SCOPEID, HashMap<String, SCOPEID>>,
 }
 
-impl<SCOPEID,SYMID> Default for Tree<SCOPEID,SYMID> 
+impl<SCOPEID, SYMID> Default for Tree<SCOPEID, SYMID>
 where
     SCOPEID: ScopeIdTraits,
-    SYMID: SymIdTraits {
-        fn default() -> Self {
-        panic!()
+    SYMID: SymIdTraits,
+{
+    fn default() -> Self {
+        let root = SymbolTable::new(
+            "",
+            "",
+            SCOPEID::from(0),
+            None,
+            SymbolResolutionBarrier::default(),
+        );
+        Self::new(root)
     }
-    }
+}
 
 // Internal
 impl<SCOPEID, SYMID> Tree<SCOPEID, SYMID>
@@ -43,7 +51,7 @@ where
     fn get_node_from_id(
         &self,
         scope_id: SCOPEID,
-    ) -> Result<ESymbolNodeRef<SCOPEID, SYMID>, SymbolError> {
+    ) -> Result<ESymbolNodeRef<'_, SCOPEID, SYMID>, SymbolError> {
         let node_id = self.get_node_id_from_scope_id(scope_id)?;
         self.tree.get(node_id).ok_or(SymbolError::InvalidScope)
     }
@@ -57,8 +65,8 @@ where
 {
     pub fn get_parent_scope_id(&self, scope_id: SCOPEID) -> Option<SCOPEID> {
         self.get_node_from_id(scope_id)
-            .expect("Illegal scope id")
-            .parent()
+            .ok()
+            .and_then(|node| node.parent())
             .map(|n| n.value().get_scope_id())
     }
 
@@ -71,6 +79,7 @@ where
         Self {
             tree,
             scope_id_to_node_id,
+            child_scope_ids: HashMap::new(),
         }
     }
     // @TODO implement this
@@ -84,9 +93,23 @@ where
     pub fn children(
         &self,
         scope_id: SCOPEID,
-    ) -> impl Iterator<Item = &SymbolTable<SCOPEID, SYMID>> + '_ {
-        let node = self.get_node_from_id(scope_id).unwrap();
-        node.children().map(|n| n.value())
+    ) -> Box<dyn Iterator<Item = &SymbolTable<SCOPEID, SYMID>> + '_> {
+        match self.get_node_from_id(scope_id) {
+            Ok(node) => Box::new(node.children().map(|n| n.value())),
+            Err(_) => Box::new(std::iter::empty()),
+        }
+    }
+
+    pub fn get_child_scope_id(
+        &self,
+        parent_id: SCOPEID,
+        name: &str,
+    ) -> Result<SCOPEID, SymbolError> {
+        self.child_scope_ids
+            .get(&parent_id)
+            .and_then(|children| children.get(name))
+            .copied()
+            .ok_or(SymbolError::NotFound)
     }
 
     pub fn get_scope(
@@ -119,17 +142,30 @@ where
         self.scope_id_to_node_id
             .keys()
             .cloned()
-            .map(|id| self.get_scope(id).unwrap())
+            .filter_map(|id| self.get_scope(id).ok())
             .collect()
     }
 
-    pub fn insert_new_table(&mut self, tab: SymbolTable<SCOPEID, SYMID>) -> SCOPEID {
-        let parent_id = tab.get_parent_id().expect("Must have a parent");
+    pub fn insert_new_table(
+        &mut self,
+        tab: SymbolTable<SCOPEID, SYMID>,
+    ) -> Result<SCOPEID, SymbolError> {
+        let parent_id = tab.get_parent_id().ok_or(SymbolError::InvalidScope)?;
         let tab_id = tab.get_scope_id();
-        let parent_node_id = self.scope_id_to_node_id.get(&parent_id).unwrap();
-        let mut parent_mut = self.tree.get_mut(*parent_node_id).unwrap();
+        let parent_node_id = self
+            .scope_id_to_node_id
+            .get(&parent_id)
+            .ok_or(SymbolError::InvalidScope)?;
+        let mut parent_mut = self
+            .tree
+            .get_mut(*parent_node_id)
+            .ok_or(SymbolError::InvalidScope)?;
         let mut n = parent_mut.append(tab);
         self.scope_id_to_node_id.insert(tab_id, n.id());
-        n.value().get_scope_id()
+        self.child_scope_ids
+            .entry(parent_id)
+            .or_default()
+            .insert(n.value().get_scope_name().to_owned(), tab_id);
+        Ok(n.value().get_scope_id())
     }
 }

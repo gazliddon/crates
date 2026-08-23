@@ -32,7 +32,11 @@ pub trait Bus {
     fn fetch_operand<M: MemoryIO, R: RegisterFileTrait + StatusRegTrait>(
         _m: &mut Machine<M, R>,
     ) -> MemResult<u8> {
-        panic!("Not implemented fetch_operand for {}", Self::get_name())
+        panic!(
+            "Not implemented fetch_operand for {} at PC {:04x}",
+            Self::get_name(),
+            _m.regs.pc()
+        )
     }
 
     fn fetch_operand_16<M: MemoryIO, R: RegisterFileTrait + StatusRegTrait>(
@@ -62,7 +66,11 @@ pub trait Bus {
     where
         F: Fn(u8) -> u8,
     {
-        panic!("Not implemented read_mod_write for {}", Self::get_name())
+        panic!(
+            "Not implemented read_mod_write for {} at PC {:04x}",
+            Self::get_name(),
+            _m.regs.pc()
+        )
     }
 }
 

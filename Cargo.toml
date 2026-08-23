@@ -1,5 +1,10 @@
 [workspace]
-members = ["emu6809","grl-eval","grl-sources","unraveler","grl-utils", "grl-symbols","emucore", "emu6800", "emu6502"]
+members = ["emu6809","grl-eval","grl-sources","unraveler","grl-utils", "grl-symbols","emucore", "emu6800", "emu6502", "wms-sound", "stargate-emu", "stargate-debug", "stargate-app"]
 resolver = "2"
 
-
+# Favor maximum runtime performance for emulator and assembler binaries.
+[profile.release]
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+strip = "symbols"

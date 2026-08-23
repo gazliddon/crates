@@ -7,7 +7,6 @@ use crate::isa::AddrModeEnum;
 use log::warn;
 
 pub trait AddressLines {
-
     fn get_addr_mode() -> AddrModeEnum;
 
     fn name() -> String {

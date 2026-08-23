@@ -7,16 +7,19 @@ edition = "2021"
 
 [dependencies]
 thin-vec="0.2.12"
-ego-tree= "0.6.2"
+ego-tree= "0.11.0"
 serde = { version="1.0.188", features=[ "derive" ], optional=true}
 serde_json ={  version = "1.0.107", optional=true }
 thiserror="1.0.48"
 
 [dev-dependencies]
-grl-utils={path="../grl-utils"}
 pretty_assertions="1.4.0"
 
 [features]
-default=["serde_support"]
-serde_support =["dep:serde", "dep:serde_json"]
+default=["serde", "json"]
+serde =["dep:serde"]
+json =["serde", "dep:serde_json"]
 
+[[bench]]
+name = "symbol_lookup"
+harness = false

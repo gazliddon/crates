@@ -7,15 +7,14 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
 anyhow="1.0.75"
-path-clean="1.0.1"
-pathdiff="0.2.1"
-serde = { version="1.0.188", features=[ "derive" ]}
-serde_json = "1.0.107"
+serde = { version="1.0.188", features=[ "derive" ], optional = true }
 thiserror="1.0.48"
 
-grl-symbols = {path="../grl-symbols", features=["serde_support"]}
 grl-utils = {path="../grl-utils"}
+
+[features]
+default = []
+serde = ["dep:serde"]
 
 [dev-dependencies]
 pretty_assertions="1.4.0"
-

@@ -1,8 +1,7 @@
 #![deny(unused_imports)]
 
 use super::{SourceFile, SourceFiles};
-use grl_utils::{PathSearcher, Paths, FResult,FileIo};
-
+use grl_utils::{FResult, FileIo, PathSearcher, Paths};
 
 use std::{
     collections::{HashMap, HashSet},
@@ -16,7 +15,6 @@ use std::{
 pub struct SourceFileLoader {
     pub source_search_paths: Paths,
     pub sources: SourceFiles,
-    id: u64,
     pub files_loaded: HashSet<PathBuf>,
     pub files_written: HashSet<PathBuf>,
     bin_file_cache: HashMap<PathBuf, Vec<u8>>,
@@ -85,6 +83,15 @@ impl SourceFileLoader {
         Self::default()
     }
 
+    /// Create a loader using an existing source snapshot database.  The
+    /// `SourceFile` text is copy-on-write, so cloning a populated `SourceFiles`
+    /// value does not duplicate source buffers.
+    pub fn from_sources<P: AsRef<Path>>(paths: &[P], sources: SourceFiles) -> Self {
+        let mut loader = Self::from_search_paths(paths);
+        loader.sources = sources;
+        loader
+    }
+
     pub fn read_source<P: AsRef<Path>>(&mut self, path: P) -> FResult<&SourceFile> {
         let (path, text) = self.read_to_string(path)?;
         self.add_source_file(&path, &text)
@@ -92,7 +99,10 @@ impl SourceFileLoader {
 
     pub fn add_source_file<P: AsRef<Path>>(&mut self, path: P, text: &str) -> FResult<&SourceFile> {
         let id = self.sources.add_source_file(&path, text);
-        let sf = self.sources.get_source_file_from_id(id).unwrap();
+        let sf = self
+            .sources
+            .get_source_file_from_id(id)
+            .map_err(|error| grl_utils::FileError::Io(error.to_string()))?;
         Ok(sf)
     }
 
@@ -100,11 +110,10 @@ impl SourceFileLoader {
         let search_paths: Vec<PathBuf> = paths.iter().map(|x| PathBuf::from(x.as_ref())).collect();
         Self {
             source_search_paths: Paths::from_paths(&search_paths),
-            sources: SourceFiles::new(),
-            id: 0,
-            files_loaded: Default::default(),
-            files_written: Default::default(),
-            bin_file_cache: Default::default(),
+            sources: SourceFiles::default(),
+            files_loaded: HashSet::default(),
+            files_written: HashSet::default(),
+            bin_file_cache: HashMap::default(),
         }
     }
 }

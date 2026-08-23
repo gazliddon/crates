@@ -3,25 +3,23 @@
 mod optable;
 
 mod addrmodes;
+mod debug_regs;
+mod diss;
+mod error;
+mod machine;
 mod opcodes;
 mod registers;
-mod machine;
-mod error;
-mod debug_regs;
 mod statusreg;
-mod diss;
-
 
 pub mod decoder;
 
 pub use addrmodes::*;
-pub use registers::*;
-pub use machine::*;
-pub use error::*;
 pub use debug_regs::*;
-pub use statusreg::*;
-pub use opcodes::*;
 pub use diss::*;
+pub use error::*;
+pub use machine::*;
+pub use opcodes::*;
+pub use registers::*;
+pub use statusreg::*;
 
 pub use optable::*;
-

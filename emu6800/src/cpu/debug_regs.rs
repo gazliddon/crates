@@ -1,7 +1,7 @@
 use super::registers::*;
 use super::statusreg::*;
+use crate::cpu_core::{RegEnum, StatusReg};
 use std::collections::HashSet;
-use crate::cpu_core::{ StatusReg, RegEnum };
 
 pub struct DebugRegisterFile<'a> {
     flags_that_will_alter: StatusReg,
@@ -23,10 +23,10 @@ pub struct DebugRegsError {
 }
 
 impl<'a> std::fmt::Display for DebugRegisterFile<'a> {
-    // TODO file this in 
+    // TODO file this in
     fn fmt(&self, _f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(_f,"{}", self.regs)?;
-        write!(_f,"Fill this in dummy")
+        writeln!(_f, "{}", self.regs)?;
+        write!(_f, "Fill this in dummy")
     }
 }
 
@@ -52,13 +52,13 @@ impl<'a> DebugRegisterFile<'a> {
     }
 
     #[inline]
-    fn set_write_status_reg(&mut self, f: StatusReg) -> &mut Self{
+    fn set_write_status_reg(&mut self, f: StatusReg) -> &mut Self {
         self.flags_altered.set(f, true);
         self
     }
 
     #[inline]
-    fn set_write_register(&mut self, _r: RegEnum) -> &mut Self{
+    fn set_write_register(&mut self, _r: RegEnum) -> &mut Self {
         self
     }
 
@@ -103,7 +103,6 @@ impl<'a> RegisterFileTrait for DebugRegisterFile<'a> {
     fn get_reg_16(&self, r: RegEnum) -> u16 {
         self.regs.get_reg_16(r)
     }
-
 }
 
 impl<'a> StatusRegTrait for DebugRegisterFile<'a> {

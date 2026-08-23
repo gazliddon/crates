@@ -1,6 +1,6 @@
+use super::byteorder;
 use super::cpu::{IndexModes, IndexedFlags, InstructionDecoder};
 use super::isa::Dbase;
-use super::byteorder;
 
 pub struct Disassembly {
     pub text: String,
@@ -8,7 +8,7 @@ pub struct Disassembly {
     pub decoded: InstructionDecoder,
 }
 
-use emucore::mem::{ MemBlock, MemoryIO, MemReader };
+use emucore::mem::{MemBlock, MemReader, MemoryIO};
 
 pub struct DissCtx {
     pub data: MemBlock<byteorder::BigEndian>,
@@ -16,8 +16,7 @@ pub struct DissCtx {
 
 impl DissCtx {
     pub fn from_matches() -> Result<Self, Box<dyn std::error::Error>> {
-
-        let vec = vec![0;0x1_0000];
+        let vec = vec![0; 0x1_0000];
 
         let ret = Self {
             data: MemBlock::from_data(0, "mem", &vec, false),
@@ -33,7 +32,6 @@ lazy_static::lazy_static! {
 
 #[derive(Default)]
 pub struct Diss {}
-
 
 struct DissIt<'a> {
     addr: usize,
@@ -56,11 +54,10 @@ impl<'a> DissIt<'a> {
 
 impl Diss {
     pub fn new() -> Self {
-        Self::default() 
+        Self::default()
     }
 
     fn diss_indexed(&self, reader: &mut MemReader) -> (IndexedFlags, String) {
-
         let flags = IndexedFlags::new(reader.next_byte().unwrap());
 
         let mut operand = match flags.get_index_type() {
@@ -111,9 +108,7 @@ impl Diss {
             }
             IndexModes::Illegal => "ILLEGAL".to_string(),
 
-            IndexModes::Ea => {
-                "EA".to_string()
-            }
+            IndexModes::Ea => "EA".to_string(),
         };
 
         if flags.is_indirect() {
@@ -153,9 +148,7 @@ impl Diss {
                 format!("${w:04X?}")
             }
 
-            Inherent => {
-                "".to_string()
-            }
+            Inherent => "".to_string(),
 
             Immediate8 => {
                 let b = reader.next_byte().unwrap();
@@ -174,8 +167,9 @@ impl Diss {
 
             RegisterPair => {
                 let r = reader.next_byte().unwrap();
-                let (a, b) = super::cpu::get_tfr_regs(r);
-                format!("{a},{b}")
+                super::cpu::get_tfr_regs(r)
+                    .map(|(a, b)| format!("{a},{b}"))
+                    .unwrap_or_else(|| format!("<invalid register pair ${r:02X}>"))
             }
 
             Relative => {

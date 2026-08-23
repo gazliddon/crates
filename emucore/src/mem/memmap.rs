@@ -33,7 +33,7 @@ impl fmt::Debug for MemMap {
 
 impl MemoryIO for MemMap {
     fn inspect_byte(&self, _addr: usize) -> MemResult<u8> {
-       panic!() 
+        panic!()
     }
 
     fn inspect_word(&self, _addr: usize) -> MemResult<u16> {
@@ -47,7 +47,7 @@ impl MemoryIO for MemMap {
 
     fn upload(&mut self, addr: usize, data: &[u8]) -> MemResult<()> {
         for (i, item) in data.iter().enumerate() {
-            let a = addr.wrapping_add(i );
+            let a = addr.wrapping_add(i);
             self.store_byte(a, *item)?;
         }
         Ok(())
@@ -95,7 +95,7 @@ impl MemMap {
 
     pub fn new() -> Self {
         Self {
-            all_memory: Vec::with_capacity(64*1024),
+            all_memory: Vec::with_capacity(64 * 1024),
             name: "all memory".to_string(),
         }
     }

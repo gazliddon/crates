@@ -14,11 +14,7 @@ pub struct TextEdit<'a> {
 
 impl<'a> TextEdit<'a> {
     pub fn from_pos(start: TextCoords, end: TextCoords, text: &'a str) -> Self {
-        Self {
-            start,
-            end,
-            text,
-        }
+        Self { start, end, text }
     }
 
     pub fn new(
@@ -42,6 +38,12 @@ pub enum EditErrorKind {
     CharacterOutOfRange(usize, usize),
     #[error("Line out of range: requested {0}, num of lines {1}")]
     LineOutOfRange(usize, usize),
+    #[error("Edit range is reversed: start {0} is after end {1}")]
+    ReversedRange(usize, usize),
+    #[error("Offset {0} is not part of a source line")]
+    OffsetNotInLine(usize),
+    #[error("Offset {0} is not a UTF-8 character boundary")]
+    NotCharBoundary(usize),
     #[error("Can't find source file {0}")]
     NoSourceFile(String),
 }
@@ -111,7 +113,7 @@ impl std::fmt::Display for TextFile {
 
 impl TextEditTrait for TextFile {
     fn is_empty(&self) -> bool {
-       self.source.is_empty()
+        self.source.is_empty()
     }
 
     fn edit(&mut self, edit: &TextEdit) -> EditResult<()> {
@@ -212,7 +214,9 @@ impl TextFile {
     fn get_range(&self, edit: &TextEdit) -> EditResult<std::ops::Range<usize>> {
         let start_index = self.start_pos_to_index(&edit.start)?;
         let end_index = self.end_pos_to_index(&edit.end)?;
-        assert!(start_index <= end_index);
+        if start_index > end_index {
+            return Err(EditErrorKind::ReversedRange(start_index, end_index));
+        }
         Ok(start_index..end_index)
     }
 
@@ -226,17 +230,16 @@ impl TextFile {
             for (line, l) in self.line_offsets.iter().enumerate() {
                 if l.contains(&offset) {
                     let col = offset - l.start;
-                    return Ok(TextCoords::new(line,col));
+                    return Ok(TextCoords::new(line, col));
                 }
             }
 
-            panic!("This shouldn't happen")
+            Err(EditErrorKind::OffsetNotInLine(offset))
         }
     }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -290,4 +293,30 @@ mod test {
     //     let edit = TextEdit::new(line_start, char_start, line_end, char_end, txt);
     //     file.edit(&edit)
     // }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{EditErrorKind, TextEdit, TextEditTrait, TextFile};
+
+    #[test]
+    fn reversed_edits_return_an_error() {
+        let mut file = TextFile::new("hello\nworld");
+        let edit = TextEdit::new(1, 0, 0, 0, "x");
+
+        assert!(matches!(
+            file.edit(&edit),
+            Err(EditErrorKind::ReversedRange(..))
+        ));
+    }
+
+    #[test]
+    fn offsets_on_newlines_return_an_error() {
+        let file = TextFile::new("hello\nworld");
+
+        assert!(matches!(
+            file.offset_to_text_pos(5),
+            Err(EditErrorKind::OffsetNotInLine(5))
+        ));
+    }
 }

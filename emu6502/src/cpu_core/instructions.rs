@@ -1,4 +1,4 @@
-use super::{from_text, AddrModeEnum, Mnemonic, InstructionKind};
+use super::{from_text, AddrModeEnum, InstructionKind, Mnemonic};
 use serde::{de::Error, Deserialize, Deserializer};
 
 use emucore::flagmods::FlagMods;
@@ -42,33 +42,33 @@ pub struct Instructions {
 
 #[derive(Debug, Copy, Clone)]
 pub struct OpcodeInfo {
-    pub addr_mode : AddrModeEnum,
+    pub addr_mode: AddrModeEnum,
     pub opcode_data: OpcodeData,
     pub menmonic: Mnemonic,
+}
+
+impl OpcodeInfo {
+    pub fn new(m: Mnemonic, a: AddrModeEnum, od: OpcodeData) -> Self {
+        Self {
+            addr_mode: a,
+            opcode_data: od,
+            menmonic: m,
+        }
+    }
 }
 
 impl Instructions {
     pub fn get_opcode_info(&self, m: Mnemonic, a: AddrModeEnum) -> Option<OpcodeInfo> {
         let i = self.instructions.get(&m)?;
-        let od = i.addr_modes.get(&a)?;
-        Some(OpcodeInfo {
-            addr_mode: a,
-            opcode_data: *od,
-            menmonic: m,
-        })
-
+        i.addr_modes.get(&a).map(|od| OpcodeInfo::new(m, a, *od))
     }
 
     pub fn get_opcode_info_from_opcode(&self, opcode: u8) -> Option<OpcodeInfo> {
         for (m, i) in self.instructions.iter() {
             for (a, od) in i.addr_modes.iter() {
-            if od.opcode == opcode {
-                return Some(OpcodeInfo {
-                    addr_mode: *a,
-                    opcode_data: *od,
-                    menmonic: *m,
-                });
-            }
+                if od.opcode == opcode {
+                    return Some(OpcodeInfo::new(*m, *a, *od));
+                }
             }
         }
         None

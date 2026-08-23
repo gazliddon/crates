@@ -8,7 +8,10 @@ pub struct TextCoords {
 
 impl TextCoords {
     pub fn new(line: usize, col: usize) -> Self {
-        Self { line: line as u32, col: col as u32 }
+        Self {
+            line: line as u32,
+            col: col as u32,
+        }
     }
     pub fn col(&self) -> usize {
         self.col as usize

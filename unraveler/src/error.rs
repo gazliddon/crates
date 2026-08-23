@@ -21,6 +21,8 @@ pub enum ParseErrorKind {
     UntilNotMatched,
     #[error("Unconsumed input")]
     UnconsumedInput,
+    #[error("Parser made no progress")]
+    NoProgress,
 }
 
 pub type PResult<'a, I, EXTRA = (), O = Span<'a, I, EXTRA>> =
@@ -49,6 +51,12 @@ where
     fn change_kind(self, kind: ParseErrorKind) -> Self;
     fn set_severity(self, sev: Severity) -> Self;
     fn severity(&self) -> Severity;
+    /// Combine diagnostics from alternative parser branches.
+    ///
+    /// Implementations should prefer the diagnostic that made the most
+    /// progress through the input. When both diagnostics are at the same
+    /// position, they may retain either one or combine their expectations.
+    fn merge(self, other: Self) -> Self;
     fn append(input: I, kind: ParseErrorKind, other: Self) -> Self;
 
     fn is_fatal(&self) -> bool {

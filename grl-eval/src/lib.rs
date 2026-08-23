@@ -1,4 +1,3 @@
-#![allow(unused)]
 pub use error::*;
 pub use eval_postfix::*;
 pub use postfix::*;
@@ -7,7 +6,6 @@ mod error;
 mod eval_postfix;
 mod postfix;
 use std::{collections::VecDeque, fmt::Debug};
-
 
 pub fn infix_expr_to_value<I, E, ERR>(i: &[I], evaluator: &E) -> Result<I::ExprValue, ERR>
 where
@@ -21,6 +19,11 @@ where
     Ok(res)
 }
 
+/// Remove the two most recent stack values in operator order.
+///
+/// Values are pushed at the front of the deque, so the returned tuple is
+/// `(rhs, lhs)`.  Keeping that order makes it difficult to accidentally
+/// reverse non-commutative operations such as subtraction and shifts.
 pub fn pop_pair<T>(s: &mut VecDeque<T>) -> Option<(T, T)> {
     s.pop_front()
         .and_then(|rhs| s.pop_front().map(|lhs| (rhs, lhs)))

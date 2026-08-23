@@ -1,15 +1,13 @@
-#![allow(unused)]
-mod traits;
-mod error;
-mod span;
-mod parsers;
 mod alt;
+mod error;
+mod parsers;
+mod span;
+mod traits;
 mod tuple;
 
-pub use traits::*;
-pub use error::*;
-pub use span::*;
-pub use parsers::*;
 pub use alt::*;
+pub use error::*;
+pub use parsers::*;
+pub use span::*;
+pub use traits::*;
 pub use tuple::*;
-

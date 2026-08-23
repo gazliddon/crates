@@ -1,16 +1,11 @@
-#[cfg(feature = "serde_support")]
+use crate::scopedname::ScopeSyntax;
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-
-#[cfg(feature = "serde_support")]
-pub trait DoSerialize: Serialize {}
-
-#[cfg(not(feature = "serde_support"))]
-pub trait DoSerialize {}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Traits
 
-#[cfg(feature = "serde_support")]
+#[cfg(feature = "serde")]
 pub trait ScopeIdTraits:
     std::hash::Hash
     + std::ops::AddAssign<u64>
@@ -23,7 +18,7 @@ pub trait ScopeIdTraits:
 {
 }
 
-#[cfg(not( feature = "serde_support" ))]
+#[cfg(not(feature = "serde"))]
 pub trait ScopeIdTraits:
     std::hash::Hash
     + std::ops::AddAssign<u64>
@@ -35,20 +30,13 @@ pub trait ScopeIdTraits:
 {
 }
 
-#[cfg(feature = "serde_support")]
+#[cfg(feature = "serde")]
 pub trait SymIdTraits:
-    std::hash::Hash
-    + std::ops::AddAssign<u64>
-    + Clone
-    + Eq
-    + From<u64>
-    + Copy
-    + Serialize
-    + Default
+    std::hash::Hash + std::ops::AddAssign<u64> + Clone + Eq + From<u64> + Copy + Serialize + Default
 {
 }
 
-#[cfg(not( feature = "serde_support" ))]
+#[cfg(not(feature = "serde"))]
 pub trait SymIdTraits:
     std::hash::Hash
     + std::ops::AddAssign<u64>
@@ -60,15 +48,12 @@ pub trait SymIdTraits:
 {
 }
 
-pub trait SymValueTraits: Clone + DoSerialize {}
-
-impl DoSerialize for u64 {}
 impl ScopeIdTraits for u64 {}
 impl SymIdTraits for u64 {}
 
 ////////////////////////////////////////////////////////////////////////////////
 #[derive(Debug, PartialEq, Eq, Clone, Hash, Copy)]
-#[cfg_attr(feature = "serde_support", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct SymbolScopeId<SCOPEID, SYMID>
 where
     SCOPEID: ScopeIdTraits,
@@ -95,7 +80,7 @@ where
 /// Holds information about a symbol
 
 #[derive(Debug, PartialEq, Eq, Clone)]
-#[cfg_attr(feature = "serde_support", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct SymbolInfo<SCOPEID, SYMID, SYMVALUE>
 where
     SCOPEID: ScopeIdTraits,
@@ -120,11 +105,21 @@ where
         symbol_id: SymbolScopeId<SCOPEID, SYMID>,
         fqn: &str,
     ) -> Self {
+        Self::new_with_syntax(name, value, symbol_id, fqn, &ScopeSyntax::default())
+    }
+
+    pub fn new_with_syntax(
+        name: &str,
+        value: Option<SYMVALUE>,
+        symbol_id: SymbolScopeId<SCOPEID, SYMID>,
+        fqn: &str,
+        syntax: &ScopeSyntax,
+    ) -> Self {
         Self {
             name: name.to_string(),
             value,
             symbol_id,
-            scoped_name: format!("{fqn}::{name}"),
+            scoped_name: format!("{fqn}{}{name}", syntax.separator()),
         }
     }
 
@@ -135,4 +130,3 @@ where
         &self.scoped_name
     }
 }
-

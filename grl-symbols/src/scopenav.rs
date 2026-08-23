@@ -2,6 +2,7 @@ use super::prelude::*;
 /// Trait for navigating around a symbol tree
 use super::symboltree::{SymbolTree, ValueTrait};
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum NavError {
     PathNotFound,
     NoParent,
@@ -9,8 +10,8 @@ pub enum NavError {
 
 pub type NResult<T> = Result<T, NavError>;
 
-// @TODO Remove this trait and incorporate methods into ScopeNav
-trait ScopeNavTrait<SCOPEID>
+/// Navigation operations for a cursor over a [`SymbolTree`].
+pub trait ScopeNavTrait<SCOPEID>
 where
     SCOPEID: std::ops::AddAssign<u64> + std::clone::Clone,
 {
@@ -21,7 +22,7 @@ where
     }
 
     fn cd(&mut self, dir: &str) -> NResult<SCOPEID> {
-        let path = ScopePath::new(dir);
+        let path = self.parse_path(dir);
 
         // If this is an abs path then cd to root
         if path.is_abs() {
@@ -34,7 +35,8 @@ where
             if path_part == ".." {
                 self.up()?;
             } else {
-                self.cd(path_part)?;
+                let next = self.find_child(&path_part).ok_or(NavError::PathNotFound)?;
+                self.set_scope(next);
             }
         }
 
@@ -50,6 +52,13 @@ where
     fn get_root(&self) -> SCOPEID;
     fn get_current_scope(&self) -> SCOPEID;
     fn get_parent(&self) -> NResult<SCOPEID>;
+    fn find_child(&self, name: &str) -> Option<SCOPEID>;
+
+    /// Parses a navigation path using the syntax configured by the owner.
+    /// Implementors that do not have custom syntax retain the legacy `::` form.
+    fn parse_path<'a>(&self, dir: &'a str) -> ScopePath<'a> {
+        ScopePath::new(dir)
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -101,5 +110,44 @@ where
 
     fn set_scope(&mut self, id: SCOPEID) {
         self.current_scope = id;
+    }
+
+    fn find_child(&self, name: &str) -> Option<SCOPEID> {
+        self.tree
+            .etree
+            .children(self.current_scope)
+            .find(|scope| scope.get_scope_name() == name)
+            .map(|scope| scope.get_scope_id())
+    }
+
+    fn parse_path<'b>(&self, dir: &'b str) -> ScopePath<'b> {
+        ScopePath::parse(dir, self.tree.syntax())
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn cd_descends_and_up_returns_to_parent() {
+        let mut tree = SymbolTree::<u64, u64, u64>::new();
+        let root = tree.get_root_scope_id();
+        tree.create_or_get_scope_for_parent("module", root).unwrap();
+
+        let mut nav = ScopeNav::new(&tree);
+        assert_eq!(nav.cd("module"), Ok(1));
+        assert_eq!(nav.up(), Ok(root));
+        assert_eq!(nav.cd("missing"), Err(NavError::PathNotFound));
+    }
+
+    #[test]
+    fn cd_uses_tree_scope_syntax() {
+        let mut tree = SymbolTree::<u64, u64, u64>::with_syntax(ScopeSyntax::new("."));
+        let root = tree.get_root_scope_id();
+        tree.create_or_get_scope_for_parent("module", root).unwrap();
+
+        let mut nav = ScopeNav::new(&tree);
+        assert_eq!(nav.cd(".module"), Ok(1));
     }
 }

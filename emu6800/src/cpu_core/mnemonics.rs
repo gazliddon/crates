@@ -1,8 +1,18 @@
 use serde::{Deserialize, Serialize};
-use strum::{ EnumString, EnumIter };
+use strum::{EnumIter, EnumString};
 
 #[derive(
-    Clone, Copy, Deserialize, Serialize, Debug, EnumString, Hash, PartialEq, PartialOrd, Eq, Default,
+    Clone,
+    Copy,
+    Deserialize,
+    Serialize,
+    Debug,
+    EnumString,
+    Hash,
+    PartialEq,
+    PartialOrd,
+    Eq,
+    Default,
     EnumIter,
 )]
 

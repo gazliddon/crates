@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use crate::mem::{Region, RegionErr};
+use std::collections::HashMap;
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Copy)]
 pub enum BreakPointTypes {
@@ -84,8 +84,7 @@ impl BreakPoints {
         }
     }
     pub fn find_breakpoint_id(&self, addr: usize, bp_type: BreakPointTypes) -> Option<usize> {
-        self.find_breakpoint(addr, bp_type)
-            .map(|bp| bp.id)
+        self.find_breakpoint(addr, bp_type).map(|bp| bp.id)
     }
 
     pub fn remove_by_id(&mut self, id: usize) {

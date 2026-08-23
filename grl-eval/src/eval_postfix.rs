@@ -1,10 +1,12 @@
 #![deny(unused_imports)]
 use std::collections::VecDeque;
 
-use super::{GenericEvalErrorKind, GetPriority, OperationError, pop_pair};
+use super::{pop_pair, GenericEvalErrorKind, GetPriority, OperationError};
 
-
-/// Traits a value in an expression must support
+/// Operations a value in an expression must support.
+///
+/// Arithmetic is fallible because callers may need to report overflow,
+/// division by zero, or an otherwise invalid operation for their value type.
 pub trait OperatorTraits:
     std::ops::Add<Output = OperationError<Self>>
     + std::ops::Sub<Output = OperationError<Self>>
@@ -21,7 +23,7 @@ pub trait OperatorTraits:
 {
 }
 
-/// Classification of what kind of item this is
+/// Classification of an expression item.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum ExprItemKind {
     Expression,
@@ -68,8 +70,7 @@ impl std::fmt::Display for Operation {
     }
 }
 
-/// Traits needed for classification of an item
-/// is it a Value, an operator or an expression
+/// Traits needed to classify and inspect an expression item.
 pub trait ItemTraits: Clone {
     type ExprValue: OperatorTraits;
 
@@ -83,7 +84,10 @@ pub trait ItemTraits: Clone {
         } else if self.is_op() {
             Operator
         } else {
-            panic!()
+            // An implementation returning `None` for all three accessors is
+            // invalid.  Keep this as a programmer-error panic rather than
+            // silently treating malformed items as values.
+            panic!("expression item has no value, operator, or expression")
         }
     }
 
@@ -104,8 +108,7 @@ pub trait ItemTraits: Clone {
     }
 }
 
-/// Trait needed to evaluate an item
-/// Evals from an item to a value
+/// Evaluates a nested expression item into a value.
 pub trait Eval<I, ERR>
 where
     ERR: From<GenericEvalErrorKind>,
@@ -115,69 +118,14 @@ where
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-#[derive(Clone)]
-enum StackItem<'a, I>
-where
-    I: ItemTraits,
-{
-    Value(<I as ItemTraits>::ExprValue),
-    Item(&'a I),
-}
-
-impl<'a, I> StackItem<'a, I>
-where
-    I: ItemTraits,
-{
-    pub fn item(&self) -> Option<&I> {
-        match self {
-            StackItem::Item(i) => Some(i),
-            _ => None,
-        }
-    }
-}
-
-impl<'a, I> From<&'a I> for StackItem<'a, I>
-where
-    I: ItemTraits,
-{
-    fn from(item: &'a I) -> Self {
-        use ExprItemKind::*;
-        match item.item_type() {
-            Value => StackItem::Value(item.value().unwrap()),
-            _ => StackItem::Item(item),
-        }
-    }
-}
-
-impl<'a, I> ItemTraits for StackItem<'a, I>
-where
-    I: ItemTraits,
-{
-    type ExprValue = I::ExprValue;
-
-    fn value(&self) -> Option<Self::ExprValue> {
-        match self {
-            StackItem::Value(v) => Some(v.clone()),
-            _ => None,
-        }
-    }
-
-    fn op(&self) -> Option<Operation> {
-        match self {
-            StackItem::Item(i) => i.op(),
-            _ => None,
-        }
-    }
-
-    fn expr(&self) -> Option<&Vec<Self>> {
-        None
-    }
-}
-
-pub fn evaluate_postfix_expr_2<'a, I, E, ERR>(
+/// Evaluate postfix items while retaining the source item for expression
+/// callbacks.  The value stack deliberately contains only evaluated values;
+/// this lets callers provide borrowed AST nodes without requiring an
+/// `I: From<I::ExprValue>` implementation.
+fn evaluate_postfix_refs<'a, I, E, ERR>(
     items: impl Iterator<Item = &'a I>,
-    _evaluator: &E,
-) -> Result<I::ExprValue, ERR>
+    evaluator: &E,
+) -> Result<I::ExprValue, (usize, ERR)>
 where
     I: ItemTraits + 'a,
     E: Eval<I, ERR>,
@@ -186,21 +134,18 @@ where
     use GenericEvalErrorKind::*;
     use Operation::*;
 
-    let mut s: VecDeque<StackItem<'a, I>> = VecDeque::new();
+    let mut values: VecDeque<I::ExprValue> = VecDeque::new();
+    let mut last_idx = 0;
 
-    let to_err = |_e| panic!("{_e:#?}");
-
-    for i in items.map(StackItem::from) {
-
-        let ret = match i.item_type() {
-            ExprItemKind::Expression => StackItem::Value(_evaluator.eval_expr(i.item().unwrap())?),
-
+    for (idx, item) in items.enumerate() {
+        last_idx = idx;
+        let error = |kind| (idx, ERR::from(kind));
+        let value = match item.item_type() {
+            ExprItemKind::Expression => evaluator.eval_expr(item).map_err(|e| (idx, e))?,
+            ExprItemKind::Value => item.value().ok_or_else(|| error(ExpectedValue))?,
             ExprItemKind::Operator => {
-                let op = i.op().ok_or_else(|| to_err(ExpectedOperator))?;
-
-                let (rhs, lhs) = pop_pair(&mut s).expect("Can't pop pair?");
-                let lhs = lhs.value().ok_or_else(|| to_err(ExpectedValue))?;
-                let rhs = rhs.value().ok_or_else(|| to_err(ExpectedValue))?;
+                let op = item.op().ok_or_else(|| error(ExpectedOperator))?;
+                let (rhs, lhs) = pop_pair(&mut values).ok_or_else(|| error(StackEmpty))?;
 
                 match op {
                     Mul => lhs * rhs,
@@ -214,95 +159,35 @@ where
                     ShiftRight => lhs >> rhs,
                     Rem => lhs % rhs,
                 }
-                .map(|i| StackItem::Value(i))
-                .map_err(|e| to_err(GenericEvalErrorKind::from(e)))?
+                .map_err(|e| error(GenericEvalErrorKind::from(e)))?
             }
-
-            ExprItemKind::Value => i,
         };
-
-        s.push_front(ret)
+        values.push_front(value);
     }
-    match s.len() {
-        // Nothing on top of stack
+
+    let result = match values.len() {
         0 => Err(StackEmpty),
-        // Something, try and extract the value
-        1 => s
-            .pop_front()
-            .expect("Can't pop!")
-            .value()
-            .ok_or(ExpectedValue),
-        // Too many things on stack
+        1 => values.pop_front().ok_or(StackEmpty),
         _ => Err(UnevaluatedTerms),
-    }
-    .map_err(|e| e.into())
+    };
+    result.map_err(|kind| (last_idx, ERR::from(kind)))
 }
-
 
 pub fn evaluate_postfix_expr<I, E, ERR>(
     items: impl Iterator<Item = I>,
     evaluator: &E,
 ) -> Result<I::ExprValue, (usize, ERR)>
 where
-    I: ItemTraits + From<I::ExprValue>,
+    I: ItemTraits,
     E: Eval<I, ERR>,
     ERR: From<GenericEvalErrorKind>,
 {
-    use GenericEvalErrorKind::*;
-    use Operation::*;
-
-    // todo
-    // check that we have enough items in the iterator?
-
-    let mut s: VecDeque<I> = VecDeque::new();
-    let idx_err = |idx, e| -> (usize, ERR) { (idx, ERR::from(e)) };
-
-    for (idx, i) in items.enumerate() {
-        let to_err = |e| -> (usize, ERR) { idx_err(idx, e) };
-
-        let i = match i.item_type() {
-            ExprItemKind::Expression => evaluator.eval_expr(&i).map_err(|e| (idx, e))?.into(),
-
-            ExprItemKind::Operator => {
-                let op = i.op().ok_or(to_err(ExpectedOperator))?;
-
-                let (rhs, lhs) = pop_pair(&mut s).expect("Can't pop pair!");
-                let lhs = lhs.value().ok_or(to_err(ExpectedValue))?;
-                let rhs = rhs.value().ok_or(to_err(ExpectedValue))?;
-
-                match op {
-                    Mul => lhs * rhs,
-                    Div => lhs / rhs,
-                    Add => lhs + rhs,
-                    Sub => lhs - rhs,
-                    BitAnd => lhs & rhs,
-                    BitXor => lhs ^ rhs,
-                    BitOr => lhs | rhs,
-                    ShiftLeft => lhs << rhs,
-                    ShiftRight => lhs >> rhs,
-                    Rem => lhs % rhs,
-                }
-                .map(|v| I::from(v))
-                .map_err(|e| to_err(GenericEvalErrorKind::from(e)))?
-            }
-
-            ExprItemKind::Value => i.clone(),
-        };
-
-        s.push_front(i)
-    }
-
-    match s.len() {
-        // Nothing on top of stack
-        0 => Err(StackEmpty),
-        // Something, try and extract the value
-        1 => s.pop_front().expect("Can't pop!").value().ok_or(ExpectedValue),
-        // Too many things on stack
-        _ => Err(UnevaluatedTerms),
-    }
-    .map_err(|e| idx_err(0, e))
+    let owned: Vec<I> = items.collect();
+    evaluate_postfix_refs(owned.iter(), evaluator)
 }
 
+/// A convenient generic expression-item implementation for clients that do
+/// not need a custom AST node type.
 #[derive(Clone, Debug, PartialEq)]
 pub enum ExprItem<V: GetPriority> {
     Op(Operation),
@@ -361,33 +246,74 @@ impl<V: GetPriority> From<V> for ExprItem<V> {
     }
 }
 
+#[cfg(test)]
 mod test {
+    use super::*;
 
-    // type OpValLocal = ExprItem<isize>;
+    #[derive(Clone, Debug, PartialEq)]
+    struct TestValue(i64);
 
-    // struct Evaluator {}
+    macro_rules! arithmetic {
+        ($trait:ident, $method:ident, $operation:expr) => {
+            impl std::ops::$trait for TestValue {
+                type Output = OperationError<Self>;
 
-    // impl EvalExpr<isize, OpValLocal, GenericEvalError> for Evaluator {
-    //     fn eval_expr(&self, _i: &OpValLocal) -> Result<OpValLocal, GenericEvalError> {
-    //         todo!()
-    //     }
-    // }
+                fn $method(self, rhs: Self) -> Self::Output {
+                    Ok(TestValue($operation(self.0, rhs.0)))
+                }
+            }
+        };
+    }
+
+    arithmetic!(Add, add, |lhs, rhs| lhs + rhs);
+    arithmetic!(Sub, sub, |lhs, rhs| lhs - rhs);
+    arithmetic!(Mul, mul, |lhs, rhs| lhs * rhs);
+    arithmetic!(Div, div, |lhs, rhs| lhs / rhs);
+    arithmetic!(Rem, rem, |lhs, rhs| lhs % rhs);
+    arithmetic!(BitOr, bitor, |lhs, rhs| lhs | rhs);
+    arithmetic!(BitAnd, bitand, |lhs, rhs| lhs & rhs);
+    arithmetic!(BitXor, bitxor, |lhs, rhs| lhs ^ rhs);
+    arithmetic!(Shl, shl, |lhs, rhs| lhs << rhs);
+    arithmetic!(Shr, shr, |lhs, rhs| lhs >> rhs);
+
+    impl OperatorTraits for TestValue {}
+    impl GetPriority for TestValue {}
+
+    struct Evaluator;
+
+    impl Eval<ExprItem<TestValue>, GenericEvalErrorKind> for Evaluator {
+        fn eval_expr(
+            &self,
+            _item: &ExprItem<TestValue>,
+        ) -> Result<TestValue, GenericEvalErrorKind> {
+            Ok(TestValue(0))
+        }
+    }
 
     #[test]
-    fn test_eval() {
-        // use Operation::*;
-        // use ExprItem::*;
+    fn evaluates_postfix_expression() {
+        use ExprItem::{Op, Val};
 
-        // let infix_items: Vec<OpValLocal> =
-        //     vec![Val(10), Op(Add), Val(20), Op(Div), Val(5)];
+        let items = vec![
+            Val(TestValue(10)),
+            Val(TestValue(20)),
+            Op(Operation::Add),
+            Val(TestValue(5)),
+            Op(Operation::Div),
+        ];
 
-        // let mut pfix = PostFixer::new();
-        // let items = pfix.get_postfix(infix_items).unwrap();
+        assert_eq!(
+            evaluate_postfix_expr(items.into_iter(), &Evaluator),
+            Ok(TestValue(6))
+        );
+    }
 
-        // // let items: Vec<OpVal> = vec![10.into(), 10.into(), Add.into(), 5.into(), Div.into()];
-        // let evaluator = Evaluator {};
-        // let x = generic_postfix_eval(items.into_iter(), &evaluator);
-        // let desired = Ok(Val(14));
-        // assert_eq!(x, desired);
+    #[test]
+    fn reports_stack_underflow_instead_of_panicking() {
+        let items = vec![ExprItem::<TestValue>::from_op(Operation::Add)];
+        assert!(matches!(
+            evaluate_postfix_expr(items.into_iter(), &Evaluator),
+            Err((0, GenericEvalErrorKind::StackEmpty))
+        ));
     }
 }

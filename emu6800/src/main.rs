@@ -1,14 +1,11 @@
-use emu6800::cpu::{
-    Machine, RegisterFile, 
-};
+use emu6800::cpu::{Machine, RegisterFile};
 
 use emucore::{
-    mem::{MemBlock, MemoryIO},
     byteorder::*,
+    mem::{MemBlock, MemoryIO},
 };
 
-
-static SND : &[u8;2048] = include_bytes!("../resources/sg.snd");
+static SND: &[u8; 2048] = include_bytes!("../resources/sg.snd");
 
 fn make_machine() -> Machine<MemBlock<BigEndian>, RegisterFile> {
     let regs = RegisterFile::default();
@@ -18,7 +15,6 @@ fn make_machine() -> Machine<MemBlock<BigEndian>, RegisterFile> {
 }
 
 fn try_diss() {
-
     let m = make_machine();
 
     let mut pc = 0xf800 + 1;
@@ -31,13 +27,14 @@ fn try_diss() {
             println!("{pc:04x} {:19} [ {cycles} ]    {}", d.mem_string, d.text);
             pc = d.next_pc;
         } else {
-            println!("Uknown: {pc:04x} : {:02x}", m.mem().inspect_byte(pc ).unwrap());
+            println!(
+                "Uknown: {pc:04x} : {:02x}",
+                m.mem().inspect_byte(pc).unwrap()
+            );
             break;
         }
     }
-
 }
-
 
 fn main() {
     try_diss();

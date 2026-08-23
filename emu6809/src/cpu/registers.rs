@@ -42,18 +42,17 @@ impl FromStr for RegEnum {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let txt = s.to_lowercase();
         match txt.as_str() {
-            "a" => Ok( Self::A ),
-            "b" => Ok( Self::B ),
-            "d" => Ok( Self::D ),
-            "x" => Ok( Self::X ),
-            "y" => Ok( Self::Y ),
-            "u" => Ok( Self::U ),
-            "s" => Ok( Self::S ),
-            "dp" => Ok( Self::DP ),
-            "cc" => Ok( Self::CC ),
-            "pc" => Ok( Self::PC),
-            _ => Err(())
-
+            "a" => Ok(Self::A),
+            "b" => Ok(Self::B),
+            "d" => Ok(Self::D),
+            "x" => Ok(Self::X),
+            "y" => Ok(Self::Y),
+            "u" => Ok(Self::U),
+            "s" => Ok(Self::S),
+            "dp" => Ok(Self::DP),
+            "cc" => Ok(Self::CC),
+            "pc" => Ok(Self::PC),
+            _ => Err(()),
         }
     }
 }
@@ -66,7 +65,7 @@ impl RegEnum {
     }
     pub fn valid_abd(&self) -> bool {
         use RegEnum::*;
-        matches!(self, A | B | D )
+        matches!(self, A | B | D)
     }
 }
 

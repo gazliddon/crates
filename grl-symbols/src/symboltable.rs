@@ -6,11 +6,11 @@ use std::{
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#[cfg(feature = "serde_support")]
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, PartialEq, Eq, Clone, Default, Copy, PartialOrd)]
-#[cfg_attr(feature = "serde_support", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum SymbolResolutionBarrier {
     Local = 0,
     Module = 1,
@@ -26,7 +26,7 @@ impl SymbolResolutionBarrier {
 
 /// Holds information about symbols
 #[derive(Debug, PartialEq, Eq, Clone, Default)]
-#[cfg_attr(feature = "serde_support", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct SymbolTable<SCOPEID, SYMID>
 where
     SCOPEID: ScopeIdTraits,
@@ -38,7 +38,7 @@ where
     pub(crate) name_to_id: HashMap<String, SYMID>,
     ref_name_to_symbol_id: HashMap<String, SymbolScopeId<SCOPEID, SYMID>>,
     highest_id: SYMID,
-    pub (crate) scope_id: SCOPEID,
+    pub(crate) scope_id: SCOPEID,
     symbol_resolution_barrier: SymbolResolutionBarrier,
 }
 
@@ -47,7 +47,6 @@ where
     SCOPEID: ScopeIdTraits + Debug,
     SYMID: SymIdTraits + Debug,
 {
-
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "Scope: {}", self.scope)?;
 
@@ -139,7 +138,6 @@ where
         scope_id: SCOPEID,
         parent_id: Option<SCOPEID>,
         symbol_resolution_barrier: SymbolResolutionBarrier,
-
     ) -> Self {
         Self {
             parent_id,

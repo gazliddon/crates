@@ -4,7 +4,7 @@ use sha1::Sha1;
 use std::ops::Range;
 use thiserror::Error;
 
-#[derive(Error,Debug, Clone, Copy, PartialEq)]
+#[derive(Error, Debug, Clone, Copy, PartialEq)]
 pub enum MemErrorTypes {
     #[error("Illegal address 0x{0:0X}")]
     IllegalAddress(usize),
@@ -21,7 +21,7 @@ pub fn build_addr_to_region<X: Copy>(illegal: X, mem_tab: &[(X, &dyn MemoryIO)])
 
     for (i, id) in ret.iter_mut().enumerate() {
         for &(this_id, mem) in mem_tab {
-            if mem.is_in_range(i ) {
+            if mem.is_in_range(i) {
                 *id = this_id;
             }
         }
@@ -42,8 +42,8 @@ pub trait CheckedMemoryIo {
 }
 
 pub trait MemoryIO {
-    fn store_bytes(&mut self, addr: usize,data: &[u8]) -> MemResult<()> {
-        for (i,b) in data.iter().enumerate() {
+    fn store_bytes(&mut self, addr: usize, data: &[u8]) -> MemResult<()> {
+        for (i, b) in data.iter().enumerate() {
             self.store_byte(addr + i, *b)?
         }
         Ok(())
@@ -79,7 +79,7 @@ pub trait MemoryIO {
         let mut m = Sha1::new();
         self.update_sha1(&mut m);
         let m = m.finalize();
-        format!("{:?}",m)
+        format!("{:?}", m)
     }
 
     fn is_in_range(&self, addr: usize) -> bool {

@@ -212,6 +212,26 @@
         }
       }
     },
+    "RolA": {
+      "flags_written": "N|Z|V|C",
+      "addr_modes": {
+        "Inherent": {
+          "opcode": 73,
+          "cycles": 2,
+          "size": 1
+        }
+      }
+    },
+    "RolB": {
+      "flags_written": "N|Z|V|C",
+      "addr_modes": {
+        "Inherent": {
+          "opcode": 89,
+          "cycles": 2,
+          "size": 1
+        }
+      }
+    },
     "Sts": {
       "flags_written": "N|Z|V",
 
@@ -1504,11 +1524,11 @@
       }
     },
     "Wai": {
-      "flags_written": "I",
+      "flags_written": "",
       "addr_modes": {
         "Inherent": {
           "opcode": 62,
-          "cycles": 4,
+          "cycles": 9,
           "size": 1
         }
       }

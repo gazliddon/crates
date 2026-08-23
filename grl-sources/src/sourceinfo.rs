@@ -1,6 +1,6 @@
 #![deny(unused_imports)]
-use super::SourceFile;
 use super::Position;
+use super::SourceFile;
 use std::path::PathBuf;
 
 #[derive(Debug, Clone)]

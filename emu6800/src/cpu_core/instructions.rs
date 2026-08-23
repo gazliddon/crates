@@ -1,8 +1,8 @@
-use serde::{Deserialize, Serialize};
 use super::Mnemonic;
+use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
-use std::collections::{ HashMap, HashSet };
+use std::collections::{HashMap, HashSet};
 
 #[derive(
     Copy, Debug, Clone, Hash, Ord, Eq, PartialEq, PartialOrd, Default, Serialize, Deserialize,
@@ -49,7 +49,7 @@ pub enum AddrModeEnum {
 
 /// All of the information for all of the address modes
 /// of this instruction
-#[derive(Default, Serialize,Deserialize,Debug, Clone)]
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct Instruction {
     #[serde(default)]
     pub flags_read: StatusReg,
@@ -74,9 +74,31 @@ pub struct OpcodeData {
     pub regs_read: HashSet<RegEnum>,
     #[serde(default)]
     pub regs_written: HashSet<RegEnum>,
+    /// Whether the instruction's operand performs a data-memory read/write.
+    /// Instruction fetches and stack accesses are intentionally excluded.
+    #[serde(default)]
+    pub memory_read: bool,
+    #[serde(default)]
+    pub memory_write: bool,
     pub opcode: usize,
     pub cycles: usize,
     pub size: usize,
+}
+
+/// Compact identity for an opcode in the ISA database.
+#[derive(Copy, Clone, Debug, Hash, Eq, PartialEq, Ord, PartialOrd)]
+pub struct OpcodeId(pub usize);
+
+impl OpcodeData {
+    pub fn id(&self) -> OpcodeId {
+        OpcodeId(self.opcode)
+    }
+}
+
+impl From<&OpcodeData> for OpcodeId {
+    fn from(data: &OpcodeData) -> Self {
+        data.id()
+    }
 }
 
 impl FromStr for RegEnum {

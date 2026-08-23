@@ -18,4 +18,3 @@ pub use decoder::*;
 pub use flags::*;
 pub use indexed::*;
 pub use registers::*;
-

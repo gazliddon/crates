@@ -46,7 +46,7 @@ impl IndexModes {
     }
 }
 
-#[derive(Default, Clone,Copy,PartialEq,Debug)]
+#[derive(Default, Clone, Copy, PartialEq, Debug)]
 #[repr(transparent)]
 pub struct IndexedFlags(u8);
 

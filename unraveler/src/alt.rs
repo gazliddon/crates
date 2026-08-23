@@ -1,17 +1,16 @@
-use std::process::ChildStdout;
-
-use crate::{ParseError, ParseErrorKind, Parser, Severity};
+use crate::{ParseError, ParseErrorKind, Parser};
 use paste::paste;
 
-pub trait Alt<I, O, E>  : Copy
-where I : Clone + Copy
+pub trait Alt<I, O, E>
+where
+    I: Clone,
 {
     fn choose(&mut self, input: I) -> Result<(I, O), E>;
 }
 
-pub fn alt<I, O, E, ALT: Alt<I, O, E>>(mut l: ALT) -> impl FnMut(I) -> Result<(I, O), E> + Copy
+pub fn alt<I, O, E, ALT: Alt<I, O, E>>(mut l: ALT) -> impl FnMut(I) -> Result<(I, O), E>
 where
-    I: Clone + Copy,
+    I: Clone,
     E: ParseError<I>,
 {
     move |i: I| l.choose(i)
@@ -26,23 +25,31 @@ macro_rules! impl_alt_tuple {
             where
                 $($T : Parser<IX,OX,EX>,)*
                 EX : ParseError<IX>,
-                IX : Clone + Copy,
-            {
+                IX : Clone,
+    {
     fn choose(&mut self, i: IX) -> Result<(IX, OX), EX> {
                 let ($(ref mut [<$T:lower 1>],)*) = self;
+                let mut branch_error: Option<EX> = None;
 
                 $(
                     let res = [<$T:lower 1>].parse(i.clone());
 
-                    match &res  {
-                        Ok(_) => return res,
-                        Err(e) => if e.is_fatal() {
-                            return res;
+                    match res  {
+                        Ok(value) => return Ok(value),
+                        Err(e) if e.is_fatal() => return Err(e),
+                        Err(e) => {
+                            branch_error = Some(match branch_error {
+                                Some(previous) => previous.merge(e),
+                                None => e,
+                            });
                         }
                     };
-                )*;
+                )*
 
-                Err(EX::from_error(i,ParseErrorKind::NoMatch))
+                match branch_error {
+                    Some(error) => Err(error),
+                    None => Err(EX::from_error(i,ParseErrorKind::NoMatch)),
+                }
                 }
             }
         }

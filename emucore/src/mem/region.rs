@@ -22,7 +22,7 @@ impl Region {
             return Err(RegionErr::RegionToLargeToFit(addr, last_addr));
         }
 
-        Ok(Self::new(addr , size))
+        Ok(Self::new(addr, size))
     }
 
     pub fn is_empty(&self) -> bool {
@@ -45,10 +45,7 @@ impl Region {
             last_addr = 0xffff;
         }
 
-        Self {
-            addr,
-            last_addr,
-        }
+        Self { addr, last_addr }
     }
 
     pub fn is_in_region(&self, addr: usize) -> bool {
@@ -56,16 +53,16 @@ impl Region {
     }
 
     fn to_usize(&self) -> (usize, usize) {
-        (self.addr , self.last_addr )
+        (self.addr, self.last_addr)
     }
 
     pub fn as_range(&self) -> std::ops::Range<usize> {
-        self.addr ..(self.last_addr + 1)
+        self.addr..(self.last_addr + 1)
     }
 }
 
 fn calc_addr_last(addr: usize, size: usize) -> (usize, usize) {
-    (addr , addr + size - 1)
+    (addr, addr + size - 1)
 }
 
 #[cfg(test)]
@@ -75,7 +72,7 @@ mod tests {
     #[test]
     fn valid_regions() {
         {
-            let start= 0;
+            let start = 0;
             let size = 0x10;
 
             let mr = Region::checked_new(start, size);
@@ -90,9 +87,9 @@ mod tests {
 
             assert!(mr.is_in_region(start));
 
-            assert!(mr.is_in_region(start + size - 1 ));
+            assert!(mr.is_in_region(start + size - 1));
 
-            assert!(!mr.is_in_region(start +size ));
+            assert!(!mr.is_in_region(start + size));
         }
     }
 

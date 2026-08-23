@@ -6,9 +6,9 @@ impl std::fmt::Display for Position {
     }
 }
 /// AsmSource is a unique identifier a chunk of sourcode
-#[derive(Default,Clone, PartialEq, Eq, Debug, Copy, Hash)]
+#[derive(Default, Clone, PartialEq, Eq, Debug, Copy, Hash)]
 pub enum AsmSource {
-   #[default] 
+    #[default]
     FromStr,
     FileId(u64),
 }
@@ -20,7 +20,7 @@ pub struct Position {
     src: AsmSource,
     line: u32,
     col: u32,
-    offset : u32,
+    offset: u32,
     len: u32,
 }
 
@@ -32,7 +32,7 @@ impl Position {
     }
 
     pub fn line_col_from_one(&self) -> (usize, usize) {
-        let (l,c) = (self.line + 1, self.col + 1);
+        let (l, c) = (self.line + 1, self.col + 1);
         (l as usize, c as usize)
     }
 
@@ -59,7 +59,7 @@ impl Position {
     }
 
     pub fn range(&self) -> std::ops::Range<usize> {
-        self.offset as usize .. ( self.offset+self.len ) as usize
+        self.offset as usize..(self.offset + self.len) as usize
     }
 
     /// Does this position overlap with another position

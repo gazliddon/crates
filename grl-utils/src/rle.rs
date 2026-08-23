@@ -41,7 +41,8 @@ impl<'a, A: Eq + Copy> Rle<'a, A> {
         self.run = val.map(|item| Run::new(item));
     }
 
-    pub fn add(&mut self, val: &'a A) -> Option<Run<'a, A>> {
+    /// Adds one item to the current run.
+    pub fn add(&mut self, val: &'a A) {
         if let Some(run) = &mut self.run {
             if run.item == val {
                 run.inc();
@@ -51,7 +52,6 @@ impl<'a, A: Eq + Copy> Rle<'a, A> {
         } else {
             self.flush(Some(val));
         }
-        None
     }
 
     pub fn get(&mut self) -> Vec<Run<'a, A>> {
@@ -62,65 +62,27 @@ impl<'a, A: Eq + Copy> Rle<'a, A> {
     }
 }
 
-// struct RleIt<I : Iterator> where
-//     A::Item : Eq + Copy
-// {
-//     iter : ,
-//     last_item : Option<A::Item>,
-//     count : usize,
-//     done : bool,
-// }
+#[cfg(test)]
+mod tests {
+    use super::Rle;
 
-// impl <A:Iterator + Copy> RleIt<A> where
-// A::Item : Eq + Copy
-// {
-//     pub fn new(iter : A) -> Self {
-//         Self {
-//             last_item : None,
-//             iter,
-//             count : 0,
-//             done: false,
-//         }
-//     }
+    #[test]
+    fn groups_adjacent_items_and_flushes_on_get() {
+        let values = [1, 1, 2, 3, 3, 3];
+        let mut rle = Rle::new();
+        for value in &values {
+            rle.add(value);
+        }
 
-// }
-
-// impl<A :Iterator + Copy> Iterator for  RleIt<A> where
-// A::Item : Eq + Copy
-// {
-//     type Item = (usize, A::Item);
-
-//     fn next(&mut self) -> Option<Self::Item> {
-
-//         // return if we're done
-
-//         if self.done {
-//             return None
-//         }
-
-//         // If we're not done and we don't have a current item
-//         // then get one
-
-//         let next_item = self.iter.next();
-
-//         if next_item.is_none() {
-//             return None
-//         }
-
-//         let mut count = 1;
-
-//         let mut i = self.iter.skip_while(|i| {
-//             let is_same = next_item.unwrap() == *i;
-
-//             if is_same {
-//                 count = count + 1
-//             }
-//             is_same
-//         });
-
-//         self.iter = i;
-
-//         Some((count,next_item.unwrap()))
-
-//     }
-// }
+        let runs = rle.get();
+        assert_eq!(
+            runs.iter().map(|run| run.run).collect::<Vec<_>>(),
+            [2, 1, 3]
+        );
+        assert_eq!(
+            runs.iter().map(|run| *run.item).collect::<Vec<_>>(),
+            [1, 2, 3]
+        );
+        assert!(rle.get().is_empty());
+    }
+}

@@ -40,10 +40,7 @@ pub enum DisError {
 
 pub type DisResult<T> = Result<T, DisError>;
 
-pub fn diss<'a, M: MemoryIO>(
-    mem: &M,
-    pc: usize,
-) -> DisResult<Disassmbly<'a>> {
+pub fn diss<'a, M: MemoryIO>(mem: &M, pc: usize) -> DisResult<Disassmbly<'a>> {
     let addr_u16 = (pc & 0xffff) as u16;
 
     let op_code = mem.inspect_byte(pc)?;
@@ -79,7 +76,6 @@ pub fn diss_operand<M: MemoryIO>(mem: &M, addr: u16, ins: &InstructionInfo) -> D
 
     use crate::cpu_core::AddrModeEnum::*;
     let text = match ins.addr_mode {
-
         Immediate8 => {
             let b = mem.inspect_byte(addr_usize)?;
             format!("#0x{b:02x}")
@@ -116,4 +112,43 @@ pub fn diss_operand<M: MemoryIO>(mem: &M, addr: u16, ins: &InstructionInfo) -> D
         Illegal => "????".to_owned(),
     };
     Ok(text)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::diss;
+    use crate::cpu::ISA_DBASE;
+    use emucore::byteorder::BigEndian;
+    use emucore::mem::{MemBlock, MemoryIO};
+
+    #[test]
+    fn disassembles_sound_rom_entry() {
+        let mut mem: MemBlock<BigEndian> = MemBlock::new("test", false, &(0..0x10000));
+        mem.store_byte(0xf801, 0x0f).unwrap();
+
+        let instruction = diss(&mem, 0xf801).unwrap();
+
+        assert_eq!(instruction.text.trim(), "sei");
+        assert_eq!(instruction.next_pc, 0xf802);
+        assert_eq!(instruction.mem_data, vec![0x0f]);
+    }
+
+    #[test]
+    fn disassembles_relative_branch_target() {
+        let mut mem: MemBlock<BigEndian> = MemBlock::new("test", false, &(0..0x10000));
+        // BRA -2 at $f828 branches back to itself.
+        mem.store_byte(0xf828, 0x20).unwrap();
+        mem.store_byte(0xf829, 0xfe).unwrap();
+
+        let instruction = diss(&mem, 0xf828).unwrap();
+
+        assert_eq!(instruction.text.trim(), "bra f828");
+        assert_eq!(instruction.next_pc, 0xf82a);
+    }
+
+    #[test]
+    fn opcode_database_contains_all_256_byte_values_that_are_defined() {
+        assert!(ISA_DBASE.get_instruction_info_from_opcode(0x0f).is_some());
+        assert!(ISA_DBASE.get_instruction_info_from_opcode(0xff).is_some());
+    }
 }

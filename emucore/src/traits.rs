@@ -34,7 +34,7 @@ pub trait FlagsTrait {
 ////////////////////////////////////////////////////////////////////////////////
 pub trait SingleInstructionTrait<A>
 where
-    A: PartialEq + Eq + std::hash::Hash + Copy + Clone,
+    A: PartialEq + Eq + Hash + Copy + Clone,
 {
     fn get_addressing_mode(&self) -> A;
     fn get_cycles(&self) -> usize;
@@ -43,7 +43,7 @@ where
 
 pub trait InstructionDbaseTrait<A, I, INF>
 where
-    A: PartialEq + Eq + std::hash::Hash + Copy + Clone,
+    A: PartialEq + Eq + Hash + Copy + Clone,
     I: SingleInstructionTrait<A>,
     INF: InstructionInfoTrait<A, I>,
 {

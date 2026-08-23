@@ -1,4 +1,4 @@
-use crate::error::{PResult, ParseError, ParseErrorKind, Severity};
+use crate::error::{ParseError, ParseErrorKind};
 
 use crate::traits::*;
 
@@ -31,7 +31,7 @@ where
     extra: E,
 }
 
-impl<'a, I, E> Span<'a, I, E> 
+impl<'a, I, E> Span<'a, I, E>
 where
     I: Item,
     E: Copy + Clone + std::default::Default,
@@ -51,6 +51,14 @@ where
     I: Item,
     XTRA: Copy + Clone,
 {
+    pub fn from(first: Self, next: Self) -> Self {
+        Self {
+            position: first.position,
+            len: next.position - first.position,
+            x_span: first.x_span,
+            extra: first.extra,
+        }
+    }
 
     pub fn new_extra(x_span: &'a [I], position: usize, len: usize, extra: XTRA) -> Self {
         Self {
@@ -68,14 +76,14 @@ where
     pub fn extra(&self) -> &XTRA {
         &self.extra
     }
-    
+
     pub fn extra_mut(&mut self) -> &mut XTRA {
         &mut self.extra
     }
 
-    pub fn lift_extra<F>(self, f : F) -> Self 
+    pub fn lift_extra<F>(self, f: F) -> Self
     where
-        F : Fn(XTRA) -> XTRA
+        F: Fn(XTRA) -> XTRA,
     {
         let new_extra = f(self.extra);
         Self::with_extra(self, new_extra)
@@ -90,7 +98,7 @@ where
         }
     }
 
-    //////////////////////////////////////////////////////////////////////////////// 
+    ////////////////////////////////////////////////////////////////////////////////
     // Needed in trait
     pub fn get_document(&self) -> &[I] {
         self.x_span
@@ -103,7 +111,6 @@ where
     pub fn as_slice(&self) -> &[I] {
         &self.x_span[self.get_range()]
     }
-
 
     pub fn take(&self, len: usize) -> Result<Self, ParseErrorKind> {
         if len > self.length() {
@@ -143,29 +150,6 @@ where
             let matched = self.take(n)?;
             Ok((rest, matched))
         }
-    }
-
-    fn match_token(&'a self, other: &'a [<I as Item>::Kind]) -> PResult<'a, I, XTRA> {
-        if self.length() < other.len() {
-            Err(ParseErrorKind::NoMatch)
-        } else {
-            let it = self.iter().zip(other.iter());
-
-            for (i, k) in it {
-                if i.get_kind() != *k {
-                    return Err(ParseErrorKind::NoMatch);
-                }
-            }
-
-            self.split(other.len())
-        }
-    }
-
-    fn match_kind(&self, k: I::Kind) -> bool {
-        self.as_slice()
-            .first()
-            .map(|i| i.is_kind(i.get_kind()))
-            .unwrap_or(false)
     }
 
     pub fn iter(&self) -> impl Iterator<Item = &I> + '_ {

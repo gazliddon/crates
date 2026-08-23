@@ -1,17 +1,16 @@
-use std::{collections::VecDeque, ops::{Deref, DerefMut}};
+use std::{
+    collections::VecDeque,
+    ops::{Deref, DerefMut},
+};
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Stack<OP> {
     stack: VecDeque<OP>,
 }
 
-enum StackError {
-    CantPop,
-}
-
 impl<OP: Clone> Default for Stack<OP> {
     fn default() -> Self {
         Self {
-            stack: VecDeque::with_capacity(100)
+            stack: VecDeque::with_capacity(100),
         }
     }
 }
@@ -29,7 +28,6 @@ impl<A: Clone> DerefMut for Stack<A> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.stack
     }
-
 }
 // Todo some error for illegal pops
 impl<OP: Clone> Stack<OP> {
@@ -41,13 +39,13 @@ impl<OP: Clone> Stack<OP> {
         self.stack.is_empty()
     }
 
-    pub fn with_capacity(n : usize) -> Self {
+    pub fn with_capacity(n: usize) -> Self {
         Self {
-            stack: VecDeque::with_capacity(n)
+            stack: VecDeque::with_capacity(n),
         }
     }
 
-    pub fn push<X : Into<OP>>(&mut self, op: X) {
+    pub fn push<X: Into<OP>>(&mut self, op: X) {
         self.stack.push_front(op.into())
     }
 
@@ -62,7 +60,7 @@ impl<OP: Clone> Stack<OP> {
     /// rhs = top, lhs = next
     /// returns (rhs, lhs)
     pub fn pop_pair(&mut self) -> Option<(OP, OP)> {
-        self.pop().and_then(|rhs| self.pop().map(|lhs| (rhs,lhs)))
+        self.pop().and_then(|rhs| self.pop().map(|lhs| (rhs, lhs)))
     }
 
     pub fn get_deque(&self) -> &VecDeque<OP> {

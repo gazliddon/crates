@@ -1,13 +1,11 @@
+use super::StatusRegTrait;
+use crate::cpu_core::{RegEnum, StatusReg};
+use serde::{Deserialize, Serialize};
 /// Registers, Flags and regiter store
 use std::{fmt::Debug, hash::Hash, str::FromStr};
-use serde::{Deserialize, Serialize};
-use crate::cpu_core::{ StatusReg, RegEnum };
-use super::StatusRegTrait;
-
 
 ////////////////////////////////////////////////////////////////////////////////
-pub trait RegisterFileTrait : std::fmt::Display {
-
+pub trait RegisterFileTrait: std::fmt::Display {
     fn set_reg_8(&mut self, r: RegEnum, val: u8) -> &mut Self;
     fn set_reg_16(&mut self, r: RegEnum, val: u16) -> &mut Self;
     fn get_reg_8(&self, r: RegEnum) -> u8;
@@ -149,7 +147,9 @@ impl RegisterFileTrait for RegisterFile {
         match r {
             A => self.a = val,
             B => self.b = val,
-            SR => self.flags = StatusReg::from_bits(val).unwrap(),
+            // Bits 7 and 6 of the 6800 condition-code register are fixed
+            // high when read back; only H/I/N/Z/V/C are writable state.
+            SR => self.flags = StatusReg::from_bits_truncate(val),
             _ => panic!(),
         }
         self
@@ -173,7 +173,7 @@ impl RegisterFileTrait for RegisterFile {
         match r {
             A => self.a,
             B => self.b,
-            SR => self.flags.bits(),
+            SR => self.flags.bits() | 0xc0,
             _ => panic!(),
         }
     }
@@ -188,10 +188,9 @@ impl RegisterFileTrait for RegisterFile {
             _ => panic!(),
         }
     }
-
 }
 
-#[derive(Clone,Debug,PartialEq, Default, Copy)]
+#[derive(Clone, Debug, PartialEq, Default, Copy)]
 pub struct RegisterFile {
     pub a: u8,
     pub b: u8,
@@ -202,10 +201,14 @@ pub struct RegisterFile {
 }
 
 impl std::fmt::Display for RegisterFile {
-    // TODO file this in 
+    // TODO file this in
     fn fmt(&self, _f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(_f, "A  B  X    PC   SP     F")?;
-        write!(_f, "{:02x} {:02x} {:04x} {:04x} {:04x} {:?}",self.a, self.b,self.x,self.pc,self.sp, self.flags )
+        write!(
+            _f,
+            "{:02x} {:02x} {:04x} {:04x} {:04x} {:?}",
+            self.a, self.b, self.x, self.pc, self.sp, self.flags
+        )
     }
 }
 
@@ -216,4 +219,3 @@ impl RegisterFile {
         self
     }
 }
-

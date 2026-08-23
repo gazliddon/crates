@@ -1,5 +1,5 @@
-use serde::{Deserialize, Deserializer, Serialize};
 use emucore::flagmods::FlagMods;
+use serde::{Deserialize, Deserializer, Serialize};
 
 // TODO: Can any of these be made generic and put into emu_core
 // FlagMod can

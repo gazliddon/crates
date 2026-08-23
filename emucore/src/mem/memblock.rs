@@ -17,7 +17,7 @@ pub struct MemBlock<E: ByteOrder> {
 
 #[allow(dead_code)]
 impl<E: ByteOrder> MemBlock<E> {
-    pub fn new(name: &str, read_only: bool, r : &std::ops::Range<usize>) -> MemBlock<E> {
+    pub fn new(name: &str, read_only: bool, r: &std::ops::Range<usize>) -> MemBlock<E> {
         let data = vec![0u8; r.len()];
         Self::from_data(r.start, name, &data, read_only)
     }
@@ -37,8 +37,7 @@ impl<E: ByteOrder> MemBlock<E> {
     }
     fn to_index(&self, addr: usize) -> MemResult<usize> {
         if self.region.is_in_region(addr) {
-            Ok( addr - self.region.addr )
-
+            Ok(addr - self.region.addr)
         } else {
             Err(MemErrorTypes::IllegalAddress(addr))
         }
@@ -55,7 +54,7 @@ impl<E: ByteOrder> MemoryIO for MemBlock<E> {
 
     fn inspect_word(&self, addr: usize) -> MemResult<u16> {
         let i = self.to_index(addr)?;
-        let ab = &self.data[i..i+2];
+        let ab = &self.data[i..i + 2];
         Ok(E::read_u16(ab))
     }
 

@@ -1,12 +1,13 @@
 #![deny(unused_imports)]
-use thiserror::Error;
 use super::Operation;
+use thiserror::Error;
 
-
-#[derive(Debug, Error,Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Error, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum PostfixerErrorKind {
     #[error("Expected an operator, got {0}")]
     ExpectedOperator(String),
+    #[error("Expected a value, got {0}")]
+    ExpectedValue(String),
     #[error("Expected an odd number of args, got {0}")]
     NeedOddAmountOfArgs(usize),
 }
@@ -33,7 +34,7 @@ pub enum GenericEvalErrorKind {
     UnexpectedOp(Operation),
     #[error("Unable to evaluate expression")]
     UnableToEvaluate,
-    #[error("Did not expecte a value")]
+    #[error("Did not expect a value")]
     UnexpectedValue,
     #[error("Did not evaluate all items")]
     UnevaluatedTerms,
@@ -51,12 +52,4 @@ pub enum GenericEvalErrorKind {
 
 pub type GenericEvalResult<T> = Result<T, GenericEvalErrorKind>;
 
-impl<T> From<OperationError<T>> for GenericEvalErrorKind {
-    fn from(_: OperationError<T>) -> Self {
-        todo!()
-    }
-}
-
 pub type OperationError<T> = Result<T, OperationErrorKind>;
-
-

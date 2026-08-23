@@ -3,7 +3,7 @@ use path_clean::PathClean;
 use std::path::{Path, PathBuf};
 
 pub fn rel_path<P1: AsRef<Path>, P2: AsRef<Path>>(path: P1, base: P2) -> Option<PathBuf> {
-    pathdiff::diff_paths(&path,&base)
+    pathdiff::diff_paths(&path, &base)
 }
 
 pub fn abs_path<P1: AsRef<Path>, P2: AsRef<Path>>(path: P1, base: P2) -> PathBuf {
@@ -18,8 +18,7 @@ pub fn abs_path<P1: AsRef<Path>, P2: AsRef<Path>>(path: P1, base: P2) -> PathBuf
     .clean()
 }
 
-pub fn abs_path_from_cwd<P1: AsRef<Path>>(path: P1) -> PathBuf {
-    let cwd = std::env::current_dir().unwrap();
-    abs_path(path,cwd)
+pub fn abs_path_from_cwd<P1: AsRef<Path>>(path: P1) -> std::io::Result<PathBuf> {
+    let cwd = std::env::current_dir()?;
+    Ok(abs_path(path, cwd))
 }
-

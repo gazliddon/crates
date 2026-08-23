@@ -1,25 +1,15 @@
 #![deny(unused_imports)]
 
 use super::{
-    error::*, fileloader::SourceFileLoader, AsmSource, Position, SourceFile, SourceFiles,
-    TextEditTrait,
+    fileloader::SourceFileLoader, AsmSource, Position, SourceFile, SourceFiles, TextEditTrait,
 };
-
-use path_clean::PathClean;
 
 use std::{
     collections::HashMap,
-    fs,
     path::{Path, PathBuf},
 };
 
-use grl_symbols::SymbolTree;
-use grl_utils::{fileutils, FileIo};
-
-pub trait LocationTrait: Clone {
-    fn get_line_number(&self) -> usize;
-    fn get_file(&self) -> &PathBuf;
-}
+use grl_utils::FileIo;
 
 #[derive(Clone, Debug)]
 pub struct SourceLine<'a> {
@@ -28,16 +18,6 @@ pub struct SourceLine<'a> {
     pub file_id: u64,
     pub line_number: usize,
     pub mapping: Option<&'a Mapping>,
-}
-
-impl<'a> LocationTrait for SourceLine<'a> {
-    fn get_line_number(&self) -> usize {
-        self.line_number
-    }
-
-    fn get_file(&self) -> &PathBuf {
-        &self.file
-    }
 }
 
 pub struct SourceFileAccess<'a> {
@@ -62,18 +42,29 @@ impl<'a> SourceFileAccess<'a> {
     pub fn get_line(&self, line: usize) -> Option<SourceLine<'a>> {
         self.source_database.get_source_line(self.file_id, line)
     }
+
+    /// Return a snapshot of the complete source file for syntax highlighting.
+    pub fn get_entire_source(&self) -> Option<String> {
+        self.source_database
+            .func_source_file(self.file_id, |source| {
+                Some(source.get_entire_source().to_owned())
+            })
+    }
 }
 
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-#[derive(PartialEq, Debug, Eq, Serialize, Deserialize, Clone)]
+#[derive(PartialEq, Debug, Eq, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum ItemType {
     OpCode,
     Command,
     Other,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Mapping {
     pub file_id: u64,
     pub line: usize,
@@ -90,11 +81,15 @@ impl Mapping {
 
 use grl_utils::Stack;
 
-#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+#[derive(Debug, Clone, Default)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct SourceMapping {
-    pub addr_to_mapping: Vec<Mapping>,
-    pub phys_addr_to_mapping: Vec<Mapping>,
-    #[serde(skip)]
+    /// Canonical mapping records. The two public index vectors contain
+    /// indices into this list rather than cloned `Mapping` values.
+    pub mappings: Vec<Mapping>,
+    pub addr_to_mapping: Vec<usize>,
+    pub phys_addr_to_mapping: Vec<usize>,
+    #[cfg_attr(feature = "serde", serde(skip))]
     macro_stack: Stack<Position>,
 }
 
@@ -115,12 +110,11 @@ impl SourceMapping {
         self.macro_stack.front()
     }
 
-    fn is_expanding_macro(&self) -> bool {
-        !self.macro_stack.is_empty()
-    }
-
     pub fn get_mapping(&self, addr: usize) -> Option<&Mapping> {
-        self.phys_addr_to_mapping.get(addr)
+        self.phys_addr_to_mapping
+            .iter()
+            .filter_map(|index| self.mappings.get(*index))
+            .find(|mapping| mapping.physical_mem_range.contains(&addr))
     }
 
     pub fn add_mapping(
@@ -132,32 +126,38 @@ impl SourceMapping {
     ) {
         let pos = self.get_macro_pos().unwrap_or(pos);
 
-        if let AsmSource::FileId(file_id) = pos.src() {
-            let entry = Mapping {
-                file_id,
-                line: pos.line(),
-                mem_range,
-                item_type,
-                physical_mem_range,
-            };
+        let AsmSource::FileId(file_id) = pos.src() else {
+            // Source generated from an in-memory string has no stable file
+            // identity, so it cannot participate in source-map lookups.
+            return;
+        };
 
-            self.addr_to_mapping.push(entry.clone());
-            self.phys_addr_to_mapping.push(entry);
-        } else {
-            panic!("No file id!")
-        }
+        let entry = Mapping {
+            file_id,
+            line: pos.line(),
+            mem_range,
+            item_type,
+            physical_mem_range,
+        };
+
+        let index = self.mappings.len();
+        self.mappings.push(entry);
+        self.addr_to_mapping.push(index);
+        self.phys_addr_to_mapping.push(index);
     }
 }
 use std::cell::RefCell;
 
 /// Record of a written binary chunk
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct BinWriteDesc {
     pub file: PathBuf,
     pub addr: std::ops::Range<usize>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct BinToWrite {
     pub bin_desc: BinWriteDesc,
     pub data: Vec<u8>,
@@ -174,16 +174,20 @@ impl BinToWrite {
         }
     }
 
-    pub fn write_bin(&self, loader: &mut SourceFileLoader) -> (usize, usize, PathBuf) {
+    pub fn write_bin(
+        &self,
+        loader: &mut SourceFileLoader,
+    ) -> grl_utils::FResult<(usize, usize, PathBuf)> {
         let physical_address = self.bin_desc.addr.start;
         let count = self.bin_desc.addr.len();
         let p = &self.bin_desc.file;
-        loader.write(p, &self.data);
-        (physical_address, count, self.bin_desc.file.clone())
+        loader.write(p, &self.data)?;
+        Ok((physical_address, count, self.bin_desc.file.clone()))
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct SourceDatabase {
     id_to_source_file: HashMap<u64, PathBuf>,
     mappings: SourceMapping,
@@ -192,18 +196,18 @@ pub struct SourceDatabase {
     pub exec_addr: Option<usize>,
     pub file_name: PathBuf,
 
-    #[serde(skip)]
-    range_to_mapping: HashMap<std::ops::Range<usize>, Mapping>,
-    #[serde(skip)]
-    phys_addr_to_mapping: HashMap<usize, Mapping>,
-    #[serde(skip)]
-    addr_to_mapping: HashMap<usize, Mapping>,
-    #[serde(skip)]
+    #[cfg_attr(feature = "serde", serde(skip))]
+    range_to_mapping: HashMap<std::ops::Range<usize>, usize>,
+    #[cfg_attr(feature = "serde", serde(skip))]
+    phys_addr_to_mapping: HashMap<usize, usize>,
+    #[cfg_attr(feature = "serde", serde(skip))]
+    addr_to_mapping: HashMap<usize, usize>,
+    #[cfg_attr(feature = "serde", serde(skip))]
     source_files: RefCell<HashMap<u64, SourceFile>>,
-    #[serde(skip)]
+    #[cfg_attr(feature = "serde", serde(skip))]
     source_file_to_id: HashMap<PathBuf, u64>,
-    #[serde(skip)]
-    loc_to_mapping: HashMap<(u64, usize), Mapping>,
+    #[cfg_attr(feature = "serde", serde(skip))]
+    loc_to_mapping: HashMap<(u64, usize), usize>,
 }
 
 impl Default for SourceDatabase {
@@ -224,41 +228,10 @@ impl Default for SourceDatabase {
     }
 }
 
-pub struct SourceLineInfo<'a> {
-    file: &'a String,
-    line: usize,
-    mem_range: std::ops::Range<u64>,
-}
-
-fn abs_path<P1: AsRef<Path>, P2: AsRef<Path>>(path: P1, base: P2) -> PathBuf {
-    let path = path.as_ref();
-    let base = base.as_ref().to_path_buf();
-
-    if path.is_absolute() {
-        path.to_path_buf()
-    } else {
-        base.join(path)
-    }
-    .clean()
-}
-
-fn rel_path<P1: AsRef<Path>, P2: AsRef<Path>>(path: P1, base: P2) -> Option<PathBuf> {
-    pathdiff::diff_paths(&path, &base)
-}
-
 impl SourceDatabase {
-    pub fn write_json<P: AsRef<Path>>(&self, file: P) -> std::io::Result<String> {
-        let mut copy: SourceDatabase = self.clone();
-        copy.file_name = fileutils::abs_path_from_cwd(&file);
-        let j = serde_json::to_string_pretty(&copy).expect("Unable to serialize to json");
-        fs::write(file, j)?;
-        Ok(copy.file_name.to_string_lossy().to_string())
-    }
-
     pub fn new(
         mappings: &SourceMapping,
         sources: &SourceFiles,
-        symbols: &SymbolTree<u64, u64, i64>,
         written: &[BinWriteDesc],
         exec_addr: Option<usize>,
     ) -> Self {
@@ -278,38 +251,29 @@ impl SourceDatabase {
             ..Default::default()
         };
 
-        ret.post_deserialize();
+        ret.rebuild_indexes();
         ret
     }
 
-    pub fn from_json<P: AsRef<Path>>(sym_file: P) -> Result<Self, SourceErrorType> {
-        use std::io::ErrorKind;
-        let file_name = sym_file.as_ref().to_string_lossy();
-
-        println!("Trying to load {:?}", sym_file.as_ref().to_string_lossy());
-
-        let symstr = std::fs::read_to_string(&sym_file).map_err(|e| match e.kind() {
-            ErrorKind::NotFound => SourceErrorType::FileNotFound(file_name.to_string()),
-            _ => SourceErrorType::Io(e.to_string()),
-        })?;
-
-        let mut sd: SourceDatabase =
-            serde_json::from_str(&symstr).map_err(|e| SourceErrorType::Io(e.to_string()))?;
-        sd.post_deserialize();
-        Ok(sd)
-    }
-
-    fn post_deserialize(&mut self) {
-        let mut file_dir = self.file_name.to_path_buf();
-        file_dir.pop();
-
-        for v in &self.mappings.addr_to_mapping {
-            self.range_to_mapping.insert(v.mem_range.clone(), v.clone());
-            self.addr_to_mapping.insert(v.mem_range.start, v.clone());
+    /// Rebuild the lookup indexes omitted from Serde output.
+    ///
+    /// Call this after deserializing a `SourceDatabase`. The derived Serde
+    /// implementation intentionally skips caches and reverse indexes because
+    /// they are runtime state and can be reconstructed from the persisted
+    /// source IDs and mappings.
+    pub fn rebuild_indexes(&mut self) {
+        self.range_to_mapping.clear();
+        self.addr_to_mapping.clear();
+        self.phys_addr_to_mapping.clear();
+        self.loc_to_mapping.clear();
+        self.source_file_to_id.clear();
+        for (index, v) in self.mappings.mappings.iter().enumerate() {
+            self.range_to_mapping.insert(v.mem_range.clone(), index);
+            self.addr_to_mapping.insert(v.mem_range.start, index);
             self.phys_addr_to_mapping
-                .insert(v.physical_mem_range.start, v.clone());
+                .insert(v.physical_mem_range.start, index);
             let loc = (v.file_id, v.line);
-            self.loc_to_mapping.insert(loc, v.clone());
+            self.loc_to_mapping.insert(loc, index);
         }
 
         for (k, v) in &self.id_to_source_file {
@@ -322,7 +286,7 @@ impl SourceDatabase {
         let x = self.source_files.borrow().contains_key(&file_id);
 
         if !x {
-            let s = std::fs::read_to_string(file_name).expect("Should have read source file");
+            let s = std::fs::read_to_string(file_name).map_err(|_| ())?;
             let mut x = self.source_files.borrow_mut();
             x.insert(
                 file_id,
@@ -330,13 +294,13 @@ impl SourceDatabase {
             );
             x.get(&file_id);
         } else {
-            println!("**** Got from cache! {}", file_name.to_string_lossy());
+            // Source file is already cached.
         }
 
         Ok(())
     }
 
-    pub fn get_source_file_from_file_name<P>(&self, file_name: P) -> Option<SourceFileAccess>
+    pub fn get_source_file_from_file_name<P>(&self, file_name: P) -> Option<SourceFileAccess<'_>>
     where
         P: AsRef<Path>,
     {
@@ -345,21 +309,24 @@ impl SourceDatabase {
             .and_then(|file_id| self.get_source_file(*file_id))
     }
 
-    pub fn get_source_file(&self, file_id: u64) -> Option<SourceFileAccess> {
+    pub fn get_source_file(&self, file_id: u64) -> Option<SourceFileAccess<'_>> {
         self.func_source_file(file_id, |sf| {
             let num_of_lines = sf.get_text().num_of_lines();
             Some(SourceFileAccess::new(self, file_id, num_of_lines))
         })
     }
 
-    fn get_source_line(&self, file_id: u64, line: usize) -> Option<SourceLine> {
+    fn get_source_line(&self, file_id: u64, line: usize) -> Option<SourceLine<'_>> {
         self.func_source_file(file_id, |sf| {
             sf.get_line(line).map(|text| SourceLine {
                 file_id,
                 file: sf.file.clone(),
                 line_number: line,
                 text: text.to_string(),
-                mapping: self.loc_to_mapping.get(&(file_id, line)),
+                mapping: self
+                    .loc_to_mapping
+                    .get(&(file_id, line))
+                    .and_then(|index| self.mappings.mappings.get(*index)),
             })
         })
     }
@@ -368,7 +335,7 @@ impl SourceDatabase {
     where
         F: Fn(&SourceFile) -> Option<R>,
     {
-        self.load_source_file(file_id).unwrap();
+        self.load_source_file(file_id).ok()?;
         self.source_files.borrow().get(&file_id).and_then(func)
     }
 
@@ -376,19 +343,49 @@ impl SourceDatabase {
         &self,
         file_name: P,
         line: usize,
-    ) -> Option<SourceLine> {
+    ) -> Option<SourceLine<'_>> {
         self.get_source_file_from_file_name(file_name)
             .and_then(|sf| sf.get_line(line))
     }
-    pub fn get_source_info_from_physical_address(&self, addr: usize) -> Option<SourceLine> {
+    pub fn get_source_info_from_physical_address(&self, addr: usize) -> Option<SourceLine<'_>> {
         self.phys_addr_to_mapping
             .get(&addr)
+            .and_then(|index| self.mappings.mappings.get(*index))
             .and_then(|m| self.get_source_line(m.file_id, m.line))
     }
 
-    pub fn get_source_info_from_address(&self, addr: usize) -> Option<SourceLine> {
+    pub fn get_source_info_from_address(&self, addr: usize) -> Option<SourceLine<'_>> {
         self.addr_to_mapping
             .get(&addr)
+            .and_then(|index| self.mappings.mappings.get(*index))
             .and_then(|m| self.get_source_line(m.file_id, m.line))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{ItemType, SourceMapping};
+    use crate::{AsmSource, Position};
+
+    #[test]
+    fn mapping_lookup_uses_physical_ranges() {
+        let mut mappings = SourceMapping::new();
+        let position = Position::new(3, 0, 0..4, AsmSource::FileId(7));
+        mappings.add_mapping(0x100..0x104, 0x200..0x204, &position, ItemType::OpCode);
+
+        assert!(mappings.get_mapping(0x100).is_some());
+        assert!(mappings.get_mapping(0x103).is_some());
+        assert!(mappings.get_mapping(0x104).is_none());
+    }
+
+    #[test]
+    fn mappings_without_file_ids_are_ignored() {
+        let mut mappings = SourceMapping::new();
+        let position = Position::new(0, 0, 0..1, AsmSource::FromStr);
+
+        mappings.add_mapping(0..1, 0..1, &position, ItemType::OpCode);
+
+        assert!(mappings.addr_to_mapping.is_empty());
+        assert!(mappings.phys_addr_to_mapping.is_empty());
     }
 }

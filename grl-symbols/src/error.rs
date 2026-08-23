@@ -2,7 +2,7 @@ use thiserror::Error;
 
 #[derive(PartialEq, Eq, Clone, Debug, Error)]
 pub enum SymbolError {
-    #[error("Symbol already define")]
+    #[error("Symbol already defined")]
     AlreadyDefined,
     #[error("Invalid scope")]
     InvalidScope,
@@ -12,6 +12,6 @@ pub enum SymbolError {
     NoValue,
     #[error("Invalid symbol id")]
     InvalidId,
-    #[error("Symbol not found : hit scope barrier")]
+    #[error("Symbol not found: hit scope barrier")]
     HitScopeBarrier,
 }

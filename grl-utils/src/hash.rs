@@ -1,8 +1,7 @@
+pub fn get_hash(text: &[u8]) -> String {
+    let mut dest = [0u8; 128];
 
-pub fn get_hash(text : &[u8]) -> String {
-    let mut dest= [0u8; 128];
-
-    use sha1::{Sha1, Digest};
+    use sha1::{Digest, Sha1};
 
     let mut hasher = Sha1::new();
     hasher.update(text);
@@ -12,6 +11,6 @@ pub fn get_hash(text : &[u8]) -> String {
     ret.to_string()
 }
 
-pub fn get_hash_from_str(text : &str) -> String {
+pub fn get_hash_from_str(text: &str) -> String {
     get_hash(text.as_bytes())
 }

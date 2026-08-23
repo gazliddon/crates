@@ -65,6 +65,12 @@ impl<I: Clone + GetPriority + std::fmt::Debug> PostFixer<I> {
     }
 
     pub fn get_postfix(&mut self, ops: &[I]) -> Result<Vec<I>, PostfixerErrorKind> {
+        // A PostFixer can be reused.  In particular, an error midway through
+        // a previous conversion must not leak its partially built stacks into
+        // the next expression.
+        self.opstack.clear();
+        self.ret.clear();
+
         let len = ops.len();
 
         if len % 2 == 0 && len != 0 {
@@ -73,19 +79,35 @@ impl<I: Clone + GetPriority + std::fmt::Debug> PostFixer<I> {
 
         match len {
             0 => Ok(vec![]),
-            1 => Ok(ops.to_vec()),
+            1 => {
+                if ops[0].is_op() {
+                    Err(PostfixerErrorKind::ExpectedValue(format!("{:?}", ops[0])))
+                } else {
+                    Ok(ops.to_vec())
+                }
+            }
             _ => {
                 let mut it = ops.iter();
                 let lhs = it.next().unwrap();
 
+                if lhs.is_op() {
+                    return Err(PostfixerErrorKind::ExpectedValue(format!("{lhs:?}")));
+                }
+
                 let mut next_pair = || it.next().and_then(|op| it.next().map(|rhs| (op, rhs)));
 
                 let (op, rhs) = next_pair().unwrap();
+                if rhs.is_op() {
+                    return Err(PostfixerErrorKind::ExpectedValue(format!("{rhs:?}")));
+                }
                 self.emit(lhs);
                 self.emit(rhs);
                 self.push(op)?;
 
                 while let Some((op, rhs)) = next_pair() {
+                    if rhs.is_op() {
+                        return Err(PostfixerErrorKind::ExpectedValue(format!("{rhs:?}")));
+                    }
                     let top_pri = self.top_pri();
 
                     let this_pri = op
@@ -118,7 +140,8 @@ where
 #[cfg(test)]
 mod test {
     use super::*;
-    use pretty_assertions::{assert_eq, assert_ne};
+    use crate::pop_pair;
+    use pretty_assertions::assert_eq;
     impl GetPriority for isize {}
 
     fn to_string(vs: &[char]) -> String {
@@ -139,24 +162,10 @@ mod test {
         }
     }
 
-    fn to_args(test: &str) -> (char, Vec<(char, char)>) {
-        let mut it = test.chars();
-
-        let first = it.next().unwrap();
-        let mut rest = vec![];
-
-        while let Some(op) = it.next() {
-            let arg = it.next().unwrap();
-            rest.push((op, arg))
-        }
-        (first, rest)
-    }
-
     pub fn eval(e: &[char]) -> i64 {
         let mut s: VecDeque<i64> = VecDeque::new();
 
         let to_i64 = |c: char| (c as i64) - '0' as i64;
-
 
         for i in e.iter() {
             if i.is_op() {
@@ -216,5 +225,37 @@ mod test {
         println!("{:?}", ret);
         assert_eq!(ret_str, desired);
         assert_eq!(result, 10);
+    }
+
+    #[test]
+    fn rejects_malformed_infix_sequences() {
+        let mut fixer = PostFixer::new();
+        let op_first: Vec<_> = "+12".chars().collect();
+        assert!(matches!(
+            fixer.get_postfix(&op_first),
+            Err(PostfixerErrorKind::ExpectedValue(_))
+        ));
+
+        let value_in_operator_position: Vec<_> = "1a2".chars().collect();
+        assert!(matches!(
+            fixer.get_postfix(&value_in_operator_position),
+            Err(PostfixerErrorKind::ExpectedOperator(_))
+        ));
+
+        let op_in_value_position: Vec<_> = "1+*".chars().collect();
+        assert!(matches!(
+            fixer.get_postfix(&op_in_value_position),
+            Err(PostfixerErrorKind::ExpectedValue(_))
+        ));
+    }
+
+    #[test]
+    fn reuse_after_error_starts_clean() {
+        let mut fixer = PostFixer::new();
+        let bad: Vec<_> = "1+*".chars().collect();
+        assert!(fixer.get_postfix(&bad).is_err());
+
+        let good: Vec<_> = "1+2".chars().collect();
+        assert_eq!(to_string(&fixer.get_postfix(&good).unwrap()), "12+");
     }
 }

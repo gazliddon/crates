@@ -1,7 +1,7 @@
 #![deny(unused_imports)]
 use serde::{Deserialize, Serialize};
 
-#[derive(Default, Serialize, Deserialize,Clone,Copy,PartialEq,Debug)]
+#[derive(Default, Serialize, Deserialize, Clone, Copy, PartialEq, Debug)]
 #[repr(transparent)]
 pub struct Flags(u8);
 

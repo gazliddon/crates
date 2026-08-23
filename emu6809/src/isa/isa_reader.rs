@@ -46,7 +46,21 @@ pub struct Instruction {
     #[serde(default)]
     pub operand_size: usize,
     pub subroutine: Option<bool>,
-    pub info : Option<String>,
+    pub info: Option<String>,
+}
+
+/// Compact identity for an instruction in an ISA database.
+///
+/// Instruction metadata is immutable once the database has been built.  Keep
+/// this small value in syntax trees and resolve it through [`Dbase`] only in
+/// passes that need the full metadata.
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub struct InstructionId(pub usize);
+
+impl Instruction {
+    pub fn id(&self) -> InstructionId {
+        InstructionId(self.opcode)
+    }
 }
 
 impl Instruction {
@@ -64,8 +78,6 @@ pub struct InstructionInfo {
     pub ops: Vec<Instruction>,
     pub addressing_modes: std::collections::HashMap<AddrModeEnum, Instruction>,
 }
-
-
 
 impl InstructionInfo {
     pub fn new(i: Instruction) -> Self {
@@ -95,8 +107,17 @@ impl InstructionInfo {
     pub fn get_instruction(&self, amode: &AddrModeEnum) -> Option<&Instruction> {
         self.addressing_modes.get(amode)
     }
+    pub fn get_instruction_id(&self, amode: AddrModeEnum) -> Option<InstructionId> {
+        self.get_instruction(&amode).map(Instruction::id)
+    }
+
+    /// Return an owned instruction for callers that still need one.
+    ///
+    /// New code should retain the [`InstructionId`] and resolve it through
+    /// [`Dbase::get_by_id`] instead of cloning the metadata.
+    #[deprecated(note = "store InstructionId instead of cloning Instruction")]
     pub fn get_boxed_instruction(&self, amode: AddrModeEnum) -> Option<Box<Instruction>> {
-        self.addressing_modes.get(&amode).cloned().map(Box::new)
+        self.get_instruction(&amode).cloned().map(Box::new)
     }
 
     pub fn add(&mut self, ins: &Instruction) {
@@ -130,7 +151,6 @@ fn split_opcodes(_input: &str) -> Option<(&str, &str)> {
         Some((split[0], split[1]))
     }
 }
-
 
 impl Dbase {
     pub fn from_text(json_str: &str) -> Self {
@@ -211,6 +231,10 @@ impl Dbase {
 
     pub fn get(&self, opcode: u16) -> &Instruction {
         &self.lookup[opcode as usize]
+    }
+
+    pub fn get_by_id(&self, id: InstructionId) -> &Instruction {
+        &self.lookup[id.0]
     }
 
     pub fn all_instructions(&self) -> &Vec<Instruction> {

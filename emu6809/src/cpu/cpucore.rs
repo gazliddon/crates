@@ -1,6 +1,6 @@
 #![deny(unused_imports)]
-use bitflags::bitflags;
 use alu::GazAlu;
+use bitflags::bitflags;
 
 bitflags! {
     pub struct StackFlags: u8 {
@@ -34,14 +34,11 @@ pub const VEC_RESET: usize = 0xfffe;
 
 // Handles CPU emulation
 use super::{
-    alu,
-    AddressLines, Direct, Extended, Flags, Immediate16, Immediate8, Indexed, Inherent,
+    alu, AddressLines, Direct, Extended, Flags, Immediate16, Immediate8, Indexed, Inherent,
     InstructionDecoder, RegEnum, RegisterPair, RegisterSet, Regs, Relative, Relative16,
 };
 
 use emucore::mem::{MemErrorTypes, MemoryIO};
-
-
 
 // use std::cell::RefCell;
 // use std::rc::Rc;
@@ -56,6 +53,8 @@ pub enum CpuErr {
     Unimplemented(usize),
     #[error("Illegal addressing mode")]
     IllegalAddressingMode,
+    #[error("Illegal TFR/EXG register code ${0:02X}")]
+    IllegalRegisterPair(u8),
     #[error(transparent)]
     Memory(#[from] MemErrorTypes),
 }
@@ -63,27 +62,24 @@ pub enum CpuErr {
 // use cpu::alu;
 pub type CpuResult<T = ()> = std::result::Result<T, CpuErr>;
 
-fn get_tfr_reg(op: u8) -> RegEnum {
+fn get_tfr_reg(op: u8) -> Option<RegEnum> {
     match op {
-        0 => RegEnum::D,
-        1 => RegEnum::X,
-        2 => RegEnum::Y,
-        3 => RegEnum::U,
-        4 => RegEnum::S,
-        5 => RegEnum::PC,
-        8 => RegEnum::A,
-        9 => RegEnum::B,
-        10 => RegEnum::CC,
-        11 => RegEnum::DP,
-        _ => {
-            println!("op of {op:02X}");
-            panic!("illegal tfr regs")
-        }
+        0 => Some(RegEnum::D),
+        1 => Some(RegEnum::X),
+        2 => Some(RegEnum::Y),
+        3 => Some(RegEnum::U),
+        4 => Some(RegEnum::S),
+        5 => Some(RegEnum::PC),
+        8 => Some(RegEnum::A),
+        9 => Some(RegEnum::B),
+        10 => Some(RegEnum::CC),
+        11 => Some(RegEnum::DP),
+        _ => None,
     }
 }
 
-pub fn get_tfr_regs(op: u8) -> (RegEnum, RegEnum) {
-    (get_tfr_reg(op >> 4), get_tfr_reg(op & 0xf))
+pub fn get_tfr_regs(op: u8) -> Option<(RegEnum, RegEnum)> {
+    Some((get_tfr_reg(op >> 4)?, get_tfr_reg(op & 0xf)?))
 }
 
 // Bool defaults to false
@@ -307,6 +303,30 @@ impl<'a> Context<'a> {
     }
 }
 
+impl<'a> emucore::cpu::Cpu for Context<'a> {
+    type Error = CpuErr;
+
+    fn reset(&mut self) -> Result<(), Self::Error> {
+        Context::reset(self)
+    }
+
+    fn step(&mut self) -> Result<emucore::cpu::CpuStep, Self::Error> {
+        let before = self.cycles;
+        Context::step(self)?;
+        Ok(emucore::cpu::CpuStep {
+            cycles: (self.cycles - before) as u64,
+            instruction: self.instructions as u64,
+        })
+    }
+
+    fn stats(&self) -> emucore::cpu::ExecutionStats {
+        emucore::cpu::ExecutionStats {
+            cycles: self.cycles as u64,
+            instructions: self.instructions as u64,
+        }
+    }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Stakc functions
 
@@ -437,7 +457,7 @@ impl<'a> Context<'a> {
 
     fn tfr<A: AddressLines>(&mut self) -> CpuResult<()> {
         let operand = self.fetch_byte::<A>()?;
-        let (a, b) = get_tfr_regs(operand );
+        let (a, b) = get_tfr_regs(operand).ok_or(CpuErr::IllegalRegisterPair(operand))?;
         let av = self.regs.get(&a);
         self.regs.set(&b, av);
         Ok(())
@@ -510,7 +530,9 @@ impl<'a> Context<'a> {
     fn bsr<A: AddressLines>(&mut self) -> CpuResult<()> {
         let offset = self.fetch_byte_as_i16::<A>()?;
         let next_op = self.get_pc();
-        self.push_word((next_op & 0xfff) as u16, true)?;
+        // BSR stores the complete 16-bit return address. Masking this to the
+        // low 12 bits sends subroutines in ROM back into the zero page.
+        self.push_word(next_op as u16, true)?;
         self.set_next_pc_rel(offset);
         Ok(())
     }
@@ -792,7 +814,7 @@ impl<'a> Context<'a> {
     ////////////////////////////////////////////////////////////////////////////////
     fn exg<A: AddressLines>(&mut self) -> CpuResult<()> {
         let operand = self.fetch_byte::<A>()?;
-        let (a, b) = get_tfr_regs(operand );
+        let (a, b) = get_tfr_regs(operand).ok_or(CpuErr::IllegalRegisterPair(operand))?;
         let av = self.regs.get(&a);
         let bv = self.regs.get(&b);
         self.regs.set(&b, av);
@@ -1484,9 +1506,54 @@ impl<'a> Context<'a> {
             flags: Flags::I | Flags::F,
             ..Default::default()
         };
+        // Keep the decoder cursor in sync with the architectural PC.  The
+        // next step will decode from the reset vector rather than the address
+        // that happened to be active when Context was constructed.
+        self.ins.next_addr = pc as usize;
         Ok(())
     }
 }
 
 //
 // }}}
+
+#[cfg(test)]
+mod tests {
+    use super::{Context, Pins, Regs, VEC_RESET};
+    use byteorder::BigEndian;
+    use emucore::mem::{MemBlock, MemoryIO};
+
+    #[test]
+    fn reset_synchronizes_decoder_pc_with_reset_vector() {
+        let mut mem: MemBlock<BigEndian> = MemBlock::new("reset", false, &(0..0x10000));
+        mem.store_word(VEC_RESET, 0xf486).unwrap();
+        let mut regs = Regs::default();
+        let mut pins = Pins::default();
+        let mut cpu = Context::new(&mut mem, &mut regs, &mut pins).unwrap();
+
+        cpu.reset().unwrap();
+
+        assert_eq!(cpu.get_pc(), 0xf486);
+        assert_eq!(cpu.regs.pc, 0xf486);
+    }
+
+    #[test]
+    fn bsr_preserves_the_full_return_address() {
+        let mut mem: MemBlock<BigEndian> = MemBlock::new("bsr", false, &(0..0x10000));
+        mem.store_byte(0x8000, 0x8d).unwrap(); // BSR
+        mem.store_byte(0x8001, 0x02).unwrap(); // target = $8004
+        mem.store_byte(0x8004, 0x39).unwrap(); // RTS
+        let mut regs = Regs {
+            pc: 0x8000,
+            s: 0x9000,
+            ..Default::default()
+        };
+        let mut pins = Pins::default();
+        let mut cpu = Context::new(&mut mem, &mut regs, &mut pins).unwrap();
+
+        cpu.step().unwrap();
+        assert_eq!(cpu.get_pc(), 0x8004);
+        cpu.step().unwrap();
+        assert_eq!(cpu.get_pc(), 0x8002);
+    }
+}
