@@ -3,9 +3,9 @@
 The Williams arcade hardware family — Defender (1980), Stargate (1981),
 Robotron: 2084 (1982), plus Joust, Bubbles, Sinistar, Splat and others —
 shares a common two-board platform built around the Motorola 6809. MAME
-models it in `src/mame/midway/williams.cpp`; the shared machine config is
-`williams_base`, with board revisions `williams_b0`, `williams_b1` and
-`williams_b2`.
+models it in `src/mame/midway/williams.cpp`; the shared machine
+configuration is `williams_base`, with board revisions `williams_b0`,
+`williams_b1` and `williams_b2`.
 
 Per-machine details:
 
@@ -15,11 +15,11 @@ Per-machine details:
 
 ## Board Revisions
 
-| Rev | MAME config  | Blitter           | Example machines          |
-|-----|--------------|-------------------|---------------------------|
-| B0  | williams_b0  | none              | Defender, Stargate        |
-| B1  | williams_b1  | SC1, clip `C000`  | Robotron, Joust, Sinistar |
-| B2  | williams_b2  | SC2, clip `C000`  | Splat                     |
+| Rev | MAME configuration | Blitter           | Example machines          |
+|-----|--------------------|-------------------|---------------------------|
+| B0  | williams_b0        | none              | Defender, Stargate        |
+| B1  | williams_b1        | SC1, clip `C000`  | Robotron, Joust, Sinistar |
+| B2  | williams_b2        | SC2, clip `C000`  | Splat                     |
 
 B0 boards have no blitter (Defender, Stargate). The blitter appeared on
 the B1 board with Joust/Robotron.
