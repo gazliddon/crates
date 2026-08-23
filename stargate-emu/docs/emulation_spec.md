@@ -128,7 +128,8 @@ These rules come from `lua/plugins/markdownlint.json`,
 - **Spell checking**: harper-ls checks docs. Technical terms (register
   names, game names, domain jargon) belong in the per-project workspace
   dictionary at the repo root — `.harper-dictionary.txt` (harper roots at
-  the nearest `.git`, `gazm.toml`, or `.obsidian` vault marker). Personal/global words go in the user
+  the nearest `.git`, `gazm.toml`, or `.obsidian` vault marker).
+  Personal/global words go in the user
   dictionary (`~/Library/Application Support/harper-ls/dictionary.txt`).
   Add words with the `HarperAddToWSDict` code action instead of editing
   prose around them.
