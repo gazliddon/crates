@@ -75,6 +75,21 @@ Two main-board timers drive the PIA lines: a 32-scanline timer toggles
 VA11 into CB1, and a scanline-240 timer drives COUNT240 into CA1 (the
 "16 ms" IRQ the games use for frame timing).
 
+The 6821 IRQ output is **level-based**: asserted while a CA1/CB1 flag is
+latched (active edge per control bit 1: 1 = rising, 0 = falling) **and** the
+corresponding enable bit (control bit 0) is set. Reading the matching port
+data register clears the flag. Emulators must mirror the live level rather
+than latching edges: a stale latch re-asserts after the handler clears the
+flag and RTIs, causing double IRQs.
+
+Stargate's vector table (`$FFF0-$FFFF`) is `$F486` (re-init) for everything
+except **IRQ** (`$FFF8/$FFF9`) = `$9C6B` (the beam handler at `$15BA`); the
+game clears the I mask (`ANDCC #$00`) and is interrupt-driven. The handler
+sets DP = `$9C`, disables CB1 (CRB = `$34`), clears the flag by reading port B
+data, and branches on the beam (`$CB00`): beam >= `$80` does the per-frame
+work (and latches `$6E`), beam < `$80` increments the frame flag `$39`
+(gated on `$6E`), which the main loop waits on at `$0011`.
+
 ## PIAs
 
 All boards use MC6821 PIAs. Register layout per PIA:
@@ -117,7 +132,15 @@ port A drives an MC1408 8-bit DAC into the speaker.
 - `CC00-CFFF` on later boards (`C400-C4FF` on Defender), 1K x 4, battery
   backed (5101 on Defender; 5114/6514 on later boards).
 - Only 4 data bits are valid: writes are stored as `data | 0xF0`, so the
-  upper nibble always reads as ones.
+  upper nibble always reads as ones (MAME `cmos_w`).
+- **Emulators must model this exactly** — games do read-modify-write
+  cycles on CMOS, and the forced `0xF0` upper nibble feeds back into the
+  values they write. Stargate's audit checksum sums the low nibbles of the
+  half-open interval `[$CC36, $CC9E)` (104 bytes), adds `$37`, and stores the
+  result packed across `$CCA0` (high nibble) / `$CCA1` (low nibble) as
+  `(cmos[$CCA0] << 4) | (cmos[$CCA1] & 0x0F)`; the `<< 4` works precisely
+  because of the forced `0xF0` upper nibble. It diverges from MAME if the
+  masking is skipped.
 
 ## Watchdog
 

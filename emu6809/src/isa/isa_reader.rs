@@ -121,10 +121,10 @@ impl InstructionInfo {
     }
 
     pub fn add(&mut self, ins: &Instruction) {
-        if self.addressing_modes.contains_key(&ins.addr_mode) {
-            panic!("can't contain same addressing mode twice")
-        }
-
+        // Allow duplicate (action, addressing mode) pairs: the real 6809
+        // has undocumented opcodes that alias a documented one (e.g. 0x01
+        // NEG direct, aliasing 0x00). The metadata is identical, so the
+        // overwrite is benign; both opcodes still get generated-table arms.
         self.addressing_modes.insert(ins.addr_mode, ins.clone());
         self.ops.push(ins.clone());
     }

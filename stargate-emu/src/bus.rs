@@ -36,14 +36,30 @@ pub struct StargateBus {
     vram: [u8; 0xc000],
     cmos: [u8; 0x0400],
     palette: [u8; 0x0010],
+    /// 6821 registers in MAME `pia6821_device` order, per PIA:
+    /// `[0]` = port A data, `[1]` = control A, `[2]` = port B data,
+    /// `[3]` = control B.
     pia: [[u8; 4]; 2],
+    /// 6821 CA1/CB1 interrupt flags (bit 7 of the control register).
+    pia_irq_a1: [bool; 2],
+    pia_irq_b1: [bool; 2],
+    /// Current level of the CA1/CB1 input lines (for edge detection).
+    pia_line_ca1: [bool; 2],
+    pia_line_cb1: [bool; 2],
     bank_rom: bool,
+    /// RWCNTL bit 1: cocktail table screen inversion (stored for parity
+    /// with MAME's `vram_select_w`; the upright bitmap is not flipped).
+    cocktail: bool,
     watchdog_writes: u64,
     input: StargateInput,
     sound_commands: Vec<u8>,
     video_frame: Vec<u8>,
     video_cycles: u64,
     video_scanline: usize,
+    /// Debug hook: PC/instruction count of the instruction currently being
+    /// executed (set by `StargateMachine::step` before each step).
+    pub debug_pc: u16,
+    pub debug_instr: u64,
 }
 
 impl StargateBus {
@@ -54,13 +70,20 @@ impl StargateBus {
             cmos: [0; 0x0400],
             palette: [0; 0x0010],
             pia: [[0; 4]; 2],
+            pia_irq_a1: [false; 2],
+            pia_irq_b1: [false; 2],
+            pia_line_ca1: [false; 2],
+            pia_line_cb1: [false; 2],
             bank_rom: false,
+            cocktail: false,
             watchdog_writes: 0,
             input: StargateInput::default(),
             sound_commands: Vec::new(),
             video_frame: vec![0; 292 * 240 * 4],
             video_cycles: 0,
             video_scanline: 0,
+            debug_pc: 0,
+            debug_instr: 0,
         };
         for (address, name) in ROMS {
             let data = fs::read(dir.join(name))?;
@@ -127,27 +150,64 @@ impl StargateBus {
             self.video_cycles -= 64;
             let scanline = self.video_scanline;
             self.render_scanline(scanline);
-            // The ROM PIA's CA1 and CB1 are driven by beam position.  CB1
-            // pulses at the four 4 ms phases; CA1 pulses on line 240.
-            if scanline % 64 == 0 {
-                interrupts.firq = true;
+            // Beam-position lines into ROM PIA 1 (MAME williams_m.cpp
+            // va11_callback / count240_callback):
+            //   CB1 = VA11 = bit 5 of the scanline counter (toggles every
+            //         32 lines); MAME suppresses the callback at line 256.
+            //   CA1 = COUNT240 = high from line 240 on (once per frame).
+            if scanline != 256 {
+                self.set_cb1(1, (scanline >> 5) & 1 == 1);
             }
-            // CA1's line-240 IRQ is intentionally left disabled until the
-            // 6821 control/status latch is modeled.  Asserting it as a raw
-            // CPU IRQ can race the ROM's RAM-resident IRQ vector setup and
-            // send execution through uninitialized memory.
+            self.set_ca1(1, scanline >= 240);
             self.video_scanline = (self.video_scanline + 1) % 260;
         }
+        // The 6821 asserts its IRQ output while (flag && enable); the
+        // 6809's IRQ vector ($FFF8/$FFF9) is $9C6B (the beam handler).
+        interrupts.irq = self.pia_irq_level();
         interrupts
     }
 
+    /// Drive the CA1 line of PIA `p`, latching the 6821 IRQA1 flag on the
+    /// active edge (control bit 1: 1 = low->high, 0 = high->low).
+    fn set_ca1(&mut self, p: usize, state: bool) {
+        if self.pia_line_ca1[p] != state {
+            let active_rising = self.pia[p][1] & 0x02 != 0;
+            if state == active_rising {
+                self.pia_irq_a1[p] = true;
+            }
+            self.pia_line_ca1[p] = state;
+        }
+    }
+
+    /// Drive the CB1 line of PIA `p` (see `set_ca1` for semantics).
+    fn set_cb1(&mut self, p: usize, state: bool) {
+        if self.pia_line_cb1[p] != state {
+            let active_rising = self.pia[p][3] & 0x02 != 0;
+            if state == active_rising {
+                self.pia_irq_b1[p] = true;
+            }
+            self.pia_line_cb1[p] = state;
+        }
+    }
+
+    /// 6821 IRQ output: asserted while a CA1/CB1 flag is set and the
+    /// corresponding interrupt-enable bit (control bit 0) is set.
+    fn pia_irq_level(&self) -> bool {
+        (0..2).any(|p| {
+            (self.pia_irq_a1[p] && self.pia[p][1] & 0x01 != 0)
+                || (self.pia_irq_b1[p] && self.pia[p][3] & 0x01 != 0)
+        })
+    }
+
     fn render_scanline(&mut self, scanline: usize) {
+        // Stargate's visible area is x=6..297, y=7..246 (base platform
+        // default). Defender uses 12..303 and is not rendered here.
         if !(7..247).contains(&scanline) {
             return;
         }
         let row = scanline - 7;
         let start = row * 292 * 4;
-        for x in 12..304 {
+        for x in 6..298 {
             let packed = self.vram[scanline + (x / 2) * 256];
             let value = if x & 1 == 0 {
                 packed >> 4
@@ -155,7 +215,7 @@ impl StargateBus {
                 packed & 0x0f
             };
             let pixel = Self::palette_rgba(self.palette[value as usize]);
-            let offset = start + (x - 12) * 4;
+            let offset = start + (x - 6) * 4;
             self.video_frame[offset..offset + 4].copy_from_slice(&pixel);
         }
     }
@@ -183,18 +243,47 @@ impl StargateBus {
             0xc000..=0xc00f => 0, // write-only palette
             0xc804..=0xc807 | 0xc80c..=0xc80f => {
                 let (pia, reg) = Self::pia_index(addr).unwrap();
-                match (pia, reg) {
-                    (0, 0) => self.input.port0(),
-                    (0, 2) => self.input.port1(),
-                    (1, 0) => self.input.port2(),
+                match reg {
+                    // Port A data: the value; flag clear happens on the
+                    // real read path (load_byte), not here.
+                    0 => match (pia, reg) {
+                        (0, 0) => self.input.port0(),
+                        (1, 0) => self.input.port2(),
+                        _ => self.pia[pia][reg],
+                    },
+                    // Port B data.
+                    2 => match (pia, reg) {
+                        (0, 2) => self.input.port1(),
+                        _ => self.pia[pia][reg],
+                    },
+                    // Control registers: bit 7/6 report the CA1/CB1 flags.
+                    1 => self.pia[pia][1] | (self.pia_irq_a1[pia] as u8) << 7,
+                    3 => self.pia[pia][3] | (self.pia_irq_b1[pia] as u8) << 7,
                     _ => self.pia[pia][reg],
                 }
             }
-            0xcb00..=0xcbff => self.video_scanline as u8, // vertical beam counter
+            0xcb00..=0xcbff => {
+                // Vertical beam counter: 6 bits of vpos (bits 2-7); MAME
+                // returns vpos & 0xfc, and 0xfc for lines >= 256.
+                let v = self.video_scanline;
+                (if v < 0x100 { v & 0xfc } else { 0xfc }) as u8
+            }
             0xcc00..=0xcfff => self.cmos[addr - 0xcc00],
             0xd000..=0xffff => self.rom[addr],
             _ => 0,
         }
+    }
+
+    /// Load a CMOS/nvram image (MAME `nvram` file: 1024 bytes, CMOS
+    /// address `CC00+offset`) into the battery-backed RAM.
+    pub fn load_nvram(&mut self, data: &[u8]) {
+        let n = data.len().min(self.cmos.len());
+        self.cmos[..n].copy_from_slice(&data[..n]);
+    }
+
+    /// Return a copy of the CMOS image (MAME `nvram` file format).
+    pub fn save_nvram(&self) -> Vec<u8> {
+        self.cmos.to_vec()
     }
 
     pub fn set_input(&mut self, input: StargateInput) {
@@ -207,6 +296,11 @@ impl StargateBus {
 
     pub fn palette(&self) -> [u8; 16] {
         self.palette
+    }
+
+    /// Current beam scanline (0..260) for diagnostics.
+    pub fn video_scanline(&self) -> usize {
+        self.video_scanline
     }
 }
 
@@ -239,6 +333,15 @@ impl MemoryIO for StargateBus {
         digest.update(self.cmos);
     }
     fn load_byte(&mut self, addr: usize) -> MemResult<u8> {
+        // 6821 side effect: reading a port data register clears the
+        // corresponding CA1/CB1 interrupt flag.
+        if let Some((pia, reg)) = Self::pia_index(addr) {
+            if reg == 0 {
+                self.pia_irq_a1[pia] = false;
+            } else if reg == 2 {
+                self.pia_irq_b1[pia] = false;
+            }
+        }
         self.inspect_byte(addr)
     }
     fn store_byte(&mut self, addr: usize, value: u8) -> MemResult<()> {
@@ -257,13 +360,21 @@ impl MemoryIO for StargateBus {
                     self.sound_commands.push(value | 0xc0);
                 }
             }
-            0xc900..=0xc9ff => self.bank_rom = value & 1 != 0,
+            0xc900..=0xc9ff => {
+                self.bank_rom = value & 1 != 0;
+                self.cocktail = value & 2 != 0;
+            }
             0xcbff => {
                 if value == 0x39 {
                     self.watchdog_writes += 1;
                 }
             }
-            0xcc00..=0xcfff => self.cmos[addr - 0xcc00] = value,
+            0xcc00..=0xcfff => {
+                // Battery-backed 4-bit CMOS: MAME's williams driver stores
+                // writes with the upper nibble forced to ones (only 4 bits
+                // are valid), which games rely on in read-modify-write.
+                self.cmos[addr - 0xcc00] = value | 0xf0
+            }
             0xd000..=0xffff => {} // ROM / unmapped writes are ignored
             _ => {}
         }
@@ -295,13 +406,20 @@ mod tests {
             cmos: [0; 0x0400],
             palette: [0; 0x0010],
             pia: [[0; 4]; 2],
+            pia_irq_a1: [false; 2],
+            pia_irq_b1: [false; 2],
+            pia_line_ca1: [false; 2],
+            pia_line_cb1: [false; 2],
             bank_rom: false,
+            cocktail: false,
             watchdog_writes: 0,
             input: StargateInput::default(),
             sound_commands: Vec::new(),
             video_frame: vec![0; 292 * 240 * 4],
             video_cycles: 0,
             video_scanline: 0,
+            debug_pc: 0,
+            debug_instr: 0,
         }
     }
 

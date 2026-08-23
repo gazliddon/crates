@@ -47,6 +47,8 @@ impl StargateMachine {
         self.pins.firq = self.pending_firq && !self.regs.flags.contains(Flags::F);
         let serviced_irq = self.pins.irq;
         let serviced_firq = self.pins.firq;
+        self.bus.debug_pc = self.regs.pc;
+        self.bus.debug_instr = self.instructions;
         let mut cpu = Context::new(&mut self.bus, &mut self.regs, &mut self.pins)?;
         let before = cpu.cycles();
         cpu.step()?;
@@ -61,8 +63,12 @@ impl StargateMachine {
             self.pins.firq = false;
         }
         let interrupts = self.bus.advance_video(elapsed);
-        self.pending_irq |= interrupts.irq;
-        self.pending_firq |= interrupts.firq;
+        // The 6821 IRQ output is level-based (asserted while a flag is set
+        // AND its enable bit is set), so the latch mirrors the live level
+        // rather than accumulating edges -- otherwise a stale latch
+        // re-asserts after the handler clears the flag and RTIs.
+        self.pending_irq = interrupts.irq;
+        self.pending_firq = interrupts.firq;
         self.instructions += 1;
         Ok(())
     }

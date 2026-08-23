@@ -1556,4 +1556,33 @@ mod tests {
         cpu.step().unwrap();
         assert_eq!(cpu.get_pc(), 0x8002);
     }
+
+    #[test]
+    fn indexed_abs_indirect_is_4_bytes_and_reads_the_pointer() {
+        // Postbyte 0x9F: [abs] -- the 16-bit operand names the location
+        // holding the effective address; the instruction is 4 bytes.
+        // "LDX [$9C3F]" at $0149 (the Stargate display-list push pattern):
+        // X must become mem16[mem16[$9C3F]] and the next PC $014D.
+        let mut mem: MemBlock<BigEndian> = MemBlock::new("abs", false, &(0..0x10000));
+        mem.store_byte(0x0149, 0xae).unwrap(); // LDX indexed
+        mem.store_byte(0x014a, 0x9f).unwrap(); // [abs]
+        mem.store_byte(0x014b, 0x9c).unwrap(); // operand hi
+        mem.store_byte(0x014c, 0x3f).unwrap(); // operand lo
+        // pointer at $9C3F -> $1234
+        mem.store_word(0x9c3f, 0x1234).unwrap();
+        mem.store_word(0x1234, 0xbeef).unwrap();
+        let mut regs = Regs {
+            pc: 0x0149,
+            ..Default::default()
+        };
+        let mut pins = Pins::default();
+        let mut cpu = Context::new(&mut mem, &mut regs, &mut pins).unwrap();
+
+        cpu.step().unwrap();
+        let pc = cpu.get_pc();
+        drop(cpu);
+        eprintln!("pc={pc:04x} x={:04x}", regs.x);
+        assert_eq!(pc, 0x014d);
+        assert_eq!(regs.x, 0xbeef);
+    }
 }

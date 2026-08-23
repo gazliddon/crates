@@ -68,6 +68,24 @@ fn decode_op(reader: &mut MemReader) -> CpuResult<InstructionDecoder> {
     let range = reader.get_taken_range();
     let data = reader.get_taken_bytes();
 
+    // Indexed addressing adds effective-address cycles beyond the flat
+    // table value (which assumes a 2-cycle ,R / 5-bit-offset EA), per the
+    // M6809 datasheet.
+    let ea_cycles = if instruction_info.addr_mode == AddrModeEnum::Indexed {
+        let index_mode = super::indexed::IndexedFlags::new(reader.peek_byte()?);
+        use super::IndexModes::*;
+        match index_mode.get_index_type() {
+            RPlus(_) | RSub(_) => 1,
+            RPlusPlus(_) | RSubSub(_) => 2,
+            RAddi8(_) | PCAddi8 => 1,
+            RAddi16(_) | PCAddi16 | RAddD(_) => 2,
+            Ea => 4,
+            _ => 0,
+        }
+    } else {
+        0
+    };
+
     // Create the decoded instruction
     let ret = InstructionDecoder {
         size: range.len(),
@@ -75,7 +93,7 @@ fn decode_op(reader: &mut MemReader) -> CpuResult<InstructionDecoder> {
         addr,
         op_code,
         instruction_info,
-        cycles: instruction_info.cycles,
+        cycles: instruction_info.cycles + ea_cycles,
         data,
         operand_addr,
     };

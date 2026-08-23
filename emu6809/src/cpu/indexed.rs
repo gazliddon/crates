@@ -41,7 +41,8 @@ impl IndexModes {
             Self::PCAddi8 => 1,
             Self::PCAddi16 => 2,
             Self::Illegal => 0,
-            Self::Ea => 0,
+            // [abs] (postbyte 0x9F): 16-bit absolute operand.
+            Self::Ea => 2,
         }
     }
 }

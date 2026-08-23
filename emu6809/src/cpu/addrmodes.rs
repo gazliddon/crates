@@ -413,8 +413,10 @@ impl Indexed {
             IndexModes::Illegal => Err(CpuErr::IllegalAddressingMode),
 
             IndexModes::Ea => {
+                // [abs] (postbyte 0x9F): the 16-bit operand; the indirect
+                // pointer read is applied by `AddressLines::ea` (the
+                // is_indirect() path).
                 let idx = ins.fetch_word(mem)?;
-                // format!("0x{:04X}", diss.fetch_word(mem))
                 Ok((idx, index_mode))
             }
 
