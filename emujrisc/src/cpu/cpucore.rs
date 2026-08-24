@@ -8,6 +8,7 @@
 use crate::cpu::alu::execute;
 use crate::cpu::decoder::decode_word;
 use crate::cpu::{Chip, DecodedInsn, Flags, Registers};
+use crate::isa::Kind;
 use crate::mem::JriscBus;
 use emucore::cpu::ExecutionStats;
 
@@ -132,8 +133,8 @@ impl Cpu {
         if d.insn.class != crate::isa::InsnClass::Branch {
             self.execute_with(&d, bus)?;
         } else {
-        match d.insn.mnemonic {
-            "jump" => {
+        match d.insn.kind {
+            Kind::Jump => {
                 let cc = d.dst;
                 let reg = d.src as usize;
                 if self.flags.condition(cc) {
@@ -146,7 +147,7 @@ impl Cpu {
                     extra_cycles = 3;
                 }
             }
-            "jr" => {
+            Kind::Jr => {
                 let cc = d.dst;
                 if self.flags.condition(cc) {
                     // offset = signed 5-bit src, in words; relative to the

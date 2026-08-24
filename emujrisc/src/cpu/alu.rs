@@ -14,6 +14,7 @@
 //! - `abs` of 0x80000000 sets N only (Z/C untouched).
 
 use crate::cpu::{Cpu, DecodedInsn};
+use crate::isa::Kind;
 use crate::mem::JriscBus;
 
 /// `convert_zero`: quick-immediate fields where raw 0 means 32.
@@ -45,25 +46,25 @@ pub fn execute<B: JriscBus + ?Sized>(cpu: &mut Cpu, d: &DecodedInsn, bus: &mut B
     let src = d.src as usize;
     let dst = d.dst as usize;
     let mn = d.insn.mnemonic;
-    match mn {
+    match d.insn.kind {
         // ---- arithmetic ----
         // cmpq first: the T2K DSP main loop is a cmpq/jr spin (measured
         // ~50% of the executed stream), so it must win in one compare.
-        "cmpq" => {
+        Kind::Cmpq => {
             // 5-bit signed immediate, sign-extended (MAME: (s8)(op>>2)>>3)
             let r1 = ((src << 27) as i32 >> 27) as u32;
             let r2 = cpu.r(dst);
             let r = r2.wrapping_sub(r1);
             cpu.flags.set_znc_sub(r2, r1, r);
         }
-        "add" => {
+        Kind::Add => {
             let r2 = cpu.r(dst);
             let r1 = cpu.r(src);
             let r = r2.wrapping_add(r1);
             cpu.w(dst, r);
             cpu.flags.set_znc_add(r2, r1, r);
         }
-        "addc" => {
+        Kind::Addc => {
             let r2 = cpu.r(dst);
             let r1 = cpu.r(src);
             let c = cpu.flags.c as u32;
@@ -71,14 +72,14 @@ pub fn execute<B: JriscBus + ?Sized>(cpu: &mut Cpu, d: &DecodedInsn, bus: &mut B
             cpu.w(dst, r);
             cpu.flags.set_znc_add(r2, r1.wrapping_add(c), r);
         }
-        "addq" => {
+        Kind::Addq => {
             let r2 = cpu.r(dst);
             let r1 = convert_zero(src);
             let r = r2.wrapping_add(r1);
             cpu.w(dst, r);
             cpu.flags.set_znc_add(r2, r1, r);
         }
-        "addqmod" => {
+        Kind::Addqmod => {
             let r2 = cpu.r(dst);
             let r1 = convert_zero(src);
             let mut r = r2.wrapping_add(r1);
@@ -86,18 +87,18 @@ pub fn execute<B: JriscBus + ?Sized>(cpu: &mut Cpu, d: &DecodedInsn, bus: &mut B
             cpu.w(dst, r);
             cpu.flags.set_znc_add(r2, r1, r);
         }
-        "addqt" => {
+        Kind::Addqt => {
             let r = cpu.r(dst).wrapping_add(convert_zero(src));
             cpu.w(dst, r);
         }
-        "sub" => {
+        Kind::Sub => {
             let r2 = cpu.r(dst);
             let r1 = cpu.r(src);
             let r = r2.wrapping_sub(r1);
             cpu.w(dst, r);
             cpu.flags.set_znc_sub(r2, r1, r);
         }
-        "subc" => {
+        Kind::Subc => {
             let r2 = cpu.r(dst);
             let r1 = cpu.r(src);
             let c = cpu.flags.c as u32;
@@ -105,14 +106,14 @@ pub fn execute<B: JriscBus + ?Sized>(cpu: &mut Cpu, d: &DecodedInsn, bus: &mut B
             cpu.w(dst, r);
             cpu.flags.set_znc_sub(r2, r1.wrapping_add(c), r);
         }
-        "subq" => {
+        Kind::Subq => {
             let r2 = cpu.r(dst);
             let r1 = convert_zero(src);
             let r = r2.wrapping_sub(r1);
             cpu.w(dst, r);
             cpu.flags.set_znc_sub(r2, r1, r);
         }
-        "subqmod" => {
+        Kind::Subqmod => {
             let r2 = cpu.r(dst);
             let r1 = convert_zero(src);
             let mut r = r2.wrapping_sub(r1);
@@ -120,17 +121,17 @@ pub fn execute<B: JriscBus + ?Sized>(cpu: &mut Cpu, d: &DecodedInsn, bus: &mut B
             cpu.w(dst, r);
             cpu.flags.set_znc_sub(r2, r1, r);
         }
-        "subqt" => {
+        Kind::Subqt => {
             let r = cpu.r(dst).wrapping_sub(convert_zero(src));
             cpu.w(dst, r);
         }
-        "neg" => {
+        Kind::Neg => {
             let r2 = cpu.r(dst);
             let r = r2.wrapping_neg();
             cpu.w(dst, r);
             cpu.flags.set_znc_sub(0, r2, r);
         }
-        "abs" => {
+        Kind::Abs => {
             let r2 = cpu.r(dst) as i32;
             if r2 == i32::MIN {
                 // quirk: does not work for 0x80000000 — N only
@@ -144,13 +145,13 @@ pub fn execute<B: JriscBus + ?Sized>(cpu: &mut Cpu, d: &DecodedInsn, bus: &mut B
                 cpu.flags.z = cpu.r(dst) == 0;
             }
         }
-        "cmp" => {
+        Kind::Cmp => {
             let r1 = cpu.r(src);
             let r2 = cpu.r(dst);
             let r = r2.wrapping_sub(r1);
             cpu.flags.set_znc_sub(r2, r1, r);
         }
-        "div" => {
+        Kind::Div => {
             let r1 = cpu.r(src);
             let r2 = cpu.r(dst);
             if r1 != 0 {
@@ -168,48 +169,48 @@ pub fn execute<B: JriscBus + ?Sized>(cpu: &mut Cpu, d: &DecodedInsn, bus: &mut B
             }
         }
         // ---- logic / bit ----
-        "and" => {
+        Kind::And => {
             let r = cpu.r(dst) & cpu.r(src);
             cpu.w(dst, r);
             cpu.flags.set_zn(r);
         }
-        "or" => {
+        Kind::Or => {
             let r = cpu.r(dst) | cpu.r(src);
             cpu.w(dst, r);
             cpu.flags.set_zn(r);
         }
-        "xor" => {
+        Kind::Xor => {
             let r = cpu.r(dst) ^ cpu.r(src);
             cpu.w(dst, r);
             cpu.flags.set_zn(r);
         }
-        "not" => {
+        Kind::Not => {
             let r = !cpu.r(dst);
             cpu.w(dst, r);
             cpu.flags.set_zn(r);
         }
-        "btst" => {
+        Kind::Btst => {
             let bit = src & 31;
             cpu.flags.z = (cpu.r(dst) >> bit) & 1 == 0;
         }
-        "bset" => {
+        Kind::Bset => {
             let r = cpu.r(dst) | (1 << (src & 31));
             cpu.w(dst, r);
             cpu.flags.set_zn(r);
         }
-        "bclr" => {
+        Kind::Bclr => {
             let r = cpu.r(dst) & !(1 << (src & 31));
             cpu.w(dst, r);
             cpu.flags.set_zn(r);
         }
-        "mirror" => {
+        Kind::Mirror => {
             let r = cpu.r(dst);
             let res = (mirror16((r & 0xffff) as u16) as u32) << 16 | mirror16((r >> 16) as u16) as u32;
             cpu.w(dst, res);
             cpu.flags.set_zn(res);
         }
         // ---- shifts / rotates ----
-        "sh" | "sha" => {
+        Kind::Sh | Kind::Sha => {
             let r1 = cpu.r(src) as i32;
             let r2 = cpu.r(dst);
             cpu.flags.z = false;
@@ -241,7 +242,7 @@ pub fn execute<B: JriscBus + ?Sized>(cpu: &mut Cpu, d: &DecodedInsn, bus: &mut B
             cpu.w(dst, res);
             cpu.flags.set_zn(res);
         }
-        "shlq" => {
+        Kind::Shlq => {
             // amount = 32 - raw; raw 0 -> 32 (MAME note: convert_zero not used)
             let amt = (32 - src as u32) & 63;
             let r2 = cpu.r(dst);
@@ -253,7 +254,7 @@ pub fn execute<B: JriscBus + ?Sized>(cpu: &mut Cpu, d: &DecodedInsn, bus: &mut B
             cpu.w(dst, res);
             cpu.flags.set_zn(res);
         }
-        "shrq" => {
+        Kind::Shrq => {
             let amt = convert_zero(src);
             let r2 = cpu.r(dst);
             cpu.flags.z = false;
@@ -264,7 +265,7 @@ pub fn execute<B: JriscBus + ?Sized>(cpu: &mut Cpu, d: &DecodedInsn, bus: &mut B
             cpu.w(dst, res);
             cpu.flags.set_zn(res);
         }
-        "sharq" => {
+        Kind::Sharq => {
             let amt = convert_zero(src);
             let r2 = cpu.r(dst);
             cpu.flags.z = false;
@@ -279,7 +280,7 @@ pub fn execute<B: JriscBus + ?Sized>(cpu: &mut Cpu, d: &DecodedInsn, bus: &mut B
             cpu.w(dst, res);
             cpu.flags.set_zn(res);
         }
-        "ror" => {
+        Kind::Ror => {
             let r1 = cpu.r(src) & 31;
             let r2 = cpu.r(dst);
             let res = r2.rotate_right(r1);
@@ -290,7 +291,7 @@ pub fn execute<B: JriscBus + ?Sized>(cpu: &mut Cpu, d: &DecodedInsn, bus: &mut B
             cpu.w(dst, res);
             cpu.flags.set_zn(res);
         }
-        "rorq" => {
+        Kind::Rorq => {
             let r1 = convert_zero(src);
             let r2 = cpu.r(dst);
             let res = r2.rotate_right(r1);
@@ -302,33 +303,33 @@ pub fn execute<B: JriscBus + ?Sized>(cpu: &mut Cpu, d: &DecodedInsn, bus: &mut B
             cpu.flags.set_zn(res);
         }
         // ---- multiply / MAC ----
-        "mult" => {
+        Kind::Mult => {
             let r = (cpu.r(src) as u16 as u32) * (cpu.r(dst) as u16 as u32);
             cpu.w(dst, r);
             cpu.flags.set_zn(r);
         }
-        "imult" => {
+        Kind::Imult => {
             let r = (cpu.r(src) as i16 as i32) * (cpu.r(dst) as i16 as i32);
             cpu.w(dst, r as u32);
             cpu.flags.set_zn(r as u32);
         }
-        "imultn" => {
+        Kind::Imultn => {
             let r = (cpu.r(src) as i16 as i32) * (cpu.r(dst) as i16 as i32);
             cpu.w(dst, r as u32);
             cpu.accum = r as i64;
             cpu.flags.set_zn(r as u32);
         }
-        "imacn" => {
+        Kind::Imacn => {
             cpu.accum += (cpu.r(src) as i16 as i64) * (cpu.r(dst) as i16 as i64);
         }
-        "resmac" => {
+        Kind::Resmac => {
             cpu.w(dst, cpu.accum as u32);
         }
-        "mtoi" => {
+        Kind::Mtoi => {
             let r1 = cpu.r(src);
             cpu.w(dst, (((r1 as i32) >> 8) as u32 & 0xff80_0000) | (r1 & 0x007f_ffff));
         }
-        "normi" => {
+        Kind::Normi => {
             let mut r1 = cpu.r(src);
             let mut res = 0i32;
             if r1 != 0 {
@@ -344,7 +345,7 @@ pub fn execute<B: JriscBus + ?Sized>(cpu: &mut Cpu, d: &DecodedInsn, bus: &mut B
             cpu.w(dst, res as u32);
             cpu.flags.set_zn(res as u32);
         }
-        "mmult" => {
+        Kind::Mmult => {
             let count = cpu.mtx_width & 0xf;
             let sreg = src;
             let mut addr = cpu.mtx_addr;
@@ -365,31 +366,31 @@ pub fn execute<B: JriscBus + ?Sized>(cpu: &mut Cpu, d: &DecodedInsn, bus: &mut B
             cpu.flags.set_zn(res);
         }
         // ---- saturation / pack ----
-        "sat8" => {
+        Kind::Sat8 => {
             let r = cpu.r(dst) as i32;
             let res = if r < 0 { 0 } else if r > 255 { 255 } else { r };
             cpu.w(dst, res as u32);
             cpu.flags.set_zn(res as u32);
         }
-        "sat16" => {
+        Kind::Sat16 => {
             let r = cpu.r(dst) as i32;
             let res = if r < 0 { 0 } else if r > 65535 { 65535 } else { r };
             cpu.w(dst, res as u32);
             cpu.flags.set_zn(res as u32);
         }
-        "sat16s" => {
+        Kind::Sat16s => {
             let r = cpu.r(dst) as i32;
             let res = if r < -32768 { -32768 } else if r > 32767 { 32767 } else { r };
             cpu.w(dst, res as u32);
             cpu.flags.set_zn(res as u32);
         }
-        "sat24" => {
+        Kind::Sat24 => {
             let r = cpu.r(dst) as i32;
             let res = if r < 0 { 0 } else if r > 16_777_215 { 16_777_215 } else { r };
             cpu.w(dst, res as u32);
             cpu.flags.set_zn(res as u32);
         }
-        "sat32s" => {
+        Kind::Sat32s => {
             let r2 = cpu.r(dst);
             let temp = (cpu.accum >> 32) as i32;
             let res = if temp < -1 {
@@ -402,7 +403,7 @@ pub fn execute<B: JriscBus + ?Sized>(cpu: &mut Cpu, d: &DecodedInsn, bus: &mut B
             cpu.w(dst, res);
             cpu.flags.set_zn(res);
         }
-        "pack" | "unpack" => {
+        Kind::Pack | Kind::Unpack => {
             // mode in the src field: 0 = PACK, else UNPACK (MAME pack_rn)
             let r2 = cpu.r(dst);
             let res = if src == 0 {
@@ -413,30 +414,30 @@ pub fn execute<B: JriscBus + ?Sized>(cpu: &mut Cpu, d: &DecodedInsn, bus: &mut B
             cpu.w(dst, res);
         }
         // ---- moves ----
-        "move" => {
+        Kind::Move => {
             let v = cpu.r(src);
             cpu.w(dst, v);
         }
-        "moveq" => {
+        Kind::Moveq => {
             cpu.w(dst, src as u32);
         }
-        "movei" => {
+        Kind::Movei => {
             cpu.w(dst, d.extra.unwrap_or(0));
         }
-        "moveta" => {
+        Kind::Moveta => {
             let v = cpu.r(src);
             cpu.regs.alt_set(dst, v);
         }
-        "movefa" => {
+        Kind::Movefa => {
             let v = cpu.regs.alt_get(src);
             cpu.w(dst, v);
         }
-        "movepc" => {
+        Kind::Movepc => {
             cpu.w(dst, cpu.ppc);
         }
-        "nop" => {}
+        Kind::Nop => {}
         // ---- loads / stores ----
-        "load" | "loadp" => {
+        Kind::Load | Kind::Loadp => {
             let addr = cpu.r(src);
             let v = if in_internal(cpu, addr) {
                 bus.read_long(addr & !3)
@@ -450,7 +451,7 @@ pub fn execute<B: JriscBus + ?Sized>(cpu: &mut Cpu, d: &DecodedInsn, bus: &mut B
             };
             cpu.w(dst, v);
         }
-        "loadb" | "loadw" => {
+        Kind::Loadb | Kind::Loadw => {
             let addr = cpu.r(src);
             let v = if in_internal(cpu, addr) {
                 bus.read_long(addr & !3)
@@ -461,19 +462,19 @@ pub fn execute<B: JriscBus + ?Sized>(cpu: &mut Cpu, d: &DecodedInsn, bus: &mut B
             };
             cpu.w(dst, v);
         }
-        "loadr14d" | "loadr15d" => {
+        Kind::Loadr14d | Kind::Loadr15d => {
             let base = cpu.r(if mn == "loadr14d" { 14 } else { 15 });
             let addr = base.wrapping_add(4 * convert_zero(src));
             let v = bus.read_long(addr);
             cpu.w(dst, v);
         }
-        "loadr14r" | "loadr15r" => {
+        Kind::Loadr14r | Kind::Loadr15r => {
             let base = cpu.r(if mn == "loadr14r" { 14 } else { 15 });
             let addr = base.wrapping_add(cpu.r(src));
             let v = bus.read_long(addr);
             cpu.w(dst, v);
         }
-        "store" | "storep" => {
+        Kind::Store | Kind::Storep => {
             let addr = cpu.r(src);
             let v = cpu.r(dst);
             if in_internal(cpu, addr) {
@@ -485,22 +486,22 @@ pub fn execute<B: JriscBus + ?Sized>(cpu: &mut Cpu, d: &DecodedInsn, bus: &mut B
                 bus.write_long(addr, v);
             }
         }
-        "storeb" | "storew" => {
+        Kind::Storeb | Kind::Storew => {
             let addr = cpu.r(src);
             let v = cpu.r(dst);
             store_value(cpu, addr, if mn == "storeb" { 1 } else { 2 }, v, bus);
         }
-        "storer14d" | "storer15d" => {
+        Kind::Storer14d | Kind::Storer15d => {
             let base = cpu.r(if mn == "storer14d" { 14 } else { 15 });
             let addr = base.wrapping_add(4 * convert_zero(src));
             bus.write_long(addr, cpu.r(dst));
         }
-        "storer14r" | "storer15r" => {
+        Kind::Storer14r | Kind::Storer15r => {
             let base = cpu.r(if mn == "storer14r" { 14 } else { 15 });
             let addr = base.wrapping_add(cpu.r(src));
             bus.write_long(addr, cpu.r(dst));
         }
-        other => return Err(format!("unimplemented instruction: {other}")),
+        _ => return Err(format!("unimplemented instruction: {mn}")),
     }
     Ok(())
 }

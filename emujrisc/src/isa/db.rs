@@ -157,11 +157,168 @@ pub enum Reloc {
     Abs32Swap,
 }
 
+/// Per-mnemonic instruction kind, precomputed at build time. Matching on
+/// the kind (a jump table) replaces string comparisons in the executor.
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub enum Kind {
+    Abs,
+    Add,
+    Addc,
+    Addq,
+    Addqmod,
+    Addqt,
+    And,
+    Bclr,
+    Bset,
+    Btst,
+    Cmp,
+    Cmpq,
+    Div,
+    Imacn,
+    Imult,
+    Imultn,
+    Jr,
+    Jump,
+    Load,
+    Loadb,
+    Loadp,
+    Loadr14d,
+    Loadr14r,
+    Loadr15d,
+    Loadr15r,
+    Loadw,
+    Mirror,
+    Mmult,
+    Move,
+    Movefa,
+    Movei,
+    Movepc,
+    Moveq,
+    Moveta,
+    Mtoi,
+    Mult,
+    Neg,
+    Nop,
+    Normi,
+    Not,
+    Or,
+    Pack,
+    Resmac,
+    Ror,
+    Rorq,
+    Sat16,
+    Sat16s,
+    Sat24,
+    Sat32s,
+    Sat8,
+    Sh,
+    Sha,
+    Sharq,
+    Shlq,
+    Shrq,
+    Store,
+    Storeb,
+    Storep,
+    Storer14d,
+    Storer14r,
+    Storer15d,
+    Storer15r,
+    Storew,
+    Sub,
+    Subc,
+    Subq,
+    Subqmod,
+    Subqt,
+    Unpack,
+    Xor,
+    Unknown,
+}
+
+impl Kind {
+    /// Map a mnemonic to its kind (build-time).
+    pub fn of(mn: &str) -> Kind {
+        match mn {
+            "abs" => Kind::Abs,
+            "add" => Kind::Add,
+            "addc" => Kind::Addc,
+            "addq" => Kind::Addq,
+            "addqmod" => Kind::Addqmod,
+            "addqt" => Kind::Addqt,
+            "and" => Kind::And,
+            "bclr" => Kind::Bclr,
+            "bset" => Kind::Bset,
+            "btst" => Kind::Btst,
+            "cmp" => Kind::Cmp,
+            "cmpq" => Kind::Cmpq,
+            "div" => Kind::Div,
+            "imacn" => Kind::Imacn,
+            "imult" => Kind::Imult,
+            "imultn" => Kind::Imultn,
+            "jr" => Kind::Jr,
+            "jump" => Kind::Jump,
+            "load" => Kind::Load,
+            "loadb" => Kind::Loadb,
+            "loadp" => Kind::Loadp,
+            "loadr14d" => Kind::Loadr14d,
+            "loadr14r" => Kind::Loadr14r,
+            "loadr15d" => Kind::Loadr15d,
+            "loadr15r" => Kind::Loadr15r,
+            "loadw" => Kind::Loadw,
+            "mirror" => Kind::Mirror,
+            "mmult" => Kind::Mmult,
+            "move" => Kind::Move,
+            "movefa" => Kind::Movefa,
+            "movei" => Kind::Movei,
+            "movepc" => Kind::Movepc,
+            "moveq" => Kind::Moveq,
+            "moveta" => Kind::Moveta,
+            "mtoi" => Kind::Mtoi,
+            "mult" => Kind::Mult,
+            "neg" => Kind::Neg,
+            "nop" => Kind::Nop,
+            "normi" => Kind::Normi,
+            "not" => Kind::Not,
+            "or" => Kind::Or,
+            "pack" => Kind::Pack,
+            "resmac" => Kind::Resmac,
+            "ror" => Kind::Ror,
+            "rorq" => Kind::Rorq,
+            "sat16" => Kind::Sat16,
+            "sat16s" => Kind::Sat16s,
+            "sat24" => Kind::Sat24,
+            "sat32s" => Kind::Sat32s,
+            "sat8" => Kind::Sat8,
+            "sh" => Kind::Sh,
+            "sha" => Kind::Sha,
+            "sharq" => Kind::Sharq,
+            "shlq" => Kind::Shlq,
+            "shrq" => Kind::Shrq,
+            "store" => Kind::Store,
+            "storeb" => Kind::Storeb,
+            "storep" => Kind::Storep,
+            "storer14d" => Kind::Storer14d,
+            "storer14r" => Kind::Storer14r,
+            "storer15d" => Kind::Storer15d,
+            "storer15r" => Kind::Storer15r,
+            "storew" => Kind::Storew,
+            "sub" => Kind::Sub,
+            "subc" => Kind::Subc,
+            "subq" => Kind::Subq,
+            "subqmod" => Kind::Subqmod,
+            "subqt" => Kind::Subqt,
+            "unpack" => Kind::Unpack,
+            "xor" => Kind::Xor,
+            _ => Kind::Unknown,
+        }
+    }
+}
+
 /// One instruction entry. `mnemonic` is `&'static str`: JSON parsing uses an
 /// owned intermediate and leaks the strings at build time only.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct Insn {
     pub mnemonic: &'static str,
+    pub kind: Kind,
     pub opcode: usize,
     pub variant: Variant,
     pub src: OperandClass,
@@ -226,8 +383,10 @@ fn default_size() -> usize {
 
 impl RawInsn {
     fn into_insn(self) -> Insn {
+        let kind = Kind::of(&self.mnemonic);
         Insn {
             mnemonic: Box::leak(self.mnemonic.into_boxed_str()),
+            kind,
             opcode: self.opcode,
             variant: self.variant,
             src: self.src,
@@ -283,6 +442,16 @@ impl Dbase {
     }
 }
 
+/// Title-case a mnemonic for its Kind variant name (non-identifier
+/// mnemonics — e.g. the JSON "??" unknown template — map to Unknown).
+fn cap(mn: &str) -> String {
+    let mut c = mn.chars();
+    match c.next() {
+        Some(f) if f.is_ascii_alphabetic() => format!("{}{}", f.to_ascii_uppercase(), c.as_str()),
+        _ => "Unknown".to_string(),
+    }
+}
+
 /// Render one instruction as a fully-qualified const expression.
 fn insn_literal(i: &Insn) -> String {
     let v = match i.variant {
@@ -296,10 +465,10 @@ fn insn_literal(i: &Insn) -> String {
     let mem = format!("MemAccess::{i:?}", i = i.mem);
     let reloc = format!("Reloc::{i:?}", i = i.reloc);
     format!(
-        "Insn {{ mnemonic: {:?}, opcode: {}, variant: {}, src: {}, dst: {}, \
+        "Insn {{ mnemonic: {:?}, kind: Kind::{}, opcode: {}, variant: {}, src: {}, dst: {}, \
 extra32: {}, opswap: {}, class: {}, mem: {}, flags: FlagSet {{ zero: {}, carry: {}, neg: {} }}, \
 mac: {}, cycles: {}, size: {}, reloc: {}, pad: {} }}",
-        i.mnemonic, i.opcode, v, src, dst, i.extra32, i.opswap, class, mem,
+        i.mnemonic, cap(i.mnemonic), i.opcode, v, src, dst, i.extra32, i.opswap, class, mem,
         i.flags.zero, i.flags.carry, i.flags.neg, i.mac, i.cycles, i.size, reloc, i.pad,
     )
 }
@@ -308,7 +477,7 @@ mac: {}, cycles: {}, size: {}, reloc: {}, pad: {} }}",
 impl fmt::Display for Dbase {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "// generated from resources/opcodes_jrisc.json — do not edit")?;
-        writeln!(f, "use crate::isa::{{Insn, FlagSet, OperandClass, Variant, InsnClass, MemAccess, Reloc}};")?;
+        writeln!(f, "use crate::isa::{{Insn, Kind, FlagSet, OperandClass, Variant, InsnClass, MemAccess, Reloc}};")?;
         writeln!(f, "pub static UNKNOWN: Insn = {};", insn_literal(&self.unknown))?;
         // entries in opcode order (all variants interleaved)
         let mut flat: Vec<&Insn> = Vec::new();
