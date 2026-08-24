@@ -17,8 +17,16 @@ game code, and the Imagitec sound module (TEST.TXT / TEST.DB) is 68000 code.
   resolution. Validated against the Imagitec TEST.TXT module (loaded at
   `$4000`) with TEST.SYM: every code symbol lands on an instruction
   boundary.
-- **Not yet** — the execution core (addressing-mode reads/writes, ALU, SR
-  flags) and a MAME trace-diff harness.
+- **Executor** — `Cpu::step` with the full addressing-mode engine
+  (including the A7-byte-step and MOVEM bit-reversed rules), ALU + SR flags,
+  branches/DBcc, jsr/rts/link/unlk, mul/div, shifts with X/C, movem, movep.
+  Validated by hand-computed unit tests and by running the module's real
+  INITDSP end to end (DSP program copied verbatim, control registers
+  programmed, channel table filled, balanced stack return) — and from the
+  module entry ($4000).
+- **Not yet** — MAME trace-diff harness and precise PRM cycle timing
+  (base cycles + EA extras are recorded; flag-dependent +2s are a
+  follow-up).
 
 ## Layout
 

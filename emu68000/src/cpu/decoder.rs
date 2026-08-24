@@ -146,10 +146,15 @@ pub fn find(word: u16) -> &'static Insn {
     crate::isa::shape_insn(&crate::isa::shapes()[word as usize])
 }
 
-/// Decode one instruction at `addr`. The extension-word layout comes from
-/// the build-time [`DecodeShape`] table — no per-instruction mode match.
-pub fn decode<M: MemoryIO>(mem: &mut M, addr: usize) -> Result<DecodedInsn, DecodeError> {
-    let word = load_word(mem, addr)?;
+/// Decode one instruction at `addr` using a raw word-fetch closure (the
+/// executor path — no `MemoryIO` trait needed). The extension-word layout
+/// comes from the build-time [`DecodeShape`] table — no per-instruction
+/// mode match.
+pub fn decode_with<F>(addr: usize, mut fetch: F) -> Result<DecodedInsn, DecodeError>
+where
+    F: FnMut(usize) -> Result<u16, DecodeError>,
+{
+    let word = fetch(addr)?;
     let shape = crate::isa::shapes()[word as usize];
     let insn = crate::isa::shape_insn(&shape);
     let reg1 = ((word >> 9) & 7) as u8;
@@ -166,14 +171,17 @@ pub fn decode<M: MemoryIO>(mem: &mut M, addr: usize) -> Result<DecodedInsn, Deco
 
     /// fetch `n` words into an EA's extension array, advancing `at`
     #[inline(always)]
-    fn fetch_ea_ext<M: MemoryIO>(
-        mem: &mut M,
+    fn fetch_ea_ext<F>(
+        fetch: &mut F,
         at: &mut usize,
         e: &mut Ea,
         n: u8,
-    ) -> Result<(), DecodeError> {
+    ) -> Result<(), DecodeError>
+    where
+        F: FnMut(usize) -> Result<u16, DecodeError>,
+    {
         for i in 0..n {
-            e.ext[i as usize] = load_word(mem, *at)?;
+            e.ext[i as usize] = fetch(*at)?;
             *at += 2;
         }
         e.ext_len = n;
@@ -185,26 +193,26 @@ pub fn decode<M: MemoryIO>(mem: &mut M, addr: usize) -> Result<DecodedInsn, Deco
         Form::ImmEa | Form::BitImmEa => {
             let mut v: u32 = 0;
             for _ in 0..shape.pre_w() {
-                v = (v << 16) | load_word(mem, at)? as u32;
+                v = (v << 16) | fetch(at)? as u32;
                 at += 2;
             }
             imm = Some(v);
             let mut e = Ea::new(word);
-            fetch_ea_ext(mem, &mut at, &mut e, shape.ea_w())?;
+            fetch_ea_ext(&mut fetch, &mut at, &mut e, shape.ea_w())?;
             ea = Some(e);
         }
         Form::Move => {
             let mut s = Ea::new(word);
-            fetch_ea_ext(mem, &mut at, &mut s, shape.ea_w())?;
+            fetch_ea_ext(&mut fetch, &mut at, &mut s, shape.ea_w())?;
             ea = Some(s);
             let mut d = Ea::from_parts(((word >> 6) & 7) as u8, ((word >> 9) & 7) as u8);
-            fetch_ea_ext(mem, &mut at, &mut d, shape.dst_w())?;
+            fetch_ea_ext(&mut fetch, &mut at, &mut d, shape.dst_w())?;
             ea_dst = Some(d);
         }
         Form::ImmOnly | Form::Imm16 | Form::Link | Form::Movep => {
             let mut v: u32 = 0;
             for _ in 0..shape.post_w() {
-                v = (v << 16) | load_word(mem, at)? as u32;
+                v = (v << 16) | fetch(at)? as u32;
                 at += 2;
             }
             imm = Some(v);
@@ -216,20 +224,20 @@ pub fn decode<M: MemoryIO>(mem: &mut M, addr: usize) -> Result<DecodedInsn, Deco
             label = Some((addr as i64 + 2 + d as i64) as u32);
         }
         Form::Bcc16 => {
-            let d = load_word(mem, at)? as i16;
+            let d = fetch(at)? as i16;
             label = Some((addr as i64 + 2 + d as i64) as u32);
         }
         Form::Dbcc => {
-            let d = load_word(mem, at)? as i16;
+            let d = fetch(at)? as i16;
             // displacement is relative to the displacement word itself
             // (addr + 2), matching MAME's d68000_dbcc
             label = Some((addr as i64 + 2 + d as i64) as u32);
         }
         Form::MovemRe | Form::MovemEr | Form::MovemPd => {
-            regmask = Some(load_word(mem, at)?);
+            regmask = Some(fetch(at)?);
             at += 2;
             let mut e = Ea::new(word);
-            fetch_ea_ext(mem, &mut at, &mut e, shape.ea_w())?;
+            fetch_ea_ext(&mut fetch, &mut at, &mut e, shape.ea_w())?;
             ea = Some(e);
         }
         _ => {
@@ -238,7 +246,7 @@ pub fn decode<M: MemoryIO>(mem: &mut M, addr: usize) -> Result<DecodedInsn, Deco
                 // with zero extension words)
                 let mut e = Ea::new(word);
                 if shape.ea_w() > 0 {
-                    fetch_ea_ext(mem, &mut at, &mut e, shape.ea_w())?;
+                    fetch_ea_ext(&mut fetch, &mut at, &mut e, shape.ea_w())?;
                     if shape.pcrel() {
                         // reference = opcode end + pre words + ea words
                         e.ref_pc =
@@ -264,6 +272,11 @@ pub fn decode<M: MemoryIO>(mem: &mut M, addr: usize) -> Result<DecodedInsn, Deco
         label,
         disp8,
     })
+}
+
+/// Decode one instruction at `addr` through a `MemoryIO` view.
+pub fn decode<M: MemoryIO>(mem: &mut M, addr: usize) -> Result<DecodedInsn, DecodeError> {
+    decode_with(addr, |a| load_word(mem, a))
 }
 
 /// Disassemble a whole region starting at `start` until `end` (exclusive)

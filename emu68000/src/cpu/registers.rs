@@ -125,6 +125,135 @@ impl Registers {
         Self::default()
     }
 
+    // ---- SR flag helpers ----
+
+    /// size mask and sign bit for byte/word/long
+    #[inline]
+    fn smask(size: u8) -> u32 {
+        match size {
+            1 => 0xFF,
+            2 => 0xFFFF,
+            _ => 0xFFFF_FFFF,
+        }
+    }
+
+    #[inline]
+    fn sbit(size: u8) -> u32 {
+        match size {
+            1 => 0x80,
+            2 => 0x8000,
+            _ => 0x8000_0000,
+        }
+    }
+
+    #[inline]
+    fn set_sr_bits(&mut self, mask: u16, v: bool) {
+        if v {
+            self.sr |= mask;
+        } else {
+            self.sr &= !mask;
+        }
+    }
+
+    #[inline]
+    pub fn set_c(&mut self, v: bool) {
+        self.set_sr_bits(0x0001, v);
+    }
+    #[inline]
+    pub fn set_v(&mut self, v: bool) {
+        self.set_sr_bits(0x0002, v);
+    }
+    #[inline]
+    pub fn set_z(&mut self, v: bool) {
+        self.set_sr_bits(0x0004, v);
+    }
+    #[inline]
+    pub fn set_n(&mut self, v: bool) {
+        self.set_sr_bits(0x0008, v);
+    }
+    #[inline]
+    pub fn set_x(&mut self, v: bool) {
+        self.set_sr_bits(0x0010, v);
+    }
+
+    pub fn c(&self) -> bool {
+        self.sr & 0x0001 != 0
+    }
+    pub fn v(&self) -> bool {
+        self.sr & 0x0002 != 0
+    }
+    pub fn z(&self) -> bool {
+        self.sr & 0x0004 != 0
+    }
+    pub fn n(&self) -> bool {
+        self.sr & 0x0008 != 0
+    }
+    pub fn x(&self) -> bool {
+        self.sr & 0x0010 != 0
+    }
+
+    /// Z/N from a result (masked to size).
+    pub fn set_zn(&mut self, size: u8, v: u32) {
+        let m = Self::smask(size);
+        self.set_z(v & m == 0);
+        self.set_n(v & Self::sbit(size) != 0);
+    }
+
+    /// Z/N/V for logical ops (V cleared).
+    pub fn set_znv_logic(&mut self, size: u8, v: u32) {
+        self.set_zn(size, v);
+        self.set_v(false);
+    }
+
+    /// Z/N/V/C for addition (C = carry out).
+    pub fn set_znv_c_add(&mut self, size: u8, a: u32, b: u32, r: u32) {
+        let m = Self::smask(size);
+        let sb = Self::sbit(size);
+        self.set_zn(size, r);
+        self.set_c((r & m) < (a & m)); // carry out (unsigned wrap)
+        let o = ((a ^ r) & (b ^ r)) & sb != 0; // overflow: sign(a)==sign(b)!=sign(r)
+        self.set_v(o);
+    }
+
+    /// Z/N/V/C for subtraction (C = borrow).
+    pub fn set_znv_c_sub(&mut self, size: u8, a: u32, b: u32, r: u32) {
+        let m = Self::smask(size);
+        let sb = Self::sbit(size);
+        self.set_zn(size, r);
+        self.set_c((a & m) < (b & m)); // borrow
+        let o = ((a ^ b) & (a ^ r)) & sb != 0; // overflow: sign(a)!=sign(b)!=sign(r)
+        self.set_v(o);
+    }
+
+    /// Z/N/V for compare = subtraction without write; sets C too.
+    pub fn set_znv_c_cmp(&mut self, size: u8, a: u32, b: u32) {
+        let m = Self::smask(size);
+        let r = (a & m).wrapping_sub(b & m);
+        self.set_znv_c_sub(size, a & m, b & m, r);
+    }
+
+    /// The 16 condition codes against the current flags.
+    pub fn cond(&self, cc: u8) -> bool {
+        match cc & 0xF {
+            0x0 => true,                      // T
+            0x1 => false,                     // F
+            0x2 => !self.c() && !self.z(),    // HI
+            0x3 => self.c() || self.z(),      // LS
+            0x4 => !self.c(),                 // CC
+            0x5 => self.c(),                  // CS
+            0x6 => !self.z(),                 // NE
+            0x7 => self.z(),                  // EQ
+            0x8 => !self.v(),                 // VC
+            0x9 => self.v(),                  // VS
+            0xA => !self.n(),                 // PL
+            0xB => self.n(),                  // MI
+            0xC => self.n() == self.v(),      // GE
+            0xD => self.n() != self.v(),      // LT
+            0xE => !self.z() && self.n() == self.v(), // GT
+            _ => self.z() || self.n() != self.v(),    // LE
+        }
+    }
+
     /// the active stack pointer (A7): USP when SR.S = 0, SSP when set
     pub fn sp(&self) -> u32 {
         if self.sr & 0x2000 != 0 {

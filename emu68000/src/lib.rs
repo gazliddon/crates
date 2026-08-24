@@ -1,16 +1,14 @@
 //! emu68000 — Motorola 68000 emulator (in development).
 //!
-//! Status: the instruction database and decoder are complete and validated
-//! against MAME's Musashi-derived 68000 disassembler (identical behaviour
-//! over all 65536 opcode words; see `tools/gen68000.py` and
-//! `resources/opcodes68000.json`). The disassembler is validated against the
-//! Imagitec Tempest 2000 sound module (`tests/data/TEST.TXT`, loaded at
-//! `$4000`) with its ALN symbol table (`TEST.SYM`) — every code symbol lands
-//! on an instruction boundary.
+//! Status: decode and disassembly are validated against MAME's
+//! Musashi-derived 68000 disassembler (identical behaviour over all 65536
+//! opcode words) and the Imagitec TEST.TXT module (every ALN code symbol
+//! lands on an instruction boundary). The executor runs the module's real
+//! INITDSP routine end to end: the DSP program is copied verbatim to
+//! $F1B000, D_CTRL/D_PC/SCLK/SMODE are programmed, the channel table at
+//! $F1B800 is filled, and the routine returns with a balanced stack.
 //!
-//! Next milestones: the execution core (addressing-mode fetches, ALU
-//! semantics, SR/flags) and a MAME trace-diff harness, mirroring how
-//! `emujrisc` was built.
+//! Next: MAME trace-diff validation and precise PRM cycle timing.
 
 #![allow(dead_code)]
 pub mod cpu;

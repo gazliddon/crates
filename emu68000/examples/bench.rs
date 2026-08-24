@@ -1,76 +1,75 @@
-//! Decode-throughput benchmark: walk the TEST.TXT module repeatedly.
+//! 68000 executor + decoder throughput benchmark.
 //!
-//! Usage: cargo run --release -p emu68000 --example bench -- [iterations]
+//! Usage: `cargo run --release -p emu68000 --example bench -- [passes]`
 
+use emu68000::cpu::{bus::Ram68k, Cpu, M68kBus};
 use emu68000::cpu::decode;
-use emu68000::diss::{Diss, SliceMem};
+use emu68000::diss::SliceMem;
 use std::time::Instant;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    let iters: usize = args.get(1).and_then(|s| s.parse().ok()).unwrap_or(10_000);
+    let passes: usize = args.get(1).and_then(|s| s.parse().ok()).unwrap_or(10_000);
 
     let module = std::fs::read("emu68000/tests/data/TEST.TXT").expect("TEST.TXT");
-    let base = 0x4000usize;
-    let end = base + module.len() - 2; // stop before the padding word
 
-    // warm up + count instructions per pass
+    // ---- decode (linear walk of the module) ----
     let mut count = 0usize;
     {
-        let mut mem = SliceMem::new(base, &module);
-        let mut pc = base;
-        while pc < end {
+        let mut mem = SliceMem::new(0x4000, &module);
+        let mut pc = 0x4000usize;
+        while pc < 0x70CE {
             let d = decode(&mut mem, pc).unwrap();
             pc += d.size;
             count += 1;
         }
     }
-    println!("module: {} bytes, {} instructions per pass", module.len(), count);
-
-    // full pass, decode only (no rendering)
     let t0 = Instant::now();
-    let mut total = 0usize;
-    for _ in 0..iters {
-        let mut mem = SliceMem::new(base, &module);
-        let mut pc = base;
-        while pc < end {
+    let mut n = 0usize;
+    for _ in 0..passes {
+        let mut mem = SliceMem::new(0x4000, &module);
+        let mut pc = 0x4000usize;
+        while pc < 0x70CE {
             let d = decode(&mut mem, pc).unwrap();
             pc += d.size;
+            n += 1;
         }
-        total += count;
     }
-    let dt = t0.elapsed();
-    let ip = total as f64 / dt.as_secs_f64();
+    let dt = t0.elapsed().as_secs_f64();
     println!(
-        "decode-only: {} passes in {:?}  ->  {:.0} instr/s  ({:.1} MB/s)",
-        iters,
-        dt,
-        ip,
-        ip as f64 * 4.0 / 1e6
+        "decode: {} instr/pass, {passes} passes -> {:.0} instr/s",
+        count,
+        n as f64 / dt
     );
 
-    // full pass with rendering + label resolution
-    let labels: Vec<(u32, String)> = vec![(0x4D46, "INITDSP".into()), (0x4E1A, "INIT_SOU".into())];
-    let diss = Diss::with_labels(labels);
+    // ---- execute: the real INITDSP routine (~530 instructions) ----
     let t1 = Instant::now();
-    let mut chars = 0usize;
-    for _ in 0..iters {
-        let mut mem = SliceMem::new(base, &module);
-        let mut pc = base;
-        while pc < end {
-            let d = decode(&mut mem, pc).unwrap();
-            let line = diss.render_line(&d);
-            chars += line.len();
-            pc += d.size;
+    let mut instrs = 0u64;
+    for _ in 0..passes {
+        let mut bus = Ram68k::new();
+        bus.map(0x4000, module.clone());
+        bus.map(0x8000, vec![0u8; 0x800]);
+        bus.map(0xF1A100, vec![0u8; 0x400]);
+        bus.map(0xF1B000, vec![0u8; 0x1000]);
+        let mut cpu = Cpu::new();
+        cpu.regs.pc = 0x4D46;
+        cpu.regs.usp = 0x8800;
+        cpu.regs.sr = 0;
+        cpu.push_long(&mut bus, 0x1234); // fake return address
+        for _ in 0..600 {
+            if cpu.regs.pc == 0x1234 {
+                break;
+            }
+            if cpu.step(&mut bus).is_err() {
+                break;
+            }
         }
+        instrs += cpu.stats.instructions;
     }
-    let dt1 = t1.elapsed();
-    let ip1 = total as f64 / dt1.as_secs_f64();
+    let dt1 = t1.elapsed().as_secs_f64();
     println!(
-        "decode+render: {} passes in {:?}  ->  {:.0} instr/s  ({:.1} MB/s listing)",
-        iters,
-        dt1,
-        ip1,
-        chars as f64 / dt1.as_secs_f64() / 1e6
+        "exec INITDSP: {} instr/pass, {passes} passes -> {:.0} instr/s",
+        instrs / passes as u64,
+        instrs as f64 / dt1
     );
 }
