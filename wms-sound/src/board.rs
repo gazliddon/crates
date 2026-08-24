@@ -11,6 +11,7 @@ use crate::{Dac8, Pia6821, PiaEvent};
 pub const SOUND_PIA_BASE: usize = 0x0400;
 pub const SOUND_ROM_BASE: usize = 0xf800;
 
+#[derive(Clone)]
 pub struct SoundBus {
     memory: [u8; 0x1_0000],
     pub pia: Pia6821,
@@ -161,6 +162,7 @@ impl MemoryIO for SoundBus {
     }
 }
 
+#[derive(Clone)]
 pub struct WmsSoundBoard {
     pub cpu: Machine<SoundBus, RegisterFile>,
     pub cycles: u64,

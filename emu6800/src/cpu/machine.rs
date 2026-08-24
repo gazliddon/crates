@@ -46,6 +46,7 @@ impl CpuState {
     }
 }
 
+#[derive(Clone)]
 pub struct Machine<M, R>
 where
     M: MemoryIO,

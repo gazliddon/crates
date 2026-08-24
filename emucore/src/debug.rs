@@ -90,6 +90,13 @@ impl BreakpointSet {
         }
     }
 
+    /// Set a breakpoint's enabled flag explicitly.
+    pub fn set_enabled(&mut self, addr: u16, enabled: bool) {
+        if let Some(bp) = self.list.iter_mut().find(|bp| bp.addr == addr) {
+            bp.enabled = enabled;
+        }
+    }
+
     /// Whether an *enabled* breakpoint sits at `addr`; the run loop's
     /// stop check.
     pub fn hit_at(&self, addr: u16) -> bool {
@@ -220,7 +227,9 @@ pub fn disassemble_around(
         for offset in 1..=32u16 {
             // Stay inside the 16-bit address space: an offset past the
             // start address would wrap below zero.
-            let Some(mut pc) = start.checked_sub(offset) else { break };
+            let Some(mut pc) = start.checked_sub(offset) else {
+                break;
+            };
             let mut candidate = Vec::new();
             while pc != start && candidate.len() <= before {
                 let Some((next, line)) = decode(pc) else {
@@ -298,11 +307,7 @@ mod tests {
         if addr + 2 > cpu.mem.len() {
             return None;
         }
-        let line = format!(
-            "{pc:04X}  {:02X} {:02X}",
-            cpu.mem[addr],
-            cpu.mem[addr + 1]
-        );
+        let line = format!("{pc:04X}  {:02X} {:02X}", cpu.mem[addr], cpu.mem[addr + 1]);
         Some((pc + 2, line))
     }
 
