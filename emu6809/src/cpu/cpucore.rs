@@ -83,7 +83,7 @@ pub fn get_tfr_regs(op: u8) -> Option<(RegEnum, RegEnum)> {
 }
 
 // Bool defaults to false
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct Pins {
     pub firq: bool,
     pub irq: bool,
