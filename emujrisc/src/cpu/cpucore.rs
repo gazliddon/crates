@@ -8,7 +8,6 @@
 use crate::cpu::alu::execute;
 use crate::cpu::decoder::decode_word;
 use crate::cpu::{Chip, DecodedInsn, Flags, Registers};
-use crate::isa::Dbase;
 use crate::mem::JriscBus;
 use emucore::cpu::ExecutionStats;
 
@@ -154,19 +153,6 @@ impl Cpu {
                     // pc AFTER the branch instruction (before the slot)
                     let off = (((d.src as i8) << 3) >> 3) as i32 * 2;
                     let target = (self.pc as i32).wrapping_add(off) as u32;
-                    let slot = self.fetch(bus)?;
-                    self.execute_with(&slot, bus)?;
-                    self.pc = target;
-                    extra_cycles = 3;
-                }
-            }
-            "jump" => {
-                let cc = d.dst;
-                let reg = d.src as usize;
-                if self.flags.condition(cc) {
-                    // target is captured BEFORE the delay slot executes (the
-                    // slot may modify the register), per MAME
-                    let target = self.regs.get_index(reg);
                     let slot = self.fetch(bus)?;
                     self.execute_with(&slot, bus)?;
                     self.pc = target;

@@ -118,13 +118,13 @@ fn jr_target_is_pc_relative_in_words() {
     let ctx = DissCtx::from_slice(0x1000, "crafted", &buf);
     let d = ctx.diss(&diss, 0x1000).expect("decode");
     assert_eq!(d.text, "jr t,$1002");
-    // jr mi, +31 words (+62 bytes): word = (53<<10)|(31<<5)|24 = 0xD7F8;
-    // target = 0x2000 + 2 + 62 = 0x203E
+    // jr mi, -1 words (src = 31 = 0b11111, 5-bit signed): word =
+    // (53<<10)|(31<<5)|24 = 0xD7F8; target = 0x2000 + 2 - 2 = 0x2000
     let mut buf2 = Vec::new();
     buf2.extend_from_slice(&0xD7F8u16.to_be_bytes());
     let ctx2 = DissCtx::from_slice(0x2000, "crafted", &buf2);
     let d2 = ctx2.diss(&diss, 0x2000).expect("decode");
-    assert_eq!(d2.text, "jr mi,$2040");
+    assert_eq!(d2.text, "jr mi,$2000");
 }
 
 #[test]

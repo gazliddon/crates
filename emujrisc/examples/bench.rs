@@ -46,14 +46,41 @@ fn main() {
         n as f64 / dt
     );
 
-    // ---- execute (the real T2K DSP program on RamBus) ----
+    // ---- execute, idle: the real T2K DSP program (its F1B330 spin) ----
     let steps = passes * 1000;
+    let (i1, cy1) = run(&dsp.to_vec(), steps, None);
+    println!(
+        "exec idle: {} steps -> {:.0} instr/s ({:.0} cycles/s)",
+        i1, i1, cy1
+    );
+
+    // ---- execute, busy: the spin patched to nop + the 68000 signal
+    // (tick/command mailboxes + a channel record) — full pipeline:
+    // record walk, command dispatch, mixing, stereo output ----
+    let mut img = dsp.to_vec();
+    img[0x332] = 0xE4; // patch `jr eq,$F1B330` -> nop
+    img[0x333] = 0x00;
+    let (i2, cy2) = run(&img, steps, Some(0x100));
+    println!(
+        "exec busy: {} steps -> {:.0} instr/s ({:.0} cycles/s)",
+        i2, i2, cy2
+    );
+
+/// Run `steps` instructions of the DSP program; `samples` (if set) writes
+/// the 68000-side signal: a channel record requesting that many samples.
+fn run(img: &[u8], steps: usize, samples: Option<u32>) -> (f64, f64) {
     let mut cpu = Cpu::new(Chip::Dsp);
     cpu.pc = 0xF1B000;
-    let mut bus = RamBus::new(Chip::Dsp, dsp.to_vec());
-    // warm-up + sanity: the smoke-test anchors
-    for _ in 0..110 {
+    let mut bus = RamBus::new(Chip::Dsp, img.to_vec());
+    for _ in 0..500 {
         cpu.step(&mut bus).expect("warm-up step");
+    }
+    if let Some(n) = samples {
+        bus.write_long(0xF1B35C, 0); // tick mailbox: zero -> mixing path
+        bus.write_long(0xF1B358, 1); // command mailbox: bit0 gate
+        bus.write_long(0xF1B800, 0); // record[0]: process
+        bus.write_long(0xF1B80C, n); // field +6 -> sample count
+        bus.write_long(0xF1B820, 0xFFFF_FFFC); // -4 terminator
     }
     let t1 = Instant::now();
     let mut done = 0u64;
@@ -64,13 +91,8 @@ fn main() {
         done += 1;
     }
     let dt1 = t1.elapsed().as_secs_f64();
-    println!(
-        "exec: {} steps in {:.3}s -> {:.0} instr/s ({:.0} cycles/s)",
-        done,
-        dt1,
-        done as f64 / dt1,
-        cpu.stats.cycles as f64 / dt1
-    );
+    (done as f64 / dt1, cpu.stats.cycles as f64 / dt1)
+}
 
     // ---- disassemble ----
     let ctx = DissCtx::from_slice(base, "dsp", dsp);

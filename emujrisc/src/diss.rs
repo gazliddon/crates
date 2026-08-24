@@ -64,7 +64,9 @@ impl Diss {
                 return format!("jump {},(r{})", cc_name(d.dst), d.src);
             }
             "jr" => {
-                let off = (d.src as i8 as i32) * 2;
+                // offset is a 5-bit signed word count (MAME:
+                // (s8)(op>>2)>>3), sign-extended here from bit 4
+                let off = (((d.src as i8) << 3) >> 3) as i32 * 2;
                 let target = d.addr as i32 + 2 + off;
                 return format!("jr {},${target:04X}", cc_name(d.dst));
             }
