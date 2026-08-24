@@ -92,18 +92,19 @@ pub struct Pins {
     pub waiting_for_irq: bool,
 }
 
-pub struct Context<'a> {
+pub struct Context<'a, M: MemoryIO> {
     pub regs: &'a mut Regs,
     pub pins: &'a mut Pins,
     pub ins: InstructionDecoder,
     pub cycles: usize,
     pub instructions: usize,
-    // TODO This should generic with compile time dispatch
-    pub mem: &'a mut dyn MemoryIO,
+    // The bus is a concrete type so every memory access is a direct,
+    // monomorphized call rather than a virtual dispatch.
+    pub mem: &'a mut M,
 }
 
 // use serde::Deserializer;
-impl<'a> Context<'a> {
+impl<'a, M: MemoryIO> Context<'a, M> {
     fn set_next_pc(&mut self, v: usize) {
         self.ins.next_addr = v & 0xffff;
     }
@@ -307,7 +308,7 @@ impl<'a> Context<'a> {
     }
 }
 
-impl<'a> emucore::cpu::Cpu for Context<'a> {
+impl<'a, M: MemoryIO> emucore::cpu::Cpu for Context<'a, M> {
     type Error = CpuErr;
 
     fn reset(&mut self) -> Result<(), Self::Error> {
@@ -334,7 +335,7 @@ impl<'a> emucore::cpu::Cpu for Context<'a> {
 ////////////////////////////////////////////////////////////////////////////////
 // Stakc functions
 
-impl<'a> Context<'a> {
+impl<'a, M: MemoryIO> Context<'a, M> {
     fn get_stack(&self, is_system: bool) -> u16 {
         if is_system {
             self.regs.s
@@ -387,7 +388,7 @@ impl<'a> Context<'a> {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-impl<'a> Context<'a> {
+impl<'a, M: MemoryIO> Context<'a, M> {
     fn orcc<A: AddressLines>(&mut self) -> CpuResult<()> {
         let v = self.fetch_byte::<A>()?;
         let cc = self.regs.flags.bits();
@@ -1381,7 +1382,7 @@ impl<'a> Context<'a> {
 
 // Interrupts / reset
 #[allow(unused_variables)]
-impl<'a> Context<'a> {
+impl<'a, M: MemoryIO> Context<'a, M> {
     fn gen_irq(&mut self, irq_flag: Flags, save_regs: bool, vector: usize) -> CpuResult<()> {
         // Is this IRQ disabled?
         // TODO: should be moved into the IRQ line sensing code
@@ -1441,7 +1442,7 @@ impl<'a> Context<'a> {
 
 // Public interface
 #[allow(unused_variables)]
-impl<'a> Context<'a> {
+impl<'a, M: MemoryIO> Context<'a, M> {
     pub fn cycles(&self) -> usize {
         self.cycles
     }
@@ -1455,10 +1456,10 @@ impl<'a> Context<'a> {
     }
 
     pub fn new(
-        mem: &'a mut dyn MemoryIO,
+        mem: &'a mut M,
         regs: &'a mut Regs,
         pins: &'a mut Pins,
-    ) -> CpuResult<Context<'a>> {
+    ) -> CpuResult<Context<'a, M>> {
         // No decode here: `Context::step` decodes (and overwrites
         // `ins`) before anything reads it, so decoding twice per
         // instruction was pure waste.

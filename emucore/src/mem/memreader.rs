@@ -1,17 +1,17 @@
 use crate::mem::*;
 
-pub struct MemReader<'a> {
-    mem: &'a mut dyn MemoryIO,
+pub struct MemReader<'a, M: MemoryIO> {
+    mem: &'a mut M,
     start_addr: usize,
     addr: usize,
 }
 
-impl<'a> MemReader<'a> {
+impl<'a, M: MemoryIO> MemReader<'a, M> {
     pub fn get_taken_range(&self) -> std::ops::Range<usize> {
         self.start_addr..self.addr
     }
 
-    pub fn get_mem(&mut self) -> &mut dyn MemoryIO {
+    pub fn get_mem(&mut self) -> &mut M {
         self.mem
     }
     pub fn get_addr(&self) -> usize {
@@ -35,7 +35,7 @@ impl<'a> MemReader<'a> {
         self.addr += n
     }
 
-    pub fn new(mem: &'a mut dyn MemoryIO) -> Self {
+    pub fn new(mem: &'a mut M) -> Self {
         let addr = mem.get_range().start;
         Self {
             mem,

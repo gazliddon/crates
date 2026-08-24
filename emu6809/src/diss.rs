@@ -57,7 +57,7 @@ impl Diss {
         Self::default()
     }
 
-    fn diss_indexed(&self, reader: &mut MemReader) -> (IndexedFlags, String) {
+    fn diss_indexed<M: MemoryIO>(&self, reader: &mut MemReader<'_, M>) -> (IndexedFlags, String) {
         let flags = IndexedFlags::new(reader.next_byte().unwrap());
 
         let mut operand = match flags.get_index_type() {
@@ -118,7 +118,7 @@ impl Diss {
         (flags, operand)
     }
 
-    pub fn diss(&self, mem: &mut dyn MemoryIO, addr: usize) -> Disassembly {
+    pub fn diss<M: MemoryIO>(&self, mem: &mut M, addr: usize) -> Disassembly {
         let mut reader = MemReader::new(mem);
         reader.set_addr(addr);
 

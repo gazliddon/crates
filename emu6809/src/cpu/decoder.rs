@@ -26,9 +26,9 @@ pub struct InstructionDecoder {
     pub operand_addr: usize,
 }
 
-fn decode_op_mem(
+fn decode_op_mem<M: MemoryIO>(
     addr: usize,
-    reader: &mut dyn MemoryIO,
+    reader: &mut M,
     capture_data: bool,
 ) -> CpuResult<InstructionDecoder> {
     let mut reader = MemReader::new(reader);
@@ -40,7 +40,10 @@ fn decode_op_mem(
 // Takes memory read as closure
 // means we can destructively read op code when emulating
 // or non destructively inspect for disassembly
-fn decode_op(reader: &mut MemReader, capture_data: bool) -> CpuResult<InstructionDecoder> {
+fn decode_op<M: MemoryIO>(
+    reader: &mut MemReader<'_, M>,
+    capture_data: bool,
+) -> CpuResult<InstructionDecoder> {
     let addr = reader.get_addr();
     let mut index_size = 0;
 
@@ -154,15 +157,15 @@ impl InstructionDecoder {
         Ok(b)
     }
 
-    pub fn new_from_reader_mut(mem: &mut MemReader) -> CpuResult<Self> {
+    pub fn new_from_reader_mut<M: MemoryIO>(mem: &mut MemReader<'_, M>) -> CpuResult<Self> {
         decode_op(mem, true)
     }
 
-    pub fn new_from_reader(mem: &mut MemReader) -> CpuResult<Self> {
+    pub fn new_from_reader<M: MemoryIO>(mem: &mut MemReader<'_, M>) -> CpuResult<Self> {
         decode_op(mem, true)
     }
 
-    pub fn new_from_read_mem(addr: usize, _mem: &mut dyn MemoryIO) -> CpuResult<Self> {
+    pub fn new_from_read_mem<M: MemoryIO>(addr: usize, _mem: &mut M) -> CpuResult<Self> {
         decode_op_mem(addr, _mem, false)
     }
 
@@ -182,23 +185,23 @@ impl InstructionDecoder {
         }
     }
 
-    pub fn fetch_byte(&mut self, mem: &mut dyn MemoryIO) -> u8 {
+    pub fn fetch_byte<M: MemoryIO>(&mut self, mem: &mut M) -> u8 {
         let b = mem.load_byte(self.operand_addr).unwrap();
         self.operand_addr += 1;
         b
     }
 
-    pub fn fetch_word(&mut self, mem: &mut dyn MemoryIO) -> Result<u16, CpuErr> {
+    pub fn fetch_word<M: MemoryIO>(&mut self, mem: &mut M) -> Result<u16, CpuErr> {
         let w = mem.load_word(self.operand_addr)?;
         self.operand_addr += 1;
         Ok(w)
     }
 
-    pub fn fetch_byte_as_i8(&mut self, mem: &mut dyn MemoryIO) -> i8 {
+    pub fn fetch_byte_as_i8<M: MemoryIO>(&mut self, mem: &mut M) -> i8 {
         self.fetch_byte(mem) as i8
     }
 
-    pub fn fetch_byte_as_i16(&mut self, mem: &mut dyn MemoryIO) -> i16 {
+    pub fn fetch_byte_as_i16<M: MemoryIO>(&mut self, mem: &mut M) -> i16 {
         i16::from(self.fetch_byte_as_i8(mem))
     }
 }
