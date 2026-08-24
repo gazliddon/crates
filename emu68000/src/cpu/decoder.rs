@@ -12,6 +12,7 @@
 
 use crate::isa::{Dbase, Form, Insn, Size, UNKNOWN};
 use emucore::mem::{MemErrorTypes, MemoryIO};
+use smallvec::SmallVec;
 use std::fmt;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -41,8 +42,9 @@ pub struct Ea {
     /// register bits (0-7)
     pub reg: u8,
     /// extension words in fetch order (d16(An) 1, d8(An,Xn) 1, abs.W 1,
-    /// abs.L 2, d16(PC) 1, d8(PC,Xn) 1, #imm size-dependent)
-    pub ext: Vec<u16>,
+    /// abs.L 2, d16(PC) 1, d8(PC,Xn) 1, #imm size-dependent). An EA never
+    /// has more than 2 extension words, so this never heap-allocates.
+    pub ext: SmallVec<[u16; 2]>,
     /// PC-relative reference address (extension-word address + 2)
     pub ref_pc: Option<u32>,
 }
@@ -52,13 +54,13 @@ impl Ea {
         Self {
             mode: ((word >> 3) & 7) as u8,
             reg: (word & 7) as u8,
-            ext: Vec::new(),
+            ext: SmallVec::new(),
             ref_pc: None,
         }
     }
 
     pub fn from_parts(mode: u8, reg: u8) -> Self {
-        Self { mode, reg, ext: Vec::new(), ref_pc: None }
+        Self { mode, reg, ext: SmallVec::new(), ref_pc: None }
     }
 
     /// number of extension words for this EA (immediate mode counts the
@@ -136,6 +138,8 @@ pub fn load_word<M: MemoryIO>(mem: &mut M, addr: usize) -> Result<u16, DecodeErr
 }
 
 /// Choose the table entry for `word`, applying EA validity (MAME order).
+/// This is MAME's `build_opcode_table()` inner loop; the result is cached
+/// in the per-word dispatch table built by [`dispatch`].
 pub fn find(word: u16) -> &'static Insn {
     let db = Dbase::get();
     for i in &db.entries {
@@ -147,6 +151,25 @@ pub fn find(word: u16) -> &'static Insn {
         }
     }
     &UNKNOWN
+}
+
+/// Direct-mapped decode table: one resolved entry per 16-bit opcode word
+/// (65536 × 8 bytes), built once with MAME's mask/EA-gate semantics — the
+/// exact equivalent of MAME's `m_instruction_table`. Decoding is then a
+/// single table load instead of a mask scan (the module's average scan
+/// depth was 177 of 282 entries).
+pub fn dispatch() -> &'static [&'static Insn; 0x10000] {
+    static TABLE: std::sync::OnceLock<Box<[&'static Insn; 0x10000]>> = std::sync::OnceLock::new();
+    TABLE.get_or_init(|| {
+        let mut t = Box::new([&UNKNOWN as &Insn; 0x10000]);
+        for (w, slot) in t.iter_mut().enumerate() {
+            let insn = find(w as u16);
+            if !std::ptr::eq(insn, &UNKNOWN) {
+                *slot = insn;
+            }
+        }
+        t
+    })
 }
 
 /// EA validity for a candidate entry (MAME's `valid_ea` gate + the MOVE
@@ -171,7 +194,7 @@ fn ea_ok(i: &Insn, word: u16) -> bool {
 /// Decode one instruction at `addr`.
 pub fn decode<M: MemoryIO>(mem: &mut M, addr: usize) -> Result<DecodedInsn, DecodeError> {
     let word = load_word(mem, addr)?;
-    let insn = *find(word);
+    let insn = *dispatch()[word as usize];
     let reg1 = ((word >> 9) & 7) as u8;
     let reg2 = (word & 7) as u8;
 
@@ -194,7 +217,7 @@ pub fn decode<M: MemoryIO>(mem: &mut M, addr: usize) -> Result<DecodedInsn, Deco
         op_size: Size,
     ) -> Result<(), DecodeError> {
         let n = e.ext_words(op_size);
-        let mut ext = Vec::with_capacity(n);
+        let mut ext: SmallVec<[u16; 2]> = SmallVec::with_capacity(n);
         for _ in 0..n {
             ext.push(load_word(mem, *at)?);
             *at += 2;
