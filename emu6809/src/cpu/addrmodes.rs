@@ -128,7 +128,7 @@ impl AddressLines for Direct {
     }
 
     fn diss(mem: &dyn MemoryIO, ins: &mut InstructionDecoder) -> String {
-        let val = ins.fetch_inspecte_byte(mem).unwrap();
+        let val = ins.fetch_inspect_byte(mem).unwrap();
         format!("<${val:02x}")
     }
 }
@@ -214,7 +214,7 @@ impl AddressLines for Immediate8 {
     }
 
     fn diss(mem: &dyn MemoryIO, ins: &mut InstructionDecoder) -> String {
-        let val = ins.fetch_inspecte_byte(mem).unwrap();
+        let val = ins.fetch_inspect_byte(mem).unwrap();
         format!("#${val:02x}")
     }
 }
@@ -436,7 +436,7 @@ impl AddressLines for Indexed {
     fn diss(mem: &dyn MemoryIO, ins: &mut InstructionDecoder) -> String {
         // FIXIT
         // Change type sign return to Result(String, CpuError)
-        let index_mode_id = ins.fetch_inspecte_byte(mem).unwrap();
+        let index_mode_id = ins.fetch_inspect_byte(mem).unwrap();
 
         let index_mode = IndexedFlags::new(index_mode_id);
         let itype = index_mode.get_index_type();
@@ -464,19 +464,19 @@ impl AddressLines for Indexed {
                 format!("A,{r:?}")
             }
             IndexModes::RAddi8(r) => {
-                format!("{},{r:?}", ins.fetch_inspecte_byte(mem).unwrap() as i8)
+                format!("{},{r:?}", ins.fetch_inspect_byte(mem).unwrap() as i8)
             }
             IndexModes::RAddi16(r) => {
-                format!("{},{r:?}", ins.fetch_inspecte_byte(mem).unwrap() as i8)
+                format!("{},{r:?}", ins.fetch_inspect_byte(mem).unwrap() as i8)
             }
             IndexModes::RAddD(r) => {
                 format!("D,{r:?}")
             }
             IndexModes::PCAddi8 => {
-                format!("PC,{:?}", ins.fetch_inspecte_byte(mem).unwrap() as i8)
+                format!("PC,{:?}", ins.fetch_inspect_byte(mem).unwrap() as i8)
             }
             IndexModes::PCAddi16 => {
-                format!("PC,{:?}", ins.fetch_inspecte_byte(mem).unwrap())
+                format!("PC,{:?}", ins.fetch_inspect_byte(mem).unwrap())
             }
             IndexModes::Illegal => format!("ILLEGAL INDEX MODE {itype:?}"),
             IndexModes::Ea => {
@@ -564,7 +564,7 @@ impl AddressLines for Relative {
     }
 
     fn diss(mem: &dyn MemoryIO, ins: &mut InstructionDecoder) -> String {
-        let val = ins.fetch_inspecte_byte(mem).unwrap() as i8;
+        let val = ins.fetch_inspect_byte(mem).unwrap() as i8;
         format!(" ${:04x} + {}", ins.addr, val)
     }
 }

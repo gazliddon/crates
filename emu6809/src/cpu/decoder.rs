@@ -125,22 +125,21 @@ fn decode_op(reader: &mut MemReader) -> CpuResult<InstructionDecoder> {
 }
 
 impl InstructionDecoder {
-    pub fn new(_addr: u16) -> Self {
-        panic!()
+    /// Pure (side-effect-free) read of the next operand word, advancing
+    /// the operand cursor.  Used by the addressing-mode disassembly
+    /// helpers; the emulator's own fetch path uses `fetch_word`.
+    pub fn fetch_inspect_word(&mut self, mem: &dyn MemoryIO) -> Result<u16, CpuErr> {
+        let w = mem.inspect_word(self.operand_addr)?;
+        self.operand_addr += 2;
+        Ok(w)
     }
 
-    pub fn fetch_inspect_word(&mut self, _mem: &dyn MemoryIO) -> Result<u16, CpuErr> {
-        panic!()
-        // let w = mem.inspect_word(self.addr.wrapping_add(self.index).into())?;
-        // self.index = self.index.wrapping_add(2);
-        // Ok(w)
-    }
-
-    pub fn fetch_inspecte_byte(&mut self, _mem: &dyn MemoryIO) -> Result<u8, CpuErr> {
-        panic!()
-        // let b = mem.inspect_byte(self.addr.wrapping_add(self.index.into()).into())?;
-        // self.index = self.index.wrapping_add(1);
-        // Ok(b)
+    /// Pure (side-effect-free) read of the next operand byte, advancing
+    /// the operand cursor (see `fetch_inspect_word`).
+    pub fn fetch_inspect_byte(&mut self, mem: &dyn MemoryIO) -> Result<u8, CpuErr> {
+        let b = mem.inspect_byte(self.operand_addr)?;
+        self.operand_addr += 1;
+        Ok(b)
     }
 
     pub fn new_from_reader_mut(mem: &mut MemReader) -> CpuResult<Self> {
@@ -149,10 +148,6 @@ impl InstructionDecoder {
 
     pub fn new_from_reader(mem: &mut MemReader) -> CpuResult<Self> {
         decode_op(mem)
-    }
-
-    pub fn new_from_inspect_mem(_addr: usize, _mem: &mut dyn MemoryIO) -> CpuResult<Self> {
-        panic!();
     }
 
     pub fn new_from_read_mem(addr: usize, _mem: &mut dyn MemoryIO) -> CpuResult<Self> {

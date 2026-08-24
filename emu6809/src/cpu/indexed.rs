@@ -21,10 +21,6 @@ pub enum IndexModes {
 }
 
 impl IndexModes {
-    pub fn to_index_byte() -> u8 {
-        panic!()
-    }
-
     pub fn get_size(&self) -> usize {
         match self {
             Self::ROff(_, _) => 0,
