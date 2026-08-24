@@ -1,5 +1,5 @@
 [workspace]
-members = ["emujrisc","emu6809","grl-eval","grl-sources","unraveler","grl-utils", "grl-symbols","emucore", "emu6800", "emu6502", "wms-sound"]
+members = ["emujrisc","emu6809","grl-eval","grl-sources","unraveler","grl-utils", "grl-symbols","emucore", "emu6800", "emu6502", "wms-sound", "emu68000"]
 resolver = "2"
 
 # Favor maximum runtime performance for emulator and assembler binaries.
