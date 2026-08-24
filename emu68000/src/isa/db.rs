@@ -307,6 +307,98 @@ pub fn gate_ok(insn: &Insn, word: u16) -> bool {
     }
 }
 
+/// Extension-word layout of one opcode word, precomputed at build time:
+/// every count below is a pure function of the word (the EA mode bits are
+/// in the word), so the decoder needs no per-instruction mode match.
+/// Word order: opcode, then `pre_w` words (immediate / movem regmask),
+/// then the src-EA extension words (`ea_w`), then the MOVE dst-EA
+/// extension words (`dst_w`), then `post_w` trailing words (label16 /
+/// link/stop immediate / movep displacement). `pcrel` marks a PC-relative
+/// src EA (reference = opcode end + pre + ea words).
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub struct DecodeShape {
+    pub insn: &'static Insn,
+    pub pre_w: u8,
+    pub ea_w: u8,
+    pub dst_w: u8,
+    pub post_w: u8,
+    pub pcrel: bool,
+}
+
+/// src-EA extension words for the EA byte in `word` (mode 5-3, reg 2-0).
+fn ea_ext_words(word: u16, size: Size) -> u8 {
+    let mode = (word >> 3) & 7;
+    let reg = word & 7;
+    match mode {
+        5 | 6 => 1,
+        7 => match reg {
+            0 | 2 | 3 => 1,
+            1 => 2,
+            4 => size.imm_words() as u8,
+            _ => 0,
+        },
+        _ => 0,
+    }
+}
+
+/// Build-side shape: like [`DecodeShape`] but with the resolved entry's
+/// index instead of a `&'static` reference (the emitter formats the
+/// reference literal from the index).
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub struct RawShape {
+    pub idx: usize,
+    pub pre_w: u8,
+    pub ea_w: u8,
+    pub dst_w: u8,
+    pub post_w: u8,
+    pub pcrel: bool,
+}
+
+impl Dbase {
+    /// The decode shape for `word` (insn resolved with the full MAME gate;
+    /// counts from the entry's form and the word's EA byte).
+    pub fn shape_of(&self, word: u16) -> RawShape {
+        let idx = self.resolve_index(word);
+        let insn = if idx == self.entries.len() { &UNKNOWN } else { &self.entries[idx] };
+        let size = insn.size;
+        let (pre_w, ea_w, dst_w, post_w) = match insn.form {
+            Form::ImmEa => (size.imm_words() as u8, ea_ext_words(word, size), 0, 0),
+            Form::BitImmEa => (1, ea_ext_words(word, Size::B), 0, 0),
+            Form::ImmOnly => (0, 0, 0, size.imm_words() as u8),
+            Form::Imm16 | Form::Link | Form::Movep => (0, 0, 0, 1),
+            Form::Move => {
+                let src = ea_ext_words(word, size);
+                let dst_mode = (word >> 6) & 7;
+                let dst_reg = (word >> 9) & 7;
+                let dst = match dst_mode {
+                    5 | 6 => 1,
+                    7 => match dst_reg {
+                        0 | 2 | 3 => 1,
+                        1 => 2,
+                        _ => 0,
+                    },
+                    _ => 0,
+                };
+                (0, src, dst, 0)
+            }
+            Form::MovemRe | Form::MovemEr | Form::MovemPd => (1, ea_ext_words(word, Size::W), 0, 0),
+            Form::Bcc8 => (0, 0, 0, 0),
+            Form::Bcc16 | Form::Dbcc => (0, 0, 0, 1),
+            _ => {
+                let ea_w = if insn.ea == "src" || insn.ea == "dst" {
+                    ea_ext_words(word, size)
+                } else {
+                    0
+                };
+                (0, ea_w, 0, 0)
+            }
+        };
+        // PC-relative src EA (d16(PC) / d8(PC,Xn)); never for MOVE dst
+        let pcrel = matches!(((word >> 3) & 7, word & 7), (7, 2) | (7, 3));
+        RawShape { idx, pre_w, ea_w, dst_w, post_w, pcrel }
+    }
+}
+
 /// Render one instruction as a fully-qualified const expression.
 fn insn_literal(i: &Insn) -> String {
     let size = match i.size {
@@ -367,27 +459,29 @@ fn form_variant(f: Form) -> &'static str {
 impl fmt::Display for Dbase {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "// generated from resources/opcodes68000.json — do not edit")?;
-        writeln!(f, "use crate::isa::{{Insn, Size, Form}};")?;
+        writeln!(f, "use crate::isa::{{Insn, Size, Form, DecodeShape}};")?;
         writeln!(f, "pub static INSNS: [Insn; {}] = [", self.entries.len())?;
         for insn in &self.entries {
             writeln!(f, "    {},", insn_literal(insn))?;
         }
         writeln!(f, "];")?;
         writeln!(f, "pub static UNKNOWN: Insn = {};", insn_literal(&UNKNOWN))?;
-        // one entry per opcode word; `sentinel` is the index past the last
-        // real instruction, pointing at UNKNOWN
-        let sentinel = self.entries.len();
-        writeln!(f, "pub static DISPATCH: [&'static Insn; 0x10000] = [")?;
-        for chunk in (0..0x10000u32).collect::<Vec<_>>().chunks(16) {
+        // one shape per opcode word, resolved at build time
+        writeln!(f, "pub static SHAPES: [DecodeShape; 0x10000] = [")?;
+        for chunk in (0..0x10000u32).collect::<Vec<_>>().chunks(8) {
             let line: Vec<String> = chunk
                 .iter()
                 .map(|&w| {
-                    let i = self.resolve_index(w as u16);
-                    if i == sentinel {
+                    let s = self.shape_of(w as u16);
+                    let target = if s.idx == self.entries.len() {
                         "&UNKNOWN".to_string()
                     } else {
-                        format!("&INSNS[{i}]")
-                    }
+                        format!("&INSNS[{}]", s.idx)
+                    };
+                    format!(
+                        "DecodeShape {{ insn: {target}, pre_w: {}, ea_w: {}, dst_w: {}, post_w: {}, pcrel: {} }}",
+                        s.pre_w, s.ea_w, s.dst_w, s.post_w, s.pcrel
+                    )
                 })
                 .collect();
             writeln!(f, "    {},", line.join(", "))?;

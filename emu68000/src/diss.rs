@@ -54,6 +54,7 @@ impl<'a> SliceMem<'a> {
 }
 
 impl MemoryIO for SliceMem<'_> {
+    #[inline(always)]
     fn inspect_byte(&self, addr: usize) -> emucore::mem::MemResult<u8> {
         let i = addr
             .checked_sub(self.base)
@@ -64,6 +65,7 @@ impl MemoryIO for SliceMem<'_> {
             .ok_or(emucore::mem::MemErrorTypes::IllegalAddress(addr))
     }
 
+    #[inline(always)]
     fn inspect_word(&self, addr: usize) -> emucore::mem::MemResult<u16> {
         let i = self.idx2(addr).ok_or(emucore::mem::MemErrorTypes::IllegalAddress(addr))?;
         Ok(u16::from_be_bytes([self.data[i], self.data[i + 1]]))
@@ -91,6 +93,7 @@ impl MemoryIO for SliceMem<'_> {
         Err(emucore::mem::MemErrorTypes::IllegalWrite(addr))
     }
 
+    #[inline(always)]
     fn load_word(&mut self, addr: usize) -> emucore::mem::MemResult<u16> {
         self.inspect_word(addr)
     }

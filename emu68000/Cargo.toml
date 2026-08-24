@@ -17,7 +17,6 @@ serde_json = "1.0.107"
 
 [dependencies]
 byteorder = "1.4.3"
-smallvec = "1.11"
 emucore = { path = "../emucore" }
 log = "0.4.20"
 serde = { version = "1.0.188", features = ["derive"] }
