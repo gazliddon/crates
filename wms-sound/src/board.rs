@@ -361,3 +361,21 @@ mod tests {
         assert_eq!(board.dac_value(), 0x5a);
     }
 }
+
+/// The debugger's stepping contract: single-step, cycle counter, fault
+/// reporting.  `board.cycles` advances with every instruction, so the
+/// generic step/run walks in `emucore::debug` get the same budget
+/// semantics as the main 6809 debugger.
+impl emucore::debug::DebugCpu for WmsSoundBoard {
+    fn pc(&self) -> u16 {
+        self.cpu.regs.pc
+    }
+
+    fn cycles(&self) -> u64 {
+        self.cycles
+    }
+
+    fn step_one(&mut self) -> bool {
+        self.step().is_ok()
+    }
+}

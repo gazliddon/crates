@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
-pub mod breakpoints;
 pub mod cpu;
+pub mod debug;
 pub mod flagmods;
 pub mod instructions;
 pub mod mem;
