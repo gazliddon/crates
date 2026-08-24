@@ -56,7 +56,8 @@ impl Cpu {
             regs: Registers::new(chip.default_bank() as usize),
             pc: chip.ram_base(),
             ppc: 0,
-            flags: Flags::default(),
+            // GPU code is assembled for bank 1 (GASM -R1), DSP for bank 0
+            flags: Flags { regpage: chip.default_bank() == 1, ..Flags::default() },
             stats: ExecutionStats::default(),
             accum: 0,
             div_remainder: 0,
