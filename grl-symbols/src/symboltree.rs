@@ -343,6 +343,13 @@ where
         self.get_reader(self.get_root_scope_id())
     }
 
+    /// All symbol records, keyed by (scope, symbol) id.  Public for
+    /// consumers that need to iterate the whole table (e.g. the
+    /// `gazm-metadata` reader's address-index).
+    pub fn symbols(&self) -> &HashMap<SymbolScopeId<SCOPEID, SYMID>, SymbolInfo<SCOPEID, SYMID, V>> {
+        &self.scope_id_to_symbol_info
+    }
+
     pub fn get_symbol_info_from_id(
         &self,
         symbol_id: SymbolScopeId<SCOPEID, SYMID>,

@@ -360,6 +360,12 @@ impl SourceDatabase {
             .and_then(|index| self.mappings.mappings.get(*index))
             .and_then(|m| self.get_source_line(m.file_id, m.line))
     }
+
+    /// All mapping records (public for consumers that need to iterate,
+    /// e.g. the `gazm-metadata` reader's instruction-boundary index).
+    pub fn mappings(&self) -> &SourceMapping {
+        &self.mappings
+    }
 }
 
 #[cfg(test)]
