@@ -86,14 +86,12 @@ impl Cpu {
     }
 
     /// Fetch + decode one instruction at `pc` (advancing `pc` past it).
-    fn fetch(&mut self, bus: &mut dyn JriscBus) -> Result<DecodedInsn, StepError> {
+    fn fetch<B: JriscBus + ?Sized>(&mut self, bus: &mut B) -> Result<DecodedInsn, StepError> {
         let word = bus.read_word(self.pc) as u16;
         self.pc = self.pc.wrapping_add(2);
         let (op, src, dst) = decode_word(word);
-        let insn = Dbase::get()
-            .lookup(op as usize, self.chip.variant())
-            .copied()
-            .unwrap_or(Dbase::get().unknown);
+        // build-time per-chip dispatch: one table load, no scan
+        let insn = crate::isa::dispatch(self.chip.variant())[op as usize];
         let mut size = 2;
         let mut extra = None;
         if insn.extra32 {
@@ -106,7 +104,11 @@ impl Cpu {
         Ok(DecodedInsn { addr: self.ppc as usize, word, insn, src, dst, extra, size })
     }
 
-    fn execute_with(&mut self, d: &DecodedInsn, bus: &mut dyn JriscBus) -> Result<(), StepError> {
+    fn execute_with<B: JriscBus + ?Sized>(
+        &mut self,
+        d: &DecodedInsn,
+        bus: &mut B,
+    ) -> Result<(), StepError> {
         execute(self, d, bus).map_err(|message| StepError { message })
     }
 
@@ -121,11 +123,16 @@ impl Cpu {
     }
 
     /// Execute one instruction from `bus`.
-    pub fn step(&mut self, bus: &mut dyn JriscBus) -> Result<StepOutcome, StepError> {
+    pub fn step<B: JriscBus + ?Sized>(&mut self, bus: &mut B) -> Result<StepOutcome, StepError> {
         self.sync_bank();
         self.ppc = self.pc;
         let d = self.fetch(bus)?;
         let mut extra_cycles = 0u64;
+        // branch class gate: one enum compare for the ~50% non-branch
+        // stream (the mnemonic string compare is only for jump/jr)
+        if d.insn.class != crate::isa::InsnClass::Branch {
+            self.execute_with(&d, bus)?;
+        } else {
         match d.insn.mnemonic {
             "jump" => {
                 let cc = d.dst;
@@ -153,9 +160,21 @@ impl Cpu {
                     extra_cycles = 3;
                 }
             }
-            _ => {
-                self.execute_with(&d, bus)?;
+            "jump" => {
+                let cc = d.dst;
+                let reg = d.src as usize;
+                if self.flags.condition(cc) {
+                    // target is captured BEFORE the delay slot executes (the
+                    // slot may modify the register), per MAME
+                    let target = self.regs.get_index(reg);
+                    let slot = self.fetch(bus)?;
+                    self.execute_with(&slot, bus)?;
+                    self.pc = target;
+                    extra_cycles = 3;
+                }
             }
+            _ => {}
+        }
         }
         self.stats.record(d.insn.cycles as u64 + extra_cycles);
         Ok(StepOutcome::Continue)

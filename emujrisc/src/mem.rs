@@ -96,6 +96,33 @@ pub trait JriscBus {
     }
 }
 
+/// Forwarding impl: `&mut B` is itself a bus. This lets `step` be generic
+/// over `B: JriscBus` (monomorphized direct calls) while existing callers
+/// holding `&mut dyn JriscBus` keep working (virtual via the forward).
+impl<B: JriscBus + ?Sized> JriscBus for &mut B {
+    fn read_byte(&self, addr: u32) -> u32 {
+        (**self).read_byte(addr)
+    }
+    fn read_word(&self, addr: u32) -> u32 {
+        (**self).read_word(addr)
+    }
+    fn read_long(&self, addr: u32) -> u32 {
+        (**self).read_long(addr)
+    }
+    fn write_byte(&mut self, addr: u32, v: u32) {
+        (**self).write_byte(addr, v)
+    }
+    fn write_word(&mut self, addr: u32, v: u32) {
+        (**self).write_word(addr, v)
+    }
+    fn write_long(&mut self, addr: u32, v: u32) {
+        (**self).write_long(addr, v)
+    }
+    fn internal_range(&self) -> (u32, u32) {
+        (**self).internal_range()
+    }
+}
+
 /// Writable execution bus: internal program RAM + an external DRAM window;
 /// anything unmapped reads as `unmapped_read` (0) and ignores writes.
 pub struct RamBus {

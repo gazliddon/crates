@@ -26,6 +26,13 @@ impl Dbase {
     }
 }
 
+/// The build-time per-chip opcode dispatch: `DISPATCH[variant][opcode]`
+/// is the first entry legal for that chip (or the unknown sentinel). One
+/// table load replaces the by-opcode scan + legality check per fetch.
+pub fn dispatch(variant: Variant) -> &'static [&'static Insn; 64] {
+    &generated::DISPATCH[variant as usize]
+}
+
 impl Default for Dbase {
     fn default() -> Self {
         Self::new()

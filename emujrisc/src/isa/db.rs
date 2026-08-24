@@ -304,17 +304,41 @@ mac: {}, cycles: {}, size: {}, reloc: {}, pad: {} }}",
     )
 }
 
-/// Emits the generated static table consumed by `Dbase::new()`.
+/// Emits the generated static tables consumed by `Dbase::new()`.
 impl fmt::Display for Dbase {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "// generated from resources/opcodes_jrisc.json — do not edit")?;
         writeln!(f, "use crate::isa::{{Insn, FlagSet, OperandClass, Variant, InsnClass, MemAccess, Reloc}};")?;
         writeln!(f, "pub static UNKNOWN: Insn = {};", insn_literal(&self.unknown))?;
-        writeln!(f, "pub static ALL: &[Insn] = &[")?;
+        // entries in opcode order (all variants interleaved)
+        let mut flat: Vec<&Insn> = Vec::new();
+        writeln!(f, "pub static INSNS: [Insn; {}] = [", self.by_opcode.iter().map(Vec::len).sum::<usize>())?;
         for op in 0..64 {
             for insn in &self.by_opcode[op] {
                 writeln!(f, "    {},", insn_literal(insn))?;
+                flat.push(insn);
             }
+        }
+        writeln!(f, "];")?;
+        writeln!(f, "pub static ALL: &[Insn] = &INSNS;")?;
+        // per-variant 64-entry dispatch: [variant as usize][opcode] — the
+        // first entry legal for that variant, else UNKNOWN (MAME's
+        // per-chip legality; shared opcode numbers differ GPU/DSP)
+        writeln!(f, "pub static DISPATCH: [[&'static Insn; 64]; 3] = [")?;
+        for variant in [Variant::Any, Variant::Gpu, Variant::Dsp] {
+            writeln!(f, "    [")?;
+            for op in 0..64 {
+                let hit = self.by_opcode[op].iter().find(|i| i.valid_for(variant));
+                let target = match hit {
+                    Some(insn) => {
+                        let idx = flat.iter().position(|e| std::ptr::eq(*e, insn)).unwrap();
+                        format!("&INSNS[{idx}]")
+                    }
+                    None => "&UNKNOWN".to_string(),
+                };
+                writeln!(f, "        {target},")?;
+            }
+            writeln!(f, "    ],")?;
         }
         writeln!(f, "];")
     }

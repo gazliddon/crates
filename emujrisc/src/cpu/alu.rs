@@ -27,7 +27,7 @@ fn in_internal(cpu: &Cpu, a: u32) -> bool {
 }
 
 /// Store semantics: byte/word stores on internal RAM write the aligned long.
-fn store_value(cpu: &mut Cpu, addr: u32, width: u8, v: u32, bus: &mut dyn JriscBus) {
+fn store_value<B: JriscBus + ?Sized>(cpu: &mut Cpu, addr: u32, width: u8, v: u32, bus: &mut B) {
     if in_internal(cpu, addr) {
         bus.write_long(addr & !3, v);
     } else {
@@ -41,12 +41,21 @@ fn store_value(cpu: &mut Cpu, addr: u32, width: u8, v: u32, bus: &mut dyn JriscB
 
 /// Execute a non-branch instruction (`jump`/`jr` are handled by
 /// [`Cpu::step`] because of the branch delay slot).
-pub fn execute(cpu: &mut Cpu, d: &DecodedInsn, bus: &mut dyn JriscBus) -> Result<(), String> {
+pub fn execute<B: JriscBus + ?Sized>(cpu: &mut Cpu, d: &DecodedInsn, bus: &mut B) -> Result<(), String> {
     let src = d.src as usize;
     let dst = d.dst as usize;
     let mn = d.insn.mnemonic;
     match mn {
         // ---- arithmetic ----
+        // cmpq first: the T2K DSP main loop is a cmpq/jr spin (measured
+        // ~50% of the executed stream), so it must win in one compare.
+        "cmpq" => {
+            // 5-bit signed immediate, sign-extended (MAME: (s8)(op>>2)>>3)
+            let r1 = ((src << 27) as i32 >> 27) as u32;
+            let r2 = cpu.r(dst);
+            let r = r2.wrapping_sub(r1);
+            cpu.flags.set_znc_sub(r2, r1, r);
+        }
         "add" => {
             let r2 = cpu.r(dst);
             let r1 = cpu.r(src);
@@ -137,13 +146,6 @@ pub fn execute(cpu: &mut Cpu, d: &DecodedInsn, bus: &mut dyn JriscBus) -> Result
         }
         "cmp" => {
             let r1 = cpu.r(src);
-            let r2 = cpu.r(dst);
-            let r = r2.wrapping_sub(r1);
-            cpu.flags.set_znc_sub(r2, r1, r);
-        }
-        "cmpq" => {
-            // 5-bit signed immediate, sign-extended (MAME: (s8)(op>>2)>>3)
-            let r1 = ((src << 27) as i32 >> 27) as u32;
             let r2 = cpu.r(dst);
             let r = r2.wrapping_sub(r1);
             cpu.flags.set_znc_sub(r2, r1, r);

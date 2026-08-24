@@ -23,12 +23,13 @@ impl fmt::Display for DecodeError {
 
 impl std::error::Error for DecodeError {}
 
-/// A decoded instruction: the matched table entry plus the raw field values.
+/// A decoded instruction: a reference into the static ISA table (no
+/// per-instruction copy of the ~90-byte entry).
 #[derive(Debug, Clone)]
 pub struct DecodedInsn {
     pub addr: usize,
     pub word: u16,
-    pub insn: Insn,
+    pub insn: &'static Insn,
     /// raw src field (5 bits)
     pub src: u8,
     /// raw dst field (5 bits)
@@ -59,7 +60,7 @@ pub fn decode<M: MemoryIO>(mem: &mut M, addr: usize, chip: Chip) -> Result<Decod
         .next_word()
         .map_err(|_| DecodeError { message: format!("truncated instruction at ${addr:08X}") })?;
     let (op, src, dst) = decode_word(word);
-    let insn = Dbase::get().lookup(op as usize, chip.variant()).copied().unwrap_or(Dbase::get().unknown);
+    let insn = Dbase::get().lookup(op as usize, chip.variant()).unwrap_or(&Dbase::get().unknown);
     let mut size = 2;
     let mut extra = None;
     if insn.extra32 {
