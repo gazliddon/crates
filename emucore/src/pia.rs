@@ -299,7 +299,7 @@ mod tests {
         pia.write(0, 0xf0); // DDRA: high nibble output
         pia.write(1, 0x04); // data selected
         pia.write(0, 0xa0); // output latch: high nibble
-        // High nibble comes from the latch, low nibble from the pins.
+                            // High nibble comes from the latch, low nibble from the pins.
         assert_eq!(pia.read(0, 0x05, 0), 0xa5);
     }
 
