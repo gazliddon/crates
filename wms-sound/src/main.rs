@@ -274,7 +274,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 harness.board.cpu.regs.b,
                 harness.board.dac_value(),
                 harness.board.cpu.mem.pia.port_a_output(),
-                harness.board.cpu.mem.pia.port_b_input(),
+                harness.board.cpu.mem.pia_input_b,
                 harness.board.cpu.mem.pia.data_direction_a(),
                 harness.board.cpu.mem.pia.control_a(),
                 harness.board.pending_dac_events()

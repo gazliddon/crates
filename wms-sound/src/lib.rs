@@ -6,9 +6,8 @@
 mod board;
 mod dac;
 mod harness;
-mod pia;
 
 pub use board::{PiaAccess, SoundBus, WmsSoundBoard, SOUND_PIA_BASE, SOUND_ROM_BASE};
 pub use dac::{Dac8, DacEvent};
+pub use emucore::pia::{Pia6821, PiaEvent};
 pub use harness::{HarnessConfig, SoundCommandEvent, SoundHarness};
-pub use pia::{Pia6821, PiaEvent};

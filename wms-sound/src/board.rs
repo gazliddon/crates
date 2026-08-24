@@ -14,6 +14,10 @@ pub const SOUND_ROM_BASE: usize = 0xf800;
 pub struct SoundBus {
     memory: [u8; 0x1_0000],
     pub pia: Pia6821,
+    /// Current level of the PIA port B input pins (the command byte
+    /// the main board delivers; the PIA combines it with the DDR and
+    /// the output latch when port B is read).
+    pub pia_input_b: u8,
     pub dac: Dac8,
     pub cycle: u64,
     capture_pia_accesses: bool,
@@ -43,6 +47,7 @@ impl SoundBus {
         Self {
             memory,
             pia: Pia6821::default(),
+            pia_input_b: 0,
             dac: Dac8::default(),
             cycle: 0,
             capture_pia_accesses,
@@ -61,7 +66,7 @@ impl SoundBus {
 
     fn read_io(&mut self, addr: usize) -> Option<u8> {
         Self::pia_offset(addr).map(|offset| {
-            let value = self.pia.read(offset);
+            let value = self.pia.read(offset, 0, self.pia_input_b);
             if self.capture_pia_accesses {
                 self.pia_accesses.push(PiaAccess {
                     cycle: self.cycle,
@@ -218,11 +223,18 @@ impl WmsSoundBoard {
     }
 
     pub fn send_pia_value(&mut self, pia_value: u8) {
-        self.cpu.mem.pia.set_port_b_input(pia_value);
+        self.cpu.mem.pia_input_b = pia_value;
+        let now = self.cycles;
         if pia_value == 0xff {
+            // Idle: hold CB1 low without an edge, so no flag latches.
             self.cpu.mem.pia.set_cb1(false);
         } else {
-            self.cpu.mem.pia.pulse_cb1();
+            // Full pulse: the 6821 latches on the active edge per CRB
+            // bit 1 (Stargate's sound ROM programs active-low, i.e.
+            // the falling edge), so drive both levels and let the
+            // device decide.
+            self.cpu.mem.pia.drive_cb1(true, now);
+            self.cpu.mem.pia.drive_cb1(false, now);
         }
         self.update_pia_irq_line();
     }
@@ -291,7 +303,7 @@ impl WmsSoundBoard {
         for address in 0..0x100 {
             add(self.cpu.mem.inspect_byte(address).unwrap_or(0));
         }
-        for value in self.cpu.mem.pia.state_bytes() {
+        for value in self.cpu.mem.pia.state() {
             add(value);
         }
         hash
@@ -335,7 +347,7 @@ mod tests {
         let mut board = WmsSoundBoard::from_rom(&[]);
         board.cpu.mem.pia.write(3, 0x05);
         board.send_command(0x19);
-        assert_eq!(board.cpu.mem.pia.port_b_input(), 0xd9);
+        assert_eq!(board.cpu.mem.pia_input_b, 0xd9);
         assert!(board.cpu.irq);
     }
 
