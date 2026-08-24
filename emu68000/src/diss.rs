@@ -320,7 +320,7 @@ impl Diss {
         // Scan register bits in the given direction; runs keep ascending
         // names (MAME convention). For predecrement the mask is bit-reversed
         // (bit 15 = D0 .. bit 0 = A7, MAME's movem_pd handlers).
-        let emit_run = |from: usize, to: usize, name_of: &dyn Fn(usize) -> usize,
+        let emit_run = |from: usize, to: usize, name_of: fn(usize) -> usize,
                         prefix: char, parts: &mut Vec<String>| {
             let desc = from > to;
             let mut i = from;
@@ -363,13 +363,19 @@ impl Diss {
                 }
             }
         };
+        fn d_map(b: usize) -> usize {
+            b
+        }
+        fn a_map(b: usize) -> usize {
+            b - 8
+        }
         if predec {
             // store order (bit-reversed mask): D7..D0 then A7..A0
-            emit_run(15, 8, &|b| 15 - b, 'D', &mut parts);
-            emit_run(7, 0, &|b| 7 - b, 'A', &mut parts);
+            emit_run(15, 8, |b| 15 - b, 'D', &mut parts);
+            emit_run(7, 0, |b| 7 - b, 'A', &mut parts);
         } else {
-            emit_run(0, 7, &|b| b, 'D', &mut parts);
-            emit_run(8, 15, &|b| b - 8, 'A', &mut parts);
+            emit_run(0, 7, d_map, 'D', &mut parts);
+            emit_run(8, 15, a_map, 'A', &mut parts);
         }
         parts.join("/")
     }
