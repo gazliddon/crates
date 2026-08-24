@@ -28,6 +28,11 @@ where
         self.syms
     }
 
+    /// The scope this reader resolves names from (chain-first starts here).
+    pub fn current_scope(&self) -> SCOPEID {
+        self.current_scope
+    }
+
     pub fn get_symbol_info(
         &self,
         name: &str,
