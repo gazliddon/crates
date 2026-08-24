@@ -10,7 +10,7 @@
 //! 8-6, reg bits 11-9). Extension-word counts: modes 101/110/111(000/010/011)
 //! = 1, 111(001) = 2, 111(100) = the immediate (1 word B/W, 2 words L).
 
-use crate::isa::{Dbase, Form, Insn, Size, UNKNOWN};
+use crate::isa::{Form, Insn, Size};
 use emucore::mem::{MemErrorTypes, MemoryIO};
 use smallvec::SmallVec;
 use std::fmt;
@@ -137,64 +137,16 @@ pub fn load_word<M: MemoryIO>(mem: &mut M, addr: usize) -> Result<u16, DecodeErr
     mem.load_word(addr).map_err(Into::into)
 }
 
-/// Choose the table entry for `word`, applying EA validity (MAME order).
-/// This is MAME's `build_opcode_table()` inner loop; the result is cached
-/// in the per-word dispatch table built by [`dispatch`].
+/// Resolve `word` to its table entry via the build-time dispatch table
+/// (MAME's `build_opcode_table()` result; see [`crate::isa::dispatch_table`]).
 pub fn find(word: u16) -> &'static Insn {
-    let db = Dbase::get();
-    for i in &db.entries {
-        if (word & i.mask) != i.pattern {
-            continue;
-        }
-        if ea_ok(i, word) {
-            return i;
-        }
-    }
-    &UNKNOWN
-}
-
-/// Direct-mapped decode table: one resolved entry per 16-bit opcode word
-/// (65536 × 8 bytes), built once with MAME's mask/EA-gate semantics — the
-/// exact equivalent of MAME's `m_instruction_table`. Decoding is then a
-/// single table load instead of a mask scan (the module's average scan
-/// depth was 177 of 282 entries).
-pub fn dispatch() -> &'static [&'static Insn; 0x10000] {
-    static TABLE: std::sync::OnceLock<Box<[&'static Insn; 0x10000]>> = std::sync::OnceLock::new();
-    TABLE.get_or_init(|| {
-        let mut t = Box::new([&UNKNOWN as &Insn; 0x10000]);
-        for (w, slot) in t.iter_mut().enumerate() {
-            let insn = find(w as u16);
-            if !std::ptr::eq(insn, &UNKNOWN) {
-                *slot = insn;
-            }
-        }
-        t
-    })
-}
-
-/// EA validity for a candidate entry (MAME's `valid_ea` gate + the MOVE
-/// destination special case).
-fn ea_ok(i: &Insn, word: u16) -> bool {
-    if i.form == Form::Move {
-        let src = Ea::new(word);
-        if !src.is_valid(i.ea_mask) {
-            return false;
-        }
-        // MOVE's destination must be data-addressable (no An / PC / imm):
-        // MAME checks it against the fixed 0xbf8 mask.
-        let dst = Ea::from_parts(((word >> 6) & 7) as u8, ((word >> 9) & 7) as u8);
-        return dst.is_valid(0xBF8);
-    }
-    match i.ea {
-        "src" | "dst" => Ea::new(word).is_valid(i.ea_mask),
-        _ => true,
-    }
+    crate::isa::dispatch_table()[word as usize]
 }
 
 /// Decode one instruction at `addr`.
 pub fn decode<M: MemoryIO>(mem: &mut M, addr: usize) -> Result<DecodedInsn, DecodeError> {
     let word = load_word(mem, addr)?;
-    let insn = *dispatch()[word as usize];
+    let insn = *find(word);
     let reg1 = ((word >> 9) & 7) as u8;
     let reg2 = (word & 7) as u8;
 

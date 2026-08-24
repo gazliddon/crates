@@ -255,6 +255,56 @@ impl Dbase {
     pub fn lookup(&self, word: u16) -> Option<&Insn> {
         self.entries.iter().find(|i| (word & i.mask) == i.pattern)
     }
+
+    /// Resolve `word` with MAME's full gate (mask specificity order +
+    /// EA validity), returning the entry index or the sentinel index.
+    /// This is what `build_opcode_table()` computes per word; build.rs
+    /// emits the result as the static [`DISPATCH`] table.
+    pub fn resolve_index(&self, word: u16) -> usize {
+        self.entries
+            .iter()
+            .position(|i| (word & i.mask) == i.pattern && gate_ok(i, word))
+            .unwrap_or(self.entries.len())
+    }
+}
+
+/// EA-validity bit for a mode/reg pair (MAME's `valid_ea` mapping).
+pub fn mode_bit(mode: u8, reg: u8) -> u16 {
+    match mode {
+        0 => 0x800,
+        1 => 0x400,
+        2 => 0x200,
+        3 => 0x100,
+        4 => 0x080,
+        5 => 0x040,
+        6 => 0x020,
+        7 => match reg {
+            0 => 0x010,
+            1 => 0x008,
+            2 => 0x002,
+            3 => 0x001,
+            4 => 0x004,
+            _ => 0,
+        },
+        _ => 0,
+    }
+}
+
+/// MAME's EA gate for a candidate entry: the entry's `ea_mask` applied to
+/// its EA operand (bits 5-0), plus MOVE's fixed destination check (mode
+/// bits 8-6, reg bits 11-9 against 0xBF8). Build-safe: no `Ea` type.
+pub fn gate_ok(insn: &Insn, word: u16) -> bool {
+    if insn.form == Form::Move {
+        if mode_bit(((word >> 3) & 7) as u8, (word & 7) as u8) & insn.ea_mask == 0 {
+            return false;
+        }
+        let dst = (((word >> 6) & 7) << 3) | ((word >> 9) & 7);
+        return mode_bit(((dst >> 3) & 7) as u8, (dst & 7) as u8) & 0xBF8 != 0;
+    }
+    match insn.ea {
+        "src" | "dst" => mode_bit(((word >> 3) & 7) as u8, (word & 7) as u8) & insn.ea_mask != 0,
+        _ => true,
+    }
 }
 
 /// Render one instruction as a fully-qualified const expression.
@@ -311,14 +361,36 @@ fn form_variant(f: Form) -> &'static str {
     }
 }
 
-/// Emits the generated static table consumed by `Dbase::new()`.
+/// Emits the generated static tables: the instruction array, the unknown
+/// sentinel, and the 64K per-word dispatch table (MAME's
+/// `build_opcode_table()` result, resolved at build time).
 impl fmt::Display for Dbase {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "// generated from resources/opcodes68000.json — do not edit")?;
         writeln!(f, "use crate::isa::{{Insn, Size, Form}};")?;
-        writeln!(f, "pub static ALL: &[Insn] = &[")?;
+        writeln!(f, "pub static INSNS: [Insn; {}] = [", self.entries.len())?;
         for insn in &self.entries {
             writeln!(f, "    {},", insn_literal(insn))?;
+        }
+        writeln!(f, "];")?;
+        writeln!(f, "pub static UNKNOWN: Insn = {};", insn_literal(&UNKNOWN))?;
+        // one entry per opcode word; `sentinel` is the index past the last
+        // real instruction, pointing at UNKNOWN
+        let sentinel = self.entries.len();
+        writeln!(f, "pub static DISPATCH: [&'static Insn; 0x10000] = [")?;
+        for chunk in (0..0x10000u32).collect::<Vec<_>>().chunks(16) {
+            let line: Vec<String> = chunk
+                .iter()
+                .map(|&w| {
+                    let i = self.resolve_index(w as u16);
+                    if i == sentinel {
+                        "&UNKNOWN".to_string()
+                    } else {
+                        format!("&INSNS[{i}]")
+                    }
+                })
+                .collect();
+            writeln!(f, "    {},", line.join(", "))?;
         }
         writeln!(f, "];")
     }
