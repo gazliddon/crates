@@ -368,6 +368,9 @@ where
                     }};
                 }
 
+                // Every opcode is now covered by the v2 table, so the
+                // fallback arm is unreachable; keep it as a safety net
+                // (the generated macro allows unreachable patterns).
                 op_table!(op_code, {
                     panic!("NOT IMP PC: {:04x} {:02x}", addr, op_code)
                 });
@@ -486,6 +489,41 @@ mod tests {
     use crate::cpu::{RegisterFile, RegisterFileTrait, StatusRegTrait};
     use emucore::byteorder::BigEndian;
     use emucore::mem::{MemBlock, MemoryIO};
+
+    #[test]
+    fn undocumented_opcodes_execute_without_panicking() {
+        // Every opcode must decode and execute (v2 table: MAME-verified
+        // undocumented behaviors).  Illegal00 (0x00) is a 1-byte NOP;
+        // Illegal61 (0x61) skips one operand byte; Brn (0x21) skips the
+        // relative operand without branching; 0x9D is JSR direct-page.
+        let program = [0x00u8, 0x61, 0xaa, 0x21, 0x01, 0x9d, 0x10];
+        let mut mem: MemBlock<BigEndian> = MemBlock::new("test", false, &(0..0x10000));
+        for (i, b) in program.iter().enumerate() {
+            mem.store_byte(i, *b).unwrap();
+        }
+        let mut regs = RegisterFile::default();
+        regs.set_pc(0);
+        regs.set_sp(0xff00);
+        let mut machine = Machine::new(mem, regs);
+        let cycles_of = |r: &StepResult| match r {
+            StepResult::Step { cycles, .. } => *cycles,
+            _ => 0,
+        };
+        // 0x00: 1-byte NOP (4 cycles), pc -> 1.
+        assert_eq!(cycles_of(&machine.step().unwrap()), 4);
+        assert_eq!(machine.regs.pc(), 1);
+        // 0x61: 2-byte NOP (4 cycles), operand skipped, pc -> 3.
+        assert_eq!(cycles_of(&machine.step().unwrap()), 4);
+        assert_eq!(machine.regs.pc(), 3);
+        // 0x21 BRN: no branch, operand skipped, pc -> 5.
+        assert_eq!(cycles_of(&machine.step().unwrap()), 4);
+        assert_eq!(machine.regs.pc(), 5);
+        // 0x9D JSR direct-page: pc -> 0x0010, return pushed.
+        let sp_before = machine.regs.sp();
+        assert_eq!(cycles_of(&machine.step().unwrap()), 6);
+        assert_eq!(machine.regs.pc(), 0x10);
+        assert_eq!(machine.regs.sp(), sp_before - 2);
+    }
 
     #[test]
     fn step_executes_immediate_ldaa() {

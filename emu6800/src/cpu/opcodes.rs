@@ -275,6 +275,85 @@ where
     pub fn nop(&mut self) -> CpuResult<()> {
         Ok(())
     }
+
+    // -- MAME-verified undocumented opcodes -------------------------------
+    // IllegalXX behave as 1/2/3-byte NOPs (MAME illegl1); the operand
+    // bytes are skipped so the instruction stream stays aligned.
+    #[inline]
+    pub fn illegal_nop(&mut self) -> CpuResult<()> {
+        Ok(())
+    }
+
+    #[inline]
+    pub fn illegal_nop2(&mut self) -> CpuResult<()> {
+        self.m.inc_pc();
+        Ok(())
+    }
+
+    #[inline]
+    pub fn illegal_nop3(&mut self) -> CpuResult<()> {
+        self.m.inc_inc_pc();
+        Ok(())
+    }
+
+    /// 0x21: branch never - fetch (skip) the relative operand, do not
+    /// branch.
+    #[inline]
+    pub fn brn(&mut self) -> CpuResult<()> {
+        self.m.inc_pc();
+        Ok(())
+    }
+
+    // Silicon quirks: STA/STB/STS/STX with EA=PC - the store target is
+    // the program counter's value (the operand byte location); PC is
+    // not advanced past the operand, mirroring MAME's m6800 core.
+    #[inline]
+    pub fn sta_ea_pc(&mut self) -> CpuResult<()> {
+        let addr = self.m.regs.pc();
+        let a = self.m.regs.a();
+        self.regs_mut().set_nz_from_u8(a).clv();
+        self.m.mem_mut().store_byte(addr as usize, a)?;
+        Ok(())
+    }
+
+    #[inline]
+    pub fn stb_ea_pc(&mut self) -> CpuResult<()> {
+        let addr = self.m.regs.pc();
+        let b = self.m.regs.b();
+        self.regs_mut().set_nz_from_u8(b).clv();
+        self.m.mem_mut().store_byte(addr as usize, b)?;
+        Ok(())
+    }
+
+    #[inline]
+    pub fn sts_ea_pc(&mut self) -> CpuResult<()> {
+        let addr = self.m.regs.pc();
+        let sp = self.m.regs.sp();
+        self.regs_mut().set_nz_from_u16(sp).clv();
+        self.m.mem_mut().store_word(addr as usize, sp)?;
+        Ok(())
+    }
+
+    #[inline]
+    pub fn stx_ea_pc(&mut self) -> CpuResult<()> {
+        let addr = self.m.regs.pc();
+        let x = self.m.regs.x();
+        self.regs_mut().set_nz_from_u16(x).clv();
+        self.m.mem_mut().store_word(addr as usize, x)?;
+        Ok(())
+    }
+
+    /// 0x9D: JSR with direct-page addressing (the operand is an 8-bit
+    /// page-zero address).
+    #[inline]
+    pub fn jsr_direct(&mut self) -> CpuResult<()> {
+        let lo = self.m.fetch_byte()?;
+        let addr = lo as u16;
+        let pc = self.m.regs.pc();
+        self.m.push_word(pc)?;
+        self.m.regs.set_pc(addr);
+        Ok(())
+    }
     #[inline]
     pub fn wai(&mut self) -> CpuResult<()> {
         // WAI saves the return state and then halts instruction execution

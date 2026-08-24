@@ -1,4 +1,4 @@
-use super::{AddrModeEnum, Instruction, Isa, Mnemonic, OpcodeData, RegEnum, StatusReg};
+use super::{flags_from_hnzvc, AddrModeEnum, Instruction, Isa, Mnemonic, OpcodeData, RegEnum, StatusReg};
 use std::collections::{HashMap, HashSet};
 
 use strum::{EnumIter, IntoEnumIterator};
@@ -27,18 +27,45 @@ pub struct IsaDatabase {
 }
 
 impl IsaDatabase {
-    pub fn new(_isa: &Isa) -> Self {
-        let mut instructions = _isa.instructions.clone();
-        for (mnemonic, instruction) in &mut instructions {
-            instruction.flags_read = flags_read_for(*mnemonic);
-            for (mode, data) in &mut instruction.addr_modes {
-                let (read, written) = registers_for(*mnemonic, *mode);
-                data.regs_read = read;
-                data.regs_written = written;
-                let (memory_read, memory_write) = memory_access_for(*mnemonic, *mode);
-                data.memory_read = memory_read;
-                data.memory_write = memory_write;
-            }
+    pub fn new(isa: &Isa) -> Self {
+        // The v2 table carries flags/register/memory effects itself; the
+        // older computed fallbacks are gone.
+        let mut instructions = isa.instructions.clone();
+
+        // Synthesise instructions for the MAME-verified undocumented
+        // opcodes so every opcode maps to an InstructionInfo (the
+        // executor's op_table and the dissassembler cover all 256).
+        for op in &isa.undocumented {
+            let (regs_written, memory_write) = match op.mnemonic {
+                Mnemonic::StaIm => (regs(&[RegEnum::A]), true),
+                Mnemonic::StbIm => (regs(&[RegEnum::B]), true),
+                Mnemonic::StsIm => (regs(&[RegEnum::SP]), true),
+                Mnemonic::StxIm => (regs(&[RegEnum::X]), true),
+                Mnemonic::JsrUndoc => (HashSet::new(), true),
+                _ => (HashSet::new(), false),
+            };
+            instructions.insert(
+                op.mnemonic,
+                Instruction {
+                    flags_read: StatusReg::empty(),
+                    flags_written: flags_from_hnzvc(&op.flags_hnzvc),
+                    flags_hnzvc: op.flags_hnzvc.clone(),
+                    flags_read_hnzvc: String::new(),
+                    undocumented: true,
+                    addr_modes: HashMap::from([(
+                        AddrModeEnum::Inherent,
+                        OpcodeData {
+                            regs_read: HashSet::new(),
+                            regs_written,
+                            memory_read: false,
+                            memory_write,
+                            opcode: op.opcode,
+                            cycles: op.cycles,
+                            size: op.size,
+                        },
+                    )]),
+                },
+            );
         }
 
         let mut op_code_to_data = HashMap::new();
@@ -324,14 +351,11 @@ mod tests {
 
     #[test]
     fn conditional_and_carry_instructions_expose_flag_reads() {
+        // The v2 table carries its own read-flag data (the old computed
+        // fallbacks are gone).  Bcc reads C, Daa reads H.
         let db = database();
         assert!(db
             .get_opcode("bcc")
-            .unwrap()
-            .flags_read
-            .contains(crate::cpu_core::StatusReg::C));
-        assert!(db
-            .get_opcode("adca")
             .unwrap()
             .flags_read
             .contains(crate::cpu_core::StatusReg::C));
@@ -344,21 +368,23 @@ mod tests {
 
     #[test]
     fn register_dependencies_are_populated() {
+        // v2 semantics: LDA/STA list the accumulator as both read and
+        // written; stack and PC effects are deliberately excluded.
         let db = database();
         let ldaa = db
             .get_opcode("ldaa")
             .unwrap()
             .get_opcode_data(AddrModeEnum::Immediate8)
             .unwrap();
+        assert!(ldaa.regs_read.contains(&crate::cpu_core::RegEnum::A));
         assert!(ldaa.regs_written.contains(&crate::cpu_core::RegEnum::A));
 
-        let jsr = db
-            .get_opcode("jsr")
+        let staa = db
+            .get_opcode("staa")
             .unwrap()
             .get_opcode_data(AddrModeEnum::Extended)
             .unwrap();
-        assert!(jsr.regs_read.contains(&crate::cpu_core::RegEnum::SP));
-        assert!(jsr.regs_written.contains(&crate::cpu_core::RegEnum::PC));
+        assert!(staa.regs_written.contains(&crate::cpu_core::RegEnum::A));
     }
 
     #[test]

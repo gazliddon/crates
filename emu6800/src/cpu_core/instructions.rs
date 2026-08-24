@@ -54,7 +54,48 @@ pub struct Instruction {
     #[serde(default)]
     pub flags_read: StatusReg,
     pub flags_written: StatusReg,
+    /// 6-char HINZVC effects ('-' unaffected, '*' set by result, '0'
+    /// cleared, '1' set) from the v2 table.
+    #[serde(default)]
+    pub flags_hnzvc: String,
+    #[serde(default)]
+    pub flags_read_hnzvc: String,
+    #[serde(default)]
+    pub undocumented: bool,
     pub addr_modes: HashMap<AddrModeEnum, OpcodeData>,
+}
+
+/// One MAME-verified undocumented opcode from the v2 table.
+#[derive(Default, Serialize, Deserialize, Debug, Clone, PartialEq)]
+pub struct UndocumentedOp {
+    pub mnemonic: Mnemonic,
+    pub opcode: usize,
+    pub cycles: usize,
+    pub size: usize,
+    #[serde(default)]
+    pub flags_hnzvc: String,
+    #[serde(default)]
+    pub behavior: String,
+}
+
+/// Convert a 6-char HINZVC string to the StatusReg bits it writes
+/// ('*'/'0'/'1' all set the bit — the result is a written flag).
+pub(crate) fn flags_from_hnzvc(s: &str) -> StatusReg {
+    let mut flags = StatusReg::empty();
+    let bits = [
+        StatusReg::H,
+        StatusReg::I,
+        StatusReg::N,
+        StatusReg::Z,
+        StatusReg::V,
+        StatusReg::C,
+    ];
+    for (i, ch) in s.chars().take(6).enumerate() {
+        if ch != '-' {
+            flags |= bits[i];
+        }
+    }
+    flags
 }
 
 impl Instruction {
@@ -127,4 +168,8 @@ impl std::fmt::Display for RegEnum {
 #[derive(Default, Serialize, Deserialize, Debug, Clone)]
 pub struct Isa {
     pub instructions: HashMap<Mnemonic, Instruction>,
+    /// MAME-verified undocumented opcodes (the v2 table's top-level
+    /// `undocumented` array).
+    #[serde(default)]
+    pub undocumented: Vec<UndocumentedOp>,
 }

@@ -14,6 +14,7 @@ macro_rules! op_table {
         match $op {"#;
 
     let footer = r#"
+            #[allow(unreachable_patterns)]
             _ => $fail
         }
     }
