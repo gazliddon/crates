@@ -193,6 +193,40 @@ impl WmsSoundBoard {
     pub fn reset(&mut self) {
         self.cpu.reset();
     }
+
+    /// Side-effect-free memory read for the debugger UI / memory window.
+    pub fn debug_read(&self, addr: u16, len: usize) -> Vec<u8> {
+        (0..len)
+            .map(|i| {
+                self.cpu
+                    .mem
+                    .inspect_byte(addr.wrapping_add(i as u16) as usize)
+                    .unwrap_or(0xff)
+            })
+            .collect()
+    }
+
+    /// Memory write with device side effects (PIA, DAC).
+    pub fn debug_write(&mut self, addr: u16, data: &[u8]) -> Result<(), String> {
+        for (i, byte) in data.iter().enumerate() {
+            let a = addr.wrapping_add(i as u16) as usize;
+            self.cpu
+                .mem
+                .store_byte(a, *byte)
+                .map_err(|e| format!("${a:04X}: {e}"))?;
+        }
+        Ok(())
+    }
+
+    /// The size of the instruction at `pc` and whether it is a call
+    /// (JSR), for step-over/step-out.
+    pub fn instruction_at(&self, pc: u16) -> Option<(usize, bool)> {
+        let op = self.cpu.mem.inspect_byte(pc as usize).ok()?;
+        let info = emu6800::cpu::ISA_DBASE.get_instruction_info_from_opcode(op as usize)?;
+        let size = info.opcode_data.size;
+        let is_call = info.mnemonic == emu6800::cpu_core::Mnemonic::Jsr;
+        Some((size, is_call))
+    }
     pub fn step(&mut self) -> emu6800::cpu::CpuResult<StepResult> {
         self.step_with(NoopEffects)
     }

@@ -230,7 +230,9 @@ impl Dbase {
     }
 
     pub fn get(&self, opcode: u16) -> &Instruction {
-        &self.lookup[opcode as usize]
+        // Unknown (or undocumented) opcodes must not panic the decoder:
+        // fall back to the table's `unknown` entry.
+        self.lookup.get(opcode as usize).unwrap_or(&self.unknown)
     }
 
     pub fn get_by_id(&self, id: InstructionId) -> &Instruction {
