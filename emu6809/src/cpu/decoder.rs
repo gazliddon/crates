@@ -17,24 +17,30 @@ pub struct InstructionDecoder {
     pub op_code: u16,
     pub cycles: usize,
     pub addr: usize,
-    pub data: Vec<u8>,
+    /// The instruction's raw bytes.  A 6809 instruction is at most 5
+    /// bytes, so this never heap-allocates.
+    pub data: smallvec::SmallVec<[u8; 8]>,
     pub next_addr: usize,
     pub instruction_info: &'static Instruction,
     pub size: usize,
     pub operand_addr: usize,
 }
 
-fn decode_op_mem(addr: usize, reader: &mut dyn MemoryIO) -> CpuResult<InstructionDecoder> {
+fn decode_op_mem(
+    addr: usize,
+    reader: &mut dyn MemoryIO,
+    capture_data: bool,
+) -> CpuResult<InstructionDecoder> {
     let mut reader = MemReader::new(reader);
     reader.set_addr(addr);
-    decode_op(&mut reader)
+    decode_op(&mut reader, capture_data)
 }
 
 // Decode an op
 // Takes memory read as closure
 // means we can destructively read op code when emulating
 // or non destructively inspect for disassembly
-fn decode_op(reader: &mut MemReader) -> CpuResult<InstructionDecoder> {
+fn decode_op(reader: &mut MemReader, capture_data: bool) -> CpuResult<InstructionDecoder> {
     let addr = reader.get_addr();
     let mut index_size = 0;
 
@@ -71,8 +77,14 @@ fn decode_op(reader: &mut MemReader) -> CpuResult<InstructionDecoder> {
     reader.set_addr(addr);
     reader.skip_bytes(size);
 
+    // Only the disassembler needs the raw bytes; capturing them also
+    // re-inspects memory, so the executor path skips it entirely.
     let range = reader.get_taken_range();
-    let data = reader.get_taken_bytes();
+    let data = if capture_data {
+        reader.get_taken_bytes().into()
+    } else {
+        smallvec::SmallVec::new()
+    };
 
     // Indexed addressing adds effective-address cycles beyond the flat
     // table value.  The table base already includes one EA cycle (the
@@ -143,15 +155,31 @@ impl InstructionDecoder {
     }
 
     pub fn new_from_reader_mut(mem: &mut MemReader) -> CpuResult<Self> {
-        decode_op(mem)
+        decode_op(mem, true)
     }
 
     pub fn new_from_reader(mem: &mut MemReader) -> CpuResult<Self> {
-        decode_op(mem)
+        decode_op(mem, true)
     }
 
     pub fn new_from_read_mem(addr: usize, _mem: &mut dyn MemoryIO) -> CpuResult<Self> {
-        decode_op_mem(addr, _mem)
+        decode_op_mem(addr, _mem, false)
+    }
+
+    /// A decoder with no work done: `Context::new` uses this because
+    /// `Context::step` re-decodes before anything reads the fields; the
+    /// IRQ paths only overwrite `cycles`.
+    pub fn dummy(next_addr: usize) -> Self {
+        Self {
+            op_code: 0,
+            cycles: 0,
+            addr: 0,
+            data: smallvec::SmallVec::new(),
+            next_addr,
+            instruction_info: DBASE.get(0),
+            size: 0,
+            operand_addr: 0,
+        }
     }
 
     pub fn fetch_byte(&mut self, mem: &mut dyn MemoryIO) -> u8 {

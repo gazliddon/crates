@@ -1459,7 +1459,10 @@ impl<'a> Context<'a> {
         regs: &'a mut Regs,
         pins: &'a mut Pins,
     ) -> CpuResult<Context<'a>> {
-        let ins = InstructionDecoder::new_from_read_mem(regs.pc as usize, mem)?;
+        // No decode here: `Context::step` decodes (and overwrites
+        // `ins`) before anything reads it, so decoding twice per
+        // instruction was pure waste.
+        let ins = InstructionDecoder::dummy(regs.pc as usize);
         let ret = Context {
             regs,
             mem,
