@@ -143,7 +143,7 @@ pub fn load_word<M: MemoryIO>(mem: &mut M, addr: usize) -> Result<u16, DecodeErr
 
 /// Resolve `word` to its table entry via the build-time shape table.
 pub fn find(word: u16) -> &'static Insn {
-    crate::isa::shapes()[word as usize].insn
+    crate::isa::shape_insn(&crate::isa::shapes()[word as usize])
 }
 
 /// Decode one instruction at `addr`. The extension-word layout comes from
@@ -151,11 +151,11 @@ pub fn find(word: u16) -> &'static Insn {
 pub fn decode<M: MemoryIO>(mem: &mut M, addr: usize) -> Result<DecodedInsn, DecodeError> {
     let word = load_word(mem, addr)?;
     let shape = crate::isa::shapes()[word as usize];
-    let insn = shape.insn;
+    let insn = crate::isa::shape_insn(&shape);
     let reg1 = ((word >> 9) & 7) as u8;
     let reg2 = (word & 7) as u8;
 
-    let size = 2 + 2 * (shape.pre_w + shape.ea_w + shape.dst_w + shape.post_w) as usize;
+    let size = 2 + 2 * (shape.pre_w() + shape.ea_w() + shape.dst_w() + shape.post_w()) as usize;
     let mut at = addr + 2;
     let mut ea: Option<Ea> = None;
     let mut ea_dst: Option<Ea> = None;
@@ -184,26 +184,26 @@ pub fn decode<M: MemoryIO>(mem: &mut M, addr: usize) -> Result<DecodedInsn, Deco
         // hot arms first (module frequency: imm_ea 23%, move 17%, ...)
         Form::ImmEa | Form::BitImmEa => {
             let mut v: u32 = 0;
-            for _ in 0..shape.pre_w {
+            for _ in 0..shape.pre_w() {
                 v = (v << 16) | load_word(mem, at)? as u32;
                 at += 2;
             }
             imm = Some(v);
             let mut e = Ea::new(word);
-            fetch_ea_ext(mem, &mut at, &mut e, shape.ea_w)?;
+            fetch_ea_ext(mem, &mut at, &mut e, shape.ea_w())?;
             ea = Some(e);
         }
         Form::Move => {
             let mut s = Ea::new(word);
-            fetch_ea_ext(mem, &mut at, &mut s, shape.ea_w)?;
+            fetch_ea_ext(mem, &mut at, &mut s, shape.ea_w())?;
             ea = Some(s);
             let mut d = Ea::from_parts(((word >> 6) & 7) as u8, ((word >> 9) & 7) as u8);
-            fetch_ea_ext(mem, &mut at, &mut d, shape.dst_w)?;
+            fetch_ea_ext(mem, &mut at, &mut d, shape.dst_w())?;
             ea_dst = Some(d);
         }
         Form::ImmOnly | Form::Imm16 | Form::Link | Form::Movep => {
             let mut v: u32 = 0;
-            for _ in 0..shape.post_w {
+            for _ in 0..shape.post_w() {
                 v = (v << 16) | load_word(mem, at)? as u32;
                 at += 2;
             }
@@ -229,7 +229,7 @@ pub fn decode<M: MemoryIO>(mem: &mut M, addr: usize) -> Result<DecodedInsn, Deco
             regmask = Some(load_word(mem, at)?);
             at += 2;
             let mut e = Ea::new(word);
-            fetch_ea_ext(mem, &mut at, &mut e, shape.ea_w)?;
+            fetch_ea_ext(mem, &mut at, &mut e, shape.ea_w())?;
             ea = Some(e);
         }
         _ => {
@@ -237,12 +237,12 @@ pub fn decode<M: MemoryIO>(mem: &mut M, addr: usize) -> Result<DecodedInsn, Deco
                 // the EA operand always exists (renders Dn/(An)/... even
                 // with zero extension words)
                 let mut e = Ea::new(word);
-                if shape.ea_w > 0 {
-                    fetch_ea_ext(mem, &mut at, &mut e, shape.ea_w)?;
-                    if shape.pcrel {
+                if shape.ea_w() > 0 {
+                    fetch_ea_ext(mem, &mut at, &mut e, shape.ea_w())?;
+                    if shape.pcrel() {
                         // reference = opcode end + pre words + ea words
                         e.ref_pc =
-                            Some((addr + 2 + 2 * (shape.pre_w + shape.ea_w) as usize) as u32);
+                            Some((addr + 2 + 2 * (shape.pre_w() + shape.ea_w()) as usize) as u32);
                     }
                 }
                 ea = Some(e);

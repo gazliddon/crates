@@ -31,6 +31,15 @@ pub fn shapes() -> &'static [DecodeShape; 0x10000] {
     &generated::SHAPES
 }
 
+/// The instruction entry for a shape (`idx` = u16::MAX is the illegal word).
+pub fn shape_insn(s: &DecodeShape) -> &'static Insn {
+    if s.idx == u16::MAX {
+        &generated::UNKNOWN
+    } else {
+        &generated::INSNS[s.idx as usize]
+    }
+}
+
 
 
 impl Default for Dbase {

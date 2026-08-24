@@ -317,12 +317,28 @@ pub fn gate_ok(insn: &Insn, word: u16) -> bool {
 /// src EA (reference = opcode end + pre + ea words).
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct DecodeShape {
-    pub insn: &'static Insn,
-    pub pre_w: u8,
-    pub ea_w: u8,
-    pub dst_w: u8,
-    pub post_w: u8,
-    pub pcrel: bool,
+    /// index into INSNS (u16::MAX = the UNKNOWN sentinel)
+    pub idx: u16,
+    /// packed counts: pre_w | ea_w<<2 | dst_w<<4 | post_w<<6 | pcrel<<8
+    pub packed: u16,
+}
+
+impl DecodeShape {
+    pub fn pre_w(self) -> u8 {
+        (self.packed & 3) as u8
+    }
+    pub fn ea_w(self) -> u8 {
+        ((self.packed >> 2) & 3) as u8
+    }
+    pub fn dst_w(self) -> u8 {
+        ((self.packed >> 4) & 3) as u8
+    }
+    pub fn post_w(self) -> u8 {
+        ((self.packed >> 6) & 3) as u8
+    }
+    pub fn pcrel(self) -> bool {
+        self.packed & (1 << 8) != 0
+    }
 }
 
 /// src-EA extension words for the EA byte in `word` (mode 5-3, reg 2-0).
@@ -358,6 +374,7 @@ impl Dbase {
     /// The decode shape for `word` (insn resolved with the full MAME gate;
     /// counts from the entry's form and the word's EA byte).
     pub fn shape_of(&self, word: u16) -> RawShape {
+        debug_assert!(self.entries.len() < u16::MAX as usize);
         let idx = self.resolve_index(word);
         let insn = if idx == self.entries.len() { &UNKNOWN } else { &self.entries[idx] };
         let size = insn.size;
@@ -473,15 +490,17 @@ impl fmt::Display for Dbase {
                 .iter()
                 .map(|&w| {
                     let s = self.shape_of(w as u16);
-                    let target = if s.idx == self.entries.len() {
-                        "&UNKNOWN".to_string()
+                    let idx = if s.idx == self.entries.len() {
+                        u16::MAX
                     } else {
-                        format!("&INSNS[{}]", s.idx)
+                        s.idx as u16
                     };
-                    format!(
-                        "DecodeShape {{ insn: {target}, pre_w: {}, ea_w: {}, dst_w: {}, post_w: {}, pcrel: {} }}",
-                        s.pre_w, s.ea_w, s.dst_w, s.post_w, s.pcrel
-                    )
+                    let packed = (s.pre_w as u16)
+                        | ((s.ea_w as u16) << 2)
+                        | ((s.dst_w as u16) << 4)
+                        | ((s.post_w as u16) << 6)
+                        | ((s.pcrel as u16) << 8);
+                    format!("DecodeShape {{ idx: {idx}, packed: 0x{packed:04X} }}")
                 })
                 .collect();
             writeln!(f, "    {},", line.join(", "))?;
