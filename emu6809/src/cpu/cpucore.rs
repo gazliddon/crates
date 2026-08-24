@@ -279,6 +279,10 @@ impl<'a> Context<'a> {
 
         if v {
             self.set_next_pc_rel(offset)
+        } else {
+            // MAME's m6809 skips the taken-branch dummy cycle when a
+            // long branch falls through (6 cycles taken, 5 not).
+            self.ins.cycles = self.ins.cycles.saturating_sub(1);
         }
         Ok(())
     }
@@ -1324,18 +1328,29 @@ impl<'a> Context<'a> {
         // pop CC
         // regs if E flag is set
         // PC
+        let base = self.cycles;
         let cc = self.pop_byte(true)?;
         self.regs.flags.set_flags(cc);
 
         // pop saved regs if E flag is set
         if self.regs.flags.contains(Flags::E) {
             self.pop_regs(StackFlags::INT_FLAGS, true)?;
-            self.cycles += 9;
         }
 
         let pc = self.pop_word(true)? as usize;
 
         self.set_next_pc(pc);
+
+        // MAME's m6809 RTI: 1 dummy cycle + CC pop (1) + PC pop (2),
+        // plus one cycle per popped register byte when E is set (the
+        // `pop_regs` per-byte counts above).  The flat table value is
+        // replaced entirely.
+        self.cycles = base;
+        self.ins.cycles = 4 + if self.regs.flags.contains(Flags::E) {
+            9
+        } else {
+            0
+        };
 
         Ok(())
     }
@@ -1466,14 +1481,28 @@ impl<'a> Context<'a> {
 
     pub fn step(&mut self) -> CpuResult<()> {
         if self.pins.irq {
+            // IRQ entry charges 19 cycles flat in MAME's m6809 (3 dummy
+            // cycles + 12 register-push writes + 4 vector reads).  The
+            // register pushes below also count per-byte cycles (as they
+            // would for PSHS/PULS); undo those and the instruction
+            // decode from `Context::new` so the flat charge stands alone.
+            let base = self.cycles;
             self.irq()?;
             self.clear_pending_irq();
+            self.cycles = base;
+            self.ins.cycles = 19;
         } else if self.pins.firq {
+            let base = self.cycles;
             self.firq()?;
             self.clear_pending_irq();
+            self.cycles = base;
+            self.ins.cycles = 12;
         } else if self.pins.nmi {
+            let base = self.cycles;
             self.nmi()?;
             self.clear_pending_irq();
+            self.cycles = base;
+            self.ins.cycles = 19;
         } else {
             self.ins = InstructionDecoder::new_from_read_mem(self.regs.pc as usize, self.mem)?;
 
@@ -1510,6 +1539,11 @@ impl<'a> Context<'a> {
         // next step will decode from the reset vector rather than the address
         // that happened to be active when Context was constructed.
         self.ins.next_addr = pc as usize;
+        // MAME's m6809 consumes 4 cycles fetching the reset vector
+        // before the first instruction executes; charge the same so the
+        // first instruction starts at cycle 8 in MAME-parity traces
+        // (vector fetch 4 + the reset-vector JMP's 4).
+        self.cycles += 4;
         Ok(())
     }
 }
@@ -1568,7 +1602,7 @@ mod tests {
         mem.store_byte(0x014a, 0x9f).unwrap(); // [abs]
         mem.store_byte(0x014b, 0x9c).unwrap(); // operand hi
         mem.store_byte(0x014c, 0x3f).unwrap(); // operand lo
-        // pointer at $9C3F -> $1234
+                                               // pointer at $9C3F -> $1234
         mem.store_word(0x9c3f, 0x1234).unwrap();
         mem.store_word(0x1234, 0xbeef).unwrap();
         let mut regs = Regs {
@@ -1584,5 +1618,75 @@ mod tests {
         eprintln!("pc={pc:04x} x={:04x}", regs.x);
         assert_eq!(pc, 0x014d);
         assert_eq!(regs.x, 0xbeef);
+    }
+
+    /// Cycle counts must match MAME's m6809 core (measured differentially
+    /// against a per-instruction cycle trace of the Stargate boot; see
+    /// williams-emu docs/differential_testing_log.md, third entry).
+    #[test]
+    fn instruction_cycle_counts_match_mame() {
+        let cases: &[(u16, &[u8], usize)] = &[
+            // (pc, bytes, expected total cycles for the instruction)
+            (0x8000, &[0x1a, 0xff], 3),             // ORCC #$FF
+            (0x8000, &[0x1c, 0x00], 3),             // ANDCC #$00
+            (0x8000, &[0x7e, 0x80, 0x10], 4),       // JMP ext
+            (0x8000, &[0xbd, 0x80, 0x10], 8),       // JSR ext
+            (0x8000, &[0x8c, 0x00, 0x00], 4),       // CMPX #imm16
+            (0x8000, &[0x11, 0x83, 0x00, 0x00], 5), // CMPU #imm16
+            (0x8000, &[0x0f, 0x00], 6),             // CLR direct
+            (0x8000, &[0xa6, 0xc0], 6),             // LDA ,U+
+            (0x8000, &[0xa6, 0x81], 7),             // LDA ,X++
+            (0x8000, &[0xa6, 0x88, 0x01], 5),       // LDA $01,X
+            (0x8000, &[0x30, 0x1f], 5),             // LEAX 5-bit offset ($FF,X)
+            (0x8000, &[0x30, 0x89, 0xff, 0xff], 8), // LEAX 16-bit offset
+            (0x8000, &[0xec, 0x81], 8),             // LDD ,X++
+            (0x8000, &[0xed, 0x81], 8),             // STD ,X++
+            (0x8000, &[0xed, 0x98, 0x08], 9),       // STD [8,X] (indirect)
+            (0x8000, &[0x10, 0xaf, 0x64], 7),       // STY $04,S (5-bit)
+            (0x8000, &[0x6f, 0x80], 8),             // CLR ,X+
+            (0x8000, &[0x6d, 0xa0], 8),             // TST ,Y+
+            (0x8000, &[0x6e, 0xa4], 3),             // JMP ,Y
+        ];
+        for (pc, bytes, expected) in cases {
+            let mut mem: MemBlock<BigEndian> = MemBlock::new("cyc", false, &(0..0x10000));
+            for (i, b) in bytes.iter().enumerate() {
+                mem.store_byte(*pc as usize + i, *b).unwrap();
+            }
+            let mut regs = Regs {
+                pc: *pc,
+                s: 0x9000,
+                u: 0xa000,
+                x: 0x2000,
+                y: 0x3000,
+                ..Default::default()
+            };
+            let mut pins = Pins::default();
+            let mut cpu = Context::new(&mut mem, &mut regs, &mut pins).unwrap();
+            cpu.step().unwrap();
+            assert_eq!(cpu.cycles(), *expected, "pc=${pc:04X} bytes={:02X?}", bytes);
+        }
+    }
+
+    /// IRQ entry charges MAME's flat 19 cycles (3 dummy + 12 push writes
+    /// + 4 vector reads), independent of the interrupted instruction.
+    #[test]
+    fn irq_entry_charges_19_cycles() {
+        let mut mem: MemBlock<BigEndian> = MemBlock::new("irq", false, &(0..0x10000));
+        mem.store_byte(0x8000, 0x01).unwrap(); // NEG direct (6 cycles)
+        mem.store_byte(0x8001, 0x00).unwrap();
+        mem.store_word(0xfff8, 0x9000).unwrap(); // IRQ vector
+        let mut regs = Regs {
+            pc: 0x8000,
+            s: 0x9000,
+            ..Default::default()
+        };
+        let mut pins = Pins {
+            irq: true,
+            ..Default::default()
+        };
+        let mut cpu = Context::new(&mut mem, &mut regs, &mut pins).unwrap();
+        cpu.step().unwrap(); // services the IRQ
+        assert_eq!(cpu.cycles(), 19);
+        assert_eq!(cpu.get_pc(), 0x9000);
     }
 }

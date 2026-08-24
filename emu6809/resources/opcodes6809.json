@@ -11,35 +11,35 @@
   "instructions": [
     {
       "addr_mode": "Direct",
-      "cycles": 5,
+      "cycles": 6,
       "opcode": "00",
       "action": "NEG",
       "size": 2
     },
     {
       "addr_mode": "Direct",
-      "cycles": 5,
+      "cycles": 6,
       "opcode": "03",
       "action": "COM",
       "size": 2
     },
     {
       "addr_mode": "Direct",
-      "cycles": 5,
+      "cycles": 6,
       "opcode": "04",
       "action": "LSR",
       "size": 2
     },
     {
       "addr_mode": "Direct",
-      "cycles": 5,
+      "cycles": 6,
       "opcode": "06",
       "action": "ROR",
       "size": 2
     },
     {
       "addr_mode": "Direct",
-      "cycles": 5,
+      "cycles": 6,
       "opcode": "07",
       "action": "ASR",
       "size": 2
@@ -53,28 +53,28 @@
     },
     {
       "addr_mode": "Direct",
-      "cycles": 5,
+      "cycles": 6,
       "opcode": "09",
       "action": "ROL",
       "size": 2
     },
     {
       "addr_mode": "Direct",
-      "cycles": 5,
+      "cycles": 6,
       "opcode": "0A",
       "action": "DEC",
       "size": 2
     },
     {
       "addr_mode": "Direct",
-      "cycles": 5,
+      "cycles": 6,
       "opcode": "0C",
       "action": "INC",
       "size": 2
     },
     {
       "addr_mode": "Direct",
-      "cycles": 4,
+      "cycles": 6,
       "opcode": "0D",
       "action": "TST",
       "size": 2
@@ -88,7 +88,7 @@
     },
     {
       "addr_mode": "Direct",
-      "cycles": 5,
+      "cycles": 6,
       "opcode": "0F",
       "action": "CLR",
       "size": 2
@@ -131,14 +131,14 @@
     },
     {
       "addr_mode": "Immediate8",
-      "cycles": 2,
+      "cycles": 3,
       "opcode": "1A",
       "action": "ORCC",
       "size": 2
     },
     {
       "addr_mode": "Immediate8",
-      "cycles": 2,
+      "cycles": 3,
       "opcode": "1C",
       "action": "ANDCC",
       "size": 2
@@ -594,7 +594,7 @@
     },
     {
       "addr_mode": "Indexed",
-      "cycles": 5,
+      "cycles": 6,
       "opcode": "6D",
       "action": "TST",
       "size": 2
@@ -678,14 +678,14 @@
     },
     {
       "addr_mode": "Extended",
-      "cycles": 6,
+      "cycles": 7,
       "opcode": "7D",
       "action": "TST",
       "size": 3
     },
     {
       "addr_mode": "Extended",
-      "cycles": 3,
+      "cycles": 4,
       "opcode": "7E",
       "action": "JMP",
       "size": 3
@@ -776,7 +776,7 @@
     },
     {
       "addr_mode": "Immediate16",
-      "cycles": 5,
+      "cycles": 4,
       "opcode": "8C",
       "action": "CMPX",
       "size": 3
@@ -1017,7 +1017,7 @@
     },
     {
       "addr_mode": "Indexed",
-      "cycles": 6,
+      "cycles": 5,
       "opcode": "AF",
       "action": "STX",
       "size": 2
@@ -1115,7 +1115,7 @@
     },
     {
       "addr_mode": "Extended",
-      "cycles": 7,
+      "cycles": 8,
       "opcode": "BD",
       "action": "JSR",
       "size": 3,
@@ -1130,7 +1130,7 @@
     },
     {
       "addr_mode": "Extended",
-      "cycles": 7,
+      "cycles": 6,
       "opcode": "BF",
       "action": "STX",
       "size": 3
@@ -1431,7 +1431,7 @@
     },
     {
       "addr_mode": "Indexed",
-      "cycles": 6,
+      "cycles": 5,
       "opcode": "ED",
       "action": "STD",
       "size": 2
@@ -1445,7 +1445,7 @@
     },
     {
       "addr_mode": "Indexed",
-      "cycles": 6,
+      "cycles": 5,
       "opcode": "EF",
       "action": "STU",
       "size": 2
@@ -1557,7 +1557,7 @@
     },
     {
       "addr_mode": "Extended",
-      "cycles": 7,
+      "cycles": 6,
       "opcode": "FF",
       "action": "STU",
       "size": 3
@@ -1677,14 +1677,14 @@
     },
     {
       "addr_mode": "Immediate16",
-      "cycles": 6,
+      "cycles": 5,
       "opcode": "1083",
       "action": "CMPD",
       "size": 4
     },
     {
       "addr_mode": "Immediate16",
-      "cycles": 6,
+      "cycles": 5,
       "opcode": "108C",
       "action": "CMPY",
       "size": 4
@@ -1846,14 +1846,14 @@
     },
     {
       "addr_mode": "Immediate16",
-      "cycles": 6,
+      "cycles": 5,
       "opcode": "1183",
       "action": "CMPU",
       "size": 4
     },
     {
       "addr_mode": "Immediate16",
-      "cycles": 6,
+      "cycles": 5,
       "opcode": "118C",
       "action": "CMPS",
       "size": 4
@@ -1895,7 +1895,7 @@
     },
     {
       "addr_mode": "Direct",
-      "cycles": 5,
+      "cycles": 6,
       "opcode": "01",
       "action": "NEG",
       "size": 2

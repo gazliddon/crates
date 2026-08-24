@@ -54,11 +54,17 @@ fn decode_op(reader: &mut MemReader) -> CpuResult<InstructionDecoder> {
     // opcode
     let instruction_info = DBASE.get(op_code);
 
-    if instruction_info.addr_mode == AddrModeEnum::Indexed {
+    // The indexed postbyte (peeked while the reader still points at the
+    // operand area) drives both the instruction size and the
+    // effective-address cycle extras.
+    let index_mode_id = if instruction_info.addr_mode == AddrModeEnum::Indexed {
         let index_mode_id = reader.peek_byte()?;
         let index_mode = super::indexed::IndexedFlags::new(index_mode_id);
         index_size = index_mode.get_index_type().get_size();
-    }
+        Some(index_mode_id)
+    } else {
+        None
+    };
 
     let size = instruction_info.size + index_size;
 
@@ -69,21 +75,38 @@ fn decode_op(reader: &mut MemReader) -> CpuResult<InstructionDecoder> {
     let data = reader.get_taken_bytes();
 
     // Indexed addressing adds effective-address cycles beyond the flat
-    // table value (which assumes a 2-cycle ,R / 5-bit-offset EA), per the
-    // M6809 datasheet.
-    let ea_cycles = if instruction_info.addr_mode == AddrModeEnum::Indexed {
-        let index_mode = super::indexed::IndexedFlags::new(reader.peek_byte()?);
-        use super::IndexModes::*;
-        match index_mode.get_index_type() {
-            RPlus(_) | RSub(_) => 1,
-            RPlusPlus(_) | RSubSub(_) => 2,
-            RAddi8(_) | PCAddi8 => 1,
-            RAddi16(_) | PCAddi16 | RAddD(_) => 2,
-            Ea => 4,
-            _ => 0,
+    // table value.  The table base already includes one EA cycle (the
+    // `,R`/5-bit-offset dummy read), so the extras below are
+    // MAME-m6809 EA cycles minus one:
+    //   ,R+ ,-R     3 -> +2        ,R++ ,--R   4 -> +3
+    //   B,R A,R     2 -> +1        ,R          1 -> +0
+    //   8-bit,PC8   2 -> +1        5-bit       2 -> +1
+    //   16-bit,D,R  5 -> +4        PC16        6 -> +5
+    //   [abs]       6 -> +5
+    let ea_cycles = match index_mode_id {
+        Some(index_mode_id) => {
+            let index_mode = super::indexed::IndexedFlags::new(index_mode_id);
+            use super::IndexModes::*;
+            let base = match index_mode.get_index_type() {
+                RPlus(_) | RSub(_) => 2,
+                RPlusPlus(_) | RSubSub(_) => 3,
+                RAddB(_) | RAddA(_) => 1,
+                RAddi8(_) | PCAddi8 => 1,
+                RAddi16(_) | RAddD(_) => 4,
+                PCAddi16 => 5,
+                Ea => 5,
+                ROff(_, _) => 1,
+                RZero(_) => 0,
+                Illegal => 0,
+            };
+            // Indirect postbytes (bit 4) read a 16-bit pointer from the
+            // computed address: 2 reads + 1 dummy = 3 cycles on top of
+            // the direct EA.  The `[abs]` (0x9F) case is already
+            // indirect and its 5 covers the pointer read.
+            let indirect = index_mode.is_indirect() && !index_mode.is_ea();
+            base + if indirect { 3 } else { 0 }
         }
-    } else {
-        0
+        None => 0,
     };
 
     // Create the decoded instruction
