@@ -13,12 +13,17 @@ RAM size/base and the peripheral register block base.
   `build.rs`) — from vasm's jagrisc backend, per the "Jaguar Technical
   Reference Manual for Tom & Jerry" Rev 8.
 - ✅ Decoder + disassembler (`cpu::decode`, `diss::Diss`), validated
-  against the real Tempest 2000 DSP program (`tests/data/dsp.bin`,
-  extracted from `MOOMOO.DAT` and cross-checked against `TEST.TXT`'s
-  `GPUSTART` blob): 382 instructions decode, entry sequence and
-  chip-disambiguation asserted in `tests/diss_dsp.rs`.
-- ⏳ Execution (ALU/cycles/peripherals) — skeleton in `cpu::alu` /
-  `cpu::cpucore`.
+  against the real Tempest 2000 DSP program (`tests/data/dsp.bin`):
+  382 instructions decode, entry sequence and chip-disambiguation
+  asserted in `tests/diss_dsp.rs`.
+- ✅ **Execution** (`cpu::alu` + `Cpu::step`): full instruction semantics
+  ported from MAME's jaguar core — quirks included (N = bit 29,
+  `convert_zero` quick immediates, `shlq` 32-raw, `ror` carry from bit
+  30, internal-RAM long accesses for loadb/storeb, branch **delay
+  slots**, +3 wait states on taken branches, the `addc` carry formula,
+  `abs` of 0x80000000). `tests/exec_dsp.rs` covers 12 semantics tests
+  plus a smoke run of the real T2K DSP program (trampoline entry, stack
+  pointer, TEST.SYM constants).
 
 ## Encoding
 

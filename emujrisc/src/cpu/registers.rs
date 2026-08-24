@@ -1,8 +1,10 @@
-//! JRISC register file: r0–r31, 32-bit, with register-bank support.
+//! JRISC register file: two banks of r0–r31, 32-bit.
 //!
-//! r31 is the stack pointer by convention (the T2K DSP program does
-//! `movei #STACKPOS, r31` on entry). The bank field mirrors `G_REGPAGE`
-//! (GPU only); the T2K programs do not switch banks.
+//! The GPU/DSP have two register banks; `G_FLAGS.REGPAGE` selects the active
+//! one (forced to bank 0 while the interrupt mask is set, per MAME).
+//! `moveta`/`movefa` move between the active and the *other* bank; `mmult`
+//! always reads its operands from bank 1. r31 is the stack pointer by
+//! convention (the T2K DSP program does `movei #STACKPOS, r31` on entry).
 
 use std::fmt::Display;
 use std::str::FromStr;
@@ -113,42 +115,58 @@ impl RegEnumTrait for RegEnum {
     }
 }
 
-/// 32 × 32-bit registers plus the active bank.
+/// 2 × 32 × 32-bit registers plus the active bank index.
 #[derive(Debug, Clone, Default)]
 pub struct Registers {
-    regs: [u32; 32],
-    bank: u8,
+    banks: [[u32; 32]; 2],
+    active: usize,
 }
 
 impl Registers {
-    pub fn new(bank: u8) -> Self {
-        Self { regs: [0; 32], bank }
+    pub fn new(bank: usize) -> Self {
+        Self { banks: [[0; 32]; 2], active: bank & 1 }
     }
 
-    pub fn bank(&self) -> u8 {
-        self.bank
+    pub fn bank(&self) -> usize {
+        self.active
     }
 
-    pub fn set_bank(&mut self, bank: u8) {
-        self.bank = bank;
+    pub fn set_bank(&mut self, bank: usize) {
+        self.active = bank & 1;
     }
 
-    /// convenience: read a register by index without an enum value
+    /// read from the active bank
     pub fn get_index(&self, i: usize) -> u32 {
-        self.regs[i & 31]
+        self.banks[self.active][i & 31]
     }
 
+    /// write to the active bank
     pub fn set_index(&mut self, i: usize, v: u32) {
-        self.regs[i & 31] = v;
+        self.banks[self.active][i & 31] = v;
+    }
+
+    /// read from the *other* bank (moveta/movefa)
+    pub fn alt_get(&self, i: usize) -> u32 {
+        self.banks[self.active ^ 1][i & 31]
+    }
+
+    /// write to the *other* bank (moveta/movefa)
+    pub fn alt_set(&mut self, i: usize, v: u32) {
+        self.banks[self.active ^ 1][i & 31] = v;
+    }
+
+    /// read from an explicit bank (mmult reads bank 1)
+    pub fn bank_get(&self, bank: usize, i: usize) -> u32 {
+        self.banks[bank & 1][i & 31]
     }
 }
 
 impl RegisterFileTrait<RegEnum> for Registers {
     fn get(&self, r: &RegEnum) -> u64 {
-        self.regs[r.index()] as u64
+        self.get_index(r.index()) as u64
     }
 
     fn set(&mut self, r: &RegEnum, v: u64) {
-        self.regs[r.index()] = v as u32;
+        self.set_index(r.index(), v as u32);
     }
 }
