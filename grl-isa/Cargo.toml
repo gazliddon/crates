@@ -1,0 +1,10 @@
+[package]
+name = "grl-isa"
+version = "0.1.0"
+edition = "2021"
+description = "Generic JSON instruction-set database reader (Dbase), shared by the emulator crates and the gazm assembler"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+serde = { version = "1.0.188", features = ["derive"] }
+serde_json = "1.0.107"

@@ -1898,7 +1898,8 @@
       "cycles": 6,
       "opcode": "01",
       "action": "NEG",
-      "size": 2
+      "size": 2,
+      "preferred": false
     }
   ]
 }
