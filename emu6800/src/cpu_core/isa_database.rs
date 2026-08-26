@@ -1,4 +1,6 @@
-use super::{flags_from_hnzvc, AddrModeEnum, Instruction, Isa, Mnemonic, OpcodeData, RegEnum, StatusReg};
+use super::{
+    flags_from_hnzvc, AddrModeEnum, Instruction, Isa, Mnemonic, OpcodeData, RegEnum, StatusReg,
+};
 use std::collections::{HashMap, HashSet};
 
 use strum::{EnumIter, IntoEnumIterator};
