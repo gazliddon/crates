@@ -9,8 +9,12 @@ gazm-style Instruction rows:
 
 - `opcode`   — prefix+opcode as a single hex value, with register/bit/vector
                fields ZEROED (the base). The assembler backend ORs in the
-               register bits (it owns the register encodings); the base is
-               what this table can know.
+               register bits from `bit_fields`; the base is what this table
+               can know.
+- `bit_fields` — per symbolic operand byte: `{var: shift}`, e.g. LD r1,r2
+               is `{"r1": 3, "r2": 0}` (0x40 | r1<<3 | r2), ADD A,r is
+               `{"r": 0}`, INC r is `{"r": 3}`. Vars: r, r1, r2, dd, cc,
+               b, p.
 - `template` — the operand shape exactly as written in the source
                ("A,(IX+d)", "r1,r2", "b,(HL)", "d", ...); the assembler
                parser canonicalizes operands to these strings for lookup.
@@ -33,6 +37,8 @@ HERE = Path(__file__).resolve().parent
 SRC = HERE / "opcode-table.json"
 OUT = HERE.parent / "resources" / "opcodesZ80.json"
 
+VARS = ("r", "r1", "r2", "dd", "cc", "b", "p")
+
 SYMBOLIC = re.compile(r"^(\((\w+)(?:<<\d+)?\)?\+?)+|^(\w+)\+(?:r\+)?\$([0-9A-F]{2})$|^(\w+)$")
 BASE_EXPR = re.compile(r"\$([0-9A-F]{2})")  # the constant part of a symbolic byte expr
 
@@ -49,6 +55,19 @@ def base_of(expr: str) -> int:
 
 def is_symbolic(byte: str) -> bool:
     return not re.fullmatch(r"[0-9A-F]{2}", byte)
+
+
+def bit_fields(expr: str) -> dict:
+    """{var: shift} for a symbolic opcode byte, e.g. '(r<<3)+$40' -> {'r': 3}."""
+    fields = {}
+    for var, shift in re.findall(r"\((\w+)<<(\d+)\)", expr):
+        fields[var] = int(shift)
+    for var in re.findall(r"[a-z0-9]+", expr):
+        if var in VARS and var not in fields:
+            # Bare operands sit at bit 0 ('r+$88' -> r, 'r' -> r), except the
+            # RST vector: 'p+$C7' is shorthand for p<<3 | 0xC7.
+            fields[var] = 3 if var == "p" else 0
+    return fields
 
 
 CONDITIONS = ("C", "NC", "NZ", "Z", "M", "P", "PE", "PO")
@@ -134,11 +153,17 @@ def main() -> None:
 
         opcode_bytes = []
         operand_size = 0
-        for b in e["bytes"]:
+        fields = {}
+        operand_offset = len(e["bytes"])
+        for idx, b in enumerate(e["bytes"]):
             if b in ("n", "nn", "d", "d-$-2"):
                 operand_size += operand_size_of(b)
+                if operand_offset == len(e["bytes"]):
+                    operand_offset = idx  # first operand byte's position
             else:
                 opcode_bytes.append(b)
+                if is_symbolic(b):
+                    fields.update(bit_fields(b))
 
         # opcode = prefix+opcode as one number, register/bit fields zeroed.
         opcode = 0
@@ -157,7 +182,9 @@ def main() -> None:
             "action": action,
             "size": size,
             "operand_size": operand_size,
+            "operand_offset": operand_offset,
             "template": template,
+            "bit_fields": fields,
         })
         if (action, template) not in order:
             order.append((action, template))

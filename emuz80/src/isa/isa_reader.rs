@@ -5,6 +5,11 @@ use std::collections::HashMap;
 
 ////////////////////////////////////////////////////////////////////////////////
 
+/// Stable identity for one instruction row: its index in the loaded table.
+/// Syntax trees store this and resolve through [`Dbase::get_by_id`].
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Default)]
+pub struct InstructionId(pub usize);
+
 fn hex_str_to_num<'de, D>(deserializer: D) -> Result<usize, D::Error>
 where
     D: Deserializer<'de>,
@@ -16,6 +21,9 @@ where
 #[derive(Debug, Deserialize, Clone, PartialEq, Eq)]
 #[serde(deny_unknown_fields)]
 pub struct Instruction {
+    /// Row index in the loaded table; assigned by [`Dbase::from_text`].
+    #[serde(skip)]
+    pub id: InstructionId,
     /// Canonical operand shape, e.g. `"A,(IX+d)"`, `"r1,r2"`, `"d"`, `""`.
     /// The assembler parser canonicalizes operand text to these strings.
     #[serde(default)]
@@ -33,6 +41,22 @@ pub struct Instruction {
     /// Bytes that follow the opcode (n=1, nn=2, d=1).
     #[serde(default)]
     pub operand_size: usize,
+    /// Position of the first operand byte within the instruction. Only the
+    /// DD/FD CB d forms interleave (DD CB <d> <op>); everywhere else this
+    /// equals `size - operand_size`.
+    #[serde(default)]
+    pub operand_offset: usize,
+    /// Where each symbolic operand sits in the low opcode byte:
+    /// `{var: shift}`, e.g. LD r1,r2 is `{"r1": 3, "r2": 0}`. Vars:
+    /// r, r1, r2, dd, b, p. The backend computes `byte |= value << shift`.
+    #[serde(default)]
+    pub bit_fields: HashMap<String, u8>,
+}
+
+impl Instruction {
+    pub fn id(&self) -> InstructionId {
+        self.id
+    }
 }
 
 /// Instructions for one mnemonic, indexed by operand template.
@@ -83,11 +107,16 @@ pub struct Dbase {
 
 impl Dbase {
     pub fn from_text(json_str: &str) -> Self {
-        let loaded: Dbase = serde_json::from_str(json_str).unwrap();
+        let Dbase {
+            unknown,
+            mut instructions,
+            ..
+        } = serde_json::from_str(json_str).unwrap();
         let mut name_to_ins: HashMap<String, InstructionInfo> = HashMap::new();
         let mut opcode_to_ins: HashMap<usize, Vec<Instruction>> = HashMap::new();
 
-        for ins in &loaded.instructions {
+        for (i, ins) in instructions.iter_mut().enumerate() {
+            ins.id = InstructionId(i);
             name_to_ins
                 .entry(ins.action.clone())
                 .or_insert_with(|| InstructionInfo::new(ins.clone()))
@@ -99,8 +128,8 @@ impl Dbase {
         }
 
         Self {
-            unknown: loaded.unknown,
-            instructions: loaded.instructions,
+            unknown,
+            instructions,
             name_to_ins,
             opcode_to_ins,
         }
@@ -125,6 +154,16 @@ impl Dbase {
         self.name_to_ins
             .get(action)
             .and_then(|info| info.get(template))
+    }
+
+    /// The instruction info block for a mnemonic (all its templates).
+    pub fn get_info(&self, action: &str) -> Option<&InstructionInfo> {
+        self.name_to_ins.get(action)
+    }
+
+    /// Resolve a stored [`InstructionId`] back to its row.
+    pub fn get_by_id(&self, id: InstructionId) -> Option<&Instruction> {
+        self.instructions.get(id.0)
     }
 
     /// Rows sharing a (zeroed) opcode value — the future decoder's entry point.
@@ -196,6 +235,16 @@ mod tests {
         assert_eq!((ld_ix.size, ld_ix.operand_size), (3, 1));
         let ld_nn = db.get("LD", "dd,nn").unwrap()[0].clone();
         assert_eq!((ld_nn.size, ld_nn.operand_size), (3, 2));
+    }
+
+    #[test]
+    fn ids_round_trip_through_the_table() {
+        let db = Dbase::new();
+        let nop = db.get("NOP", "").unwrap()[0].clone();
+        let again = db.get_by_id(nop.id()).unwrap();
+        assert_eq!(again.opcode, 0x00);
+        assert!(db.get_info("LDIR").is_some());
+        assert!(db.get_info("NOTAMNEMONIC").is_none());
     }
 
     #[test]
