@@ -1,0 +1,2711 @@
+{
+ "unknown": {
+  "addr_mode": "Inherent",
+  "cycles": 1,
+  "opcode": "00",
+  "action": "unknown",
+  "size": 1
+ },
+ "instructions": [
+  {
+   "addr_mode": "Indirect",
+   "cycles": 7,
+   "opcode": "008E",
+   "action": "ADC",
+   "size": 1,
+   "operand_size": 0,
+   "template": "A,(HL)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 19,
+   "opcode": "DD8E",
+   "action": "ADC",
+   "size": 3,
+   "operand_size": 1,
+   "template": "A,(IX+d)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 19,
+   "opcode": "FD8E",
+   "action": "ADC",
+   "size": 3,
+   "operand_size": 1,
+   "template": "A,(IY+d)"
+  },
+  {
+   "addr_mode": "Immediate8",
+   "cycles": 7,
+   "opcode": "00CE",
+   "action": "ADC",
+   "size": 2,
+   "operand_size": 1,
+   "template": "A,n"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 4,
+   "opcode": "0088",
+   "action": "ADC",
+   "size": 1,
+   "operand_size": 0,
+   "template": "A,r"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 8,
+   "opcode": "DD88",
+   "action": "ADC",
+   "size": 2,
+   "operand_size": 0,
+   "template": "A,r"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 8,
+   "opcode": "FD88",
+   "action": "ADC",
+   "size": 2,
+   "operand_size": 0,
+   "template": "A,r"
+  },
+  {
+   "addr_mode": "RegisterPair",
+   "cycles": 15,
+   "opcode": "ED4A",
+   "action": "ADC",
+   "size": 2,
+   "operand_size": 0,
+   "template": "HL,dd"
+  },
+  {
+   "addr_mode": "Indirect",
+   "cycles": 7,
+   "opcode": "0086",
+   "action": "ADD",
+   "size": 1,
+   "operand_size": 0,
+   "template": "A,(HL)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 19,
+   "opcode": "DD86",
+   "action": "ADD",
+   "size": 3,
+   "operand_size": 1,
+   "template": "A,(IX+d)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 19,
+   "opcode": "FD86",
+   "action": "ADD",
+   "size": 3,
+   "operand_size": 1,
+   "template": "A,(IY+d)"
+  },
+  {
+   "addr_mode": "Immediate8",
+   "cycles": 7,
+   "opcode": "00C6",
+   "action": "ADD",
+   "size": 2,
+   "operand_size": 1,
+   "template": "A,n"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 4,
+   "opcode": "0080",
+   "action": "ADD",
+   "size": 1,
+   "operand_size": 0,
+   "template": "A,r"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 8,
+   "opcode": "DD80",
+   "action": "ADD",
+   "size": 2,
+   "operand_size": 0,
+   "template": "A,r"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 8,
+   "opcode": "FD80",
+   "action": "ADD",
+   "size": 2,
+   "operand_size": 0,
+   "template": "A,r"
+  },
+  {
+   "addr_mode": "RegisterPair",
+   "cycles": 11,
+   "opcode": "0009",
+   "action": "ADD",
+   "size": 1,
+   "operand_size": 0,
+   "template": "HL,dd"
+  },
+  {
+   "addr_mode": "RegisterPair",
+   "cycles": 15,
+   "opcode": "DD09",
+   "action": "ADD",
+   "size": 2,
+   "operand_size": 0,
+   "template": "IX,dd"
+  },
+  {
+   "addr_mode": "RegisterPair",
+   "cycles": 15,
+   "opcode": "FD09",
+   "action": "ADD",
+   "size": 2,
+   "operand_size": 0,
+   "template": "IY,dd"
+  },
+  {
+   "addr_mode": "Indirect",
+   "cycles": 7,
+   "opcode": "00A6",
+   "action": "AND",
+   "size": 1,
+   "operand_size": 0,
+   "template": "(HL)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 19,
+   "opcode": "DDA6",
+   "action": "AND",
+   "size": 3,
+   "operand_size": 1,
+   "template": "(IX+d)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 19,
+   "opcode": "FDA6",
+   "action": "AND",
+   "size": 3,
+   "operand_size": 1,
+   "template": "(IY+d)"
+  },
+  {
+   "addr_mode": "Immediate8",
+   "cycles": 7,
+   "opcode": "00E6",
+   "action": "AND",
+   "size": 2,
+   "operand_size": 1,
+   "template": "n"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 4,
+   "opcode": "00A0",
+   "action": "AND",
+   "size": 1,
+   "operand_size": 0,
+   "template": "r"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 8,
+   "opcode": "DDA0",
+   "action": "AND",
+   "size": 2,
+   "operand_size": 0,
+   "template": "r"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 8,
+   "opcode": "FDA0",
+   "action": "AND",
+   "size": 2,
+   "operand_size": 0,
+   "template": "r"
+  },
+  {
+   "addr_mode": "BitIndirect",
+   "cycles": 12,
+   "opcode": "CB46",
+   "action": "BIT",
+   "size": 2,
+   "operand_size": 0,
+   "template": "b,(HL)"
+  },
+  {
+   "addr_mode": "BitIndexed",
+   "cycles": 20,
+   "opcode": "DDCB46",
+   "action": "BIT",
+   "size": 4,
+   "operand_size": 1,
+   "template": "b,(IX+d)"
+  },
+  {
+   "addr_mode": "BitIndexed",
+   "cycles": 20,
+   "opcode": "FDCB46",
+   "action": "BIT",
+   "size": 4,
+   "operand_size": 1,
+   "template": "b,(IY+d)"
+  },
+  {
+   "addr_mode": "BitRegister",
+   "cycles": 8,
+   "opcode": "CB40",
+   "action": "BIT",
+   "size": 2,
+   "operand_size": 0,
+   "template": "b,r"
+  },
+  {
+   "addr_mode": "ConditionImmediate",
+   "cycles": 17,
+   "opcode": "00DC",
+   "action": "CALL",
+   "size": 3,
+   "operand_size": 2,
+   "template": "C,nn"
+  },
+  {
+   "addr_mode": "ConditionImmediate",
+   "cycles": 17,
+   "opcode": "00FC",
+   "action": "CALL",
+   "size": 3,
+   "operand_size": 2,
+   "template": "M,nn"
+  },
+  {
+   "addr_mode": "ConditionImmediate",
+   "cycles": 17,
+   "opcode": "00D4",
+   "action": "CALL",
+   "size": 3,
+   "operand_size": 2,
+   "template": "NC,nn"
+  },
+  {
+   "addr_mode": "ConditionImmediate",
+   "cycles": 17,
+   "opcode": "00C4",
+   "action": "CALL",
+   "size": 3,
+   "operand_size": 2,
+   "template": "NZ,nn"
+  },
+  {
+   "addr_mode": "ConditionImmediate",
+   "cycles": 17,
+   "opcode": "00F4",
+   "action": "CALL",
+   "size": 3,
+   "operand_size": 2,
+   "template": "P,nn"
+  },
+  {
+   "addr_mode": "ConditionImmediate",
+   "cycles": 17,
+   "opcode": "00EC",
+   "action": "CALL",
+   "size": 3,
+   "operand_size": 2,
+   "template": "PE,nn"
+  },
+  {
+   "addr_mode": "ConditionImmediate",
+   "cycles": 17,
+   "opcode": "00E4",
+   "action": "CALL",
+   "size": 3,
+   "operand_size": 2,
+   "template": "PO,nn"
+  },
+  {
+   "addr_mode": "ConditionImmediate",
+   "cycles": 17,
+   "opcode": "00CC",
+   "action": "CALL",
+   "size": 3,
+   "operand_size": 2,
+   "template": "Z,nn"
+  },
+  {
+   "addr_mode": "Immediate16",
+   "cycles": 17,
+   "opcode": "00CD",
+   "action": "CALL",
+   "size": 3,
+   "operand_size": 2,
+   "template": "nn"
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 4,
+   "opcode": "003F",
+   "action": "CCF",
+   "size": 1,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "Indirect",
+   "cycles": 7,
+   "opcode": "00BE",
+   "action": "CP",
+   "size": 1,
+   "operand_size": 0,
+   "template": "(HL)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 19,
+   "opcode": "DDBE",
+   "action": "CP",
+   "size": 3,
+   "operand_size": 1,
+   "template": "(IX+d)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 19,
+   "opcode": "FDBE",
+   "action": "CP",
+   "size": 3,
+   "operand_size": 1,
+   "template": "(IY+d)"
+  },
+  {
+   "addr_mode": "Immediate8",
+   "cycles": 7,
+   "opcode": "00FE",
+   "action": "CP",
+   "size": 2,
+   "operand_size": 1,
+   "template": "n"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 4,
+   "opcode": "00B8",
+   "action": "CP",
+   "size": 1,
+   "operand_size": 0,
+   "template": "r"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 8,
+   "opcode": "DDB8",
+   "action": "CP",
+   "size": 2,
+   "operand_size": 0,
+   "template": "r"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 8,
+   "opcode": "FDB8",
+   "action": "CP",
+   "size": 2,
+   "operand_size": 0,
+   "template": "r"
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 16,
+   "opcode": "EDA9",
+   "action": "CPD",
+   "size": 2,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 21,
+   "opcode": "EDB9",
+   "action": "CPDR",
+   "size": 2,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 16,
+   "opcode": "EDA1",
+   "action": "CPI",
+   "size": 2,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 21,
+   "opcode": "EDB1",
+   "action": "CPIR",
+   "size": 2,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 4,
+   "opcode": "002F",
+   "action": "CPL",
+   "size": 1,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 4,
+   "opcode": "0027",
+   "action": "DAA",
+   "size": 1,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "Indirect",
+   "cycles": 11,
+   "opcode": "0035",
+   "action": "DEC",
+   "size": 1,
+   "operand_size": 0,
+   "template": "(HL)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 23,
+   "opcode": "DD35",
+   "action": "DEC",
+   "size": 3,
+   "operand_size": 1,
+   "template": "(IX+d)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 23,
+   "opcode": "FD35",
+   "action": "DEC",
+   "size": 3,
+   "operand_size": 1,
+   "template": "(IY+d)"
+  },
+  {
+   "addr_mode": "RegisterPair",
+   "cycles": 10,
+   "opcode": "DD2B",
+   "action": "DEC",
+   "size": 2,
+   "operand_size": 0,
+   "template": "IX"
+  },
+  {
+   "addr_mode": "RegisterPair",
+   "cycles": 10,
+   "opcode": "FD2B",
+   "action": "DEC",
+   "size": 2,
+   "operand_size": 0,
+   "template": "IY"
+  },
+  {
+   "addr_mode": "RegisterPair",
+   "cycles": 6,
+   "opcode": "000B",
+   "action": "DEC",
+   "size": 1,
+   "operand_size": 0,
+   "template": "dd"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 4,
+   "opcode": "0005",
+   "action": "DEC",
+   "size": 1,
+   "operand_size": 0,
+   "template": "r"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 8,
+   "opcode": "DD05",
+   "action": "DEC",
+   "size": 2,
+   "operand_size": 0,
+   "template": "r"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 8,
+   "opcode": "FD05",
+   "action": "DEC",
+   "size": 2,
+   "operand_size": 0,
+   "template": "r"
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 4,
+   "opcode": "00F3",
+   "action": "DI",
+   "size": 1,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "Relative",
+   "cycles": 13,
+   "opcode": "0010",
+   "action": "DJNZ",
+   "size": 2,
+   "operand_size": 1,
+   "template": "d"
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 4,
+   "opcode": "00FB",
+   "action": "EI",
+   "size": 1,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "StackIndirect",
+   "cycles": 19,
+   "opcode": "00E3",
+   "action": "EX",
+   "size": 1,
+   "operand_size": 0,
+   "template": "(SP),HL"
+  },
+  {
+   "addr_mode": "StackIndirect",
+   "cycles": 23,
+   "opcode": "DDE3",
+   "action": "EX",
+   "size": 2,
+   "operand_size": 0,
+   "template": "(SP),IX"
+  },
+  {
+   "addr_mode": "StackIndirect",
+   "cycles": 23,
+   "opcode": "FDE3",
+   "action": "EX",
+   "size": 2,
+   "operand_size": 0,
+   "template": "(SP),IY"
+  },
+  {
+   "addr_mode": "ExchangeAF",
+   "cycles": 4,
+   "opcode": "0008",
+   "action": "EX",
+   "size": 1,
+   "operand_size": 0,
+   "template": "AF,AF'"
+  },
+  {
+   "addr_mode": "RegisterPair",
+   "cycles": 4,
+   "opcode": "00EB",
+   "action": "EX",
+   "size": 1,
+   "operand_size": 0,
+   "template": "DE,HL"
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 4,
+   "opcode": "00D9",
+   "action": "EXX",
+   "size": 1,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 4,
+   "opcode": "0076",
+   "action": "HALT",
+   "size": 1,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "ImmediateMode",
+   "cycles": 8,
+   "opcode": "ED46",
+   "action": "IM",
+   "size": 2,
+   "operand_size": 0,
+   "template": "0"
+  },
+  {
+   "addr_mode": "ImmediateMode",
+   "cycles": 8,
+   "opcode": "ED56",
+   "action": "IM",
+   "size": 2,
+   "operand_size": 0,
+   "template": "1"
+  },
+  {
+   "addr_mode": "ImmediateMode",
+   "cycles": 8,
+   "opcode": "ED5E",
+   "action": "IM",
+   "size": 2,
+   "operand_size": 0,
+   "template": "2"
+  },
+  {
+   "addr_mode": "PortRegister",
+   "cycles": 12,
+   "opcode": "ED70",
+   "action": "IN",
+   "size": 2,
+   "operand_size": 0,
+   "template": "(C)"
+  },
+  {
+   "addr_mode": "Port",
+   "cycles": 11,
+   "opcode": "00DB",
+   "action": "IN",
+   "size": 2,
+   "operand_size": 1,
+   "template": "A,(n)"
+  },
+  {
+   "addr_mode": "PortRegister",
+   "cycles": 12,
+   "opcode": "ED40",
+   "action": "IN",
+   "size": 2,
+   "operand_size": 0,
+   "template": "r,(C)"
+  },
+  {
+   "addr_mode": "Port",
+   "cycles": 12,
+   "opcode": "ED00",
+   "action": "IN0",
+   "size": 3,
+   "operand_size": 1,
+   "template": "r,(n)"
+  },
+  {
+   "addr_mode": "Indirect",
+   "cycles": 11,
+   "opcode": "0034",
+   "action": "INC",
+   "size": 1,
+   "operand_size": 0,
+   "template": "(HL)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 23,
+   "opcode": "DD34",
+   "action": "INC",
+   "size": 3,
+   "operand_size": 1,
+   "template": "(IX+d)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 23,
+   "opcode": "FD34",
+   "action": "INC",
+   "size": 3,
+   "operand_size": 1,
+   "template": "(IY+d)"
+  },
+  {
+   "addr_mode": "RegisterPair",
+   "cycles": 10,
+   "opcode": "DD23",
+   "action": "INC",
+   "size": 2,
+   "operand_size": 0,
+   "template": "IX"
+  },
+  {
+   "addr_mode": "RegisterPair",
+   "cycles": 10,
+   "opcode": "FD23",
+   "action": "INC",
+   "size": 2,
+   "operand_size": 0,
+   "template": "IY"
+  },
+  {
+   "addr_mode": "RegisterPair",
+   "cycles": 6,
+   "opcode": "0003",
+   "action": "INC",
+   "size": 1,
+   "operand_size": 0,
+   "template": "dd"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 4,
+   "opcode": "0004",
+   "action": "INC",
+   "size": 1,
+   "operand_size": 0,
+   "template": "r"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 8,
+   "opcode": "DD04",
+   "action": "INC",
+   "size": 2,
+   "operand_size": 0,
+   "template": "r"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 8,
+   "opcode": "FD04",
+   "action": "INC",
+   "size": 2,
+   "operand_size": 0,
+   "template": "r"
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 16,
+   "opcode": "EDAA",
+   "action": "IND",
+   "size": 2,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 21,
+   "opcode": "EDBA",
+   "action": "INDR",
+   "size": 2,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 16,
+   "opcode": "EDA2",
+   "action": "INI",
+   "size": 2,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 21,
+   "opcode": "EDB2",
+   "action": "INIR",
+   "size": 2,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "Indirect",
+   "cycles": 4,
+   "opcode": "00E9",
+   "action": "JP",
+   "size": 1,
+   "operand_size": 0,
+   "template": "(HL)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 8,
+   "opcode": "DDE9",
+   "action": "JP",
+   "size": 2,
+   "operand_size": 0,
+   "template": "(IX)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 8,
+   "opcode": "FDE9",
+   "action": "JP",
+   "size": 2,
+   "operand_size": 0,
+   "template": "(IY)"
+  },
+  {
+   "addr_mode": "ConditionImmediate",
+   "cycles": 10,
+   "opcode": "00DA",
+   "action": "JP",
+   "size": 3,
+   "operand_size": 2,
+   "template": "C,nn"
+  },
+  {
+   "addr_mode": "ConditionImmediate",
+   "cycles": 10,
+   "opcode": "00FA",
+   "action": "JP",
+   "size": 3,
+   "operand_size": 2,
+   "template": "M,nn"
+  },
+  {
+   "addr_mode": "ConditionImmediate",
+   "cycles": 10,
+   "opcode": "00D2",
+   "action": "JP",
+   "size": 3,
+   "operand_size": 2,
+   "template": "NC,nn"
+  },
+  {
+   "addr_mode": "ConditionImmediate",
+   "cycles": 10,
+   "opcode": "00C2",
+   "action": "JP",
+   "size": 3,
+   "operand_size": 2,
+   "template": "NZ,nn"
+  },
+  {
+   "addr_mode": "ConditionImmediate",
+   "cycles": 10,
+   "opcode": "00F2",
+   "action": "JP",
+   "size": 3,
+   "operand_size": 2,
+   "template": "P,nn"
+  },
+  {
+   "addr_mode": "ConditionImmediate",
+   "cycles": 10,
+   "opcode": "00EA",
+   "action": "JP",
+   "size": 3,
+   "operand_size": 2,
+   "template": "PE,nn"
+  },
+  {
+   "addr_mode": "ConditionImmediate",
+   "cycles": 10,
+   "opcode": "00E2",
+   "action": "JP",
+   "size": 3,
+   "operand_size": 2,
+   "template": "PO,nn"
+  },
+  {
+   "addr_mode": "ConditionImmediate",
+   "cycles": 10,
+   "opcode": "00CA",
+   "action": "JP",
+   "size": 3,
+   "operand_size": 2,
+   "template": "Z,nn"
+  },
+  {
+   "addr_mode": "Immediate16",
+   "cycles": 10,
+   "opcode": "00C3",
+   "action": "JP",
+   "size": 3,
+   "operand_size": 2,
+   "template": "nn"
+  },
+  {
+   "addr_mode": "ConditionRelative",
+   "cycles": 12,
+   "opcode": "0038",
+   "action": "JR",
+   "size": 2,
+   "operand_size": 1,
+   "template": "C,d"
+  },
+  {
+   "addr_mode": "ConditionRelative",
+   "cycles": 12,
+   "opcode": "0030",
+   "action": "JR",
+   "size": 2,
+   "operand_size": 1,
+   "template": "NC,d"
+  },
+  {
+   "addr_mode": "ConditionRelative",
+   "cycles": 12,
+   "opcode": "0020",
+   "action": "JR",
+   "size": 2,
+   "operand_size": 1,
+   "template": "NZ,d"
+  },
+  {
+   "addr_mode": "ConditionRelative",
+   "cycles": 12,
+   "opcode": "0028",
+   "action": "JR",
+   "size": 2,
+   "operand_size": 1,
+   "template": "Z,d"
+  },
+  {
+   "addr_mode": "Relative",
+   "cycles": 12,
+   "opcode": "0018",
+   "action": "JR",
+   "size": 2,
+   "operand_size": 1,
+   "template": "d"
+  },
+  {
+   "addr_mode": "RegisterIndirect",
+   "cycles": 7,
+   "opcode": "0002",
+   "action": "LD",
+   "size": 1,
+   "operand_size": 0,
+   "template": "(BC),A"
+  },
+  {
+   "addr_mode": "RegisterIndirect",
+   "cycles": 7,
+   "opcode": "0012",
+   "action": "LD",
+   "size": 1,
+   "operand_size": 0,
+   "template": "(DE),A"
+  },
+  {
+   "addr_mode": "Indirect",
+   "cycles": 10,
+   "opcode": "0036",
+   "action": "LD",
+   "size": 2,
+   "operand_size": 1,
+   "template": "(HL),n"
+  },
+  {
+   "addr_mode": "Indirect",
+   "cycles": 7,
+   "opcode": "0070",
+   "action": "LD",
+   "size": 1,
+   "operand_size": 0,
+   "template": "(HL),r"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 19,
+   "opcode": "DD36",
+   "action": "LD",
+   "size": 4,
+   "operand_size": 2,
+   "template": "(IX+d),n"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 19,
+   "opcode": "DD70",
+   "action": "LD",
+   "size": 3,
+   "operand_size": 1,
+   "template": "(IX+d),r"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 19,
+   "opcode": "FD36",
+   "action": "LD",
+   "size": 4,
+   "operand_size": 2,
+   "template": "(IY+d),n"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 19,
+   "opcode": "FD70",
+   "action": "LD",
+   "size": 3,
+   "operand_size": 1,
+   "template": "(IY+d),r"
+  },
+  {
+   "addr_mode": "AbsoluteIndirect",
+   "cycles": 13,
+   "opcode": "0032",
+   "action": "LD",
+   "size": 3,
+   "operand_size": 2,
+   "template": "(nn),A"
+  },
+  {
+   "addr_mode": "AbsoluteIndirect16",
+   "cycles": 20,
+   "opcode": "ED43",
+   "action": "LD",
+   "size": 4,
+   "operand_size": 2,
+   "template": "(nn),BC"
+  },
+  {
+   "addr_mode": "AbsoluteIndirect16",
+   "cycles": 20,
+   "opcode": "ED53",
+   "action": "LD",
+   "size": 4,
+   "operand_size": 2,
+   "template": "(nn),DE"
+  },
+  {
+   "addr_mode": "AbsoluteIndirect16",
+   "cycles": 16,
+   "opcode": "0022",
+   "action": "LD",
+   "size": 3,
+   "operand_size": 2,
+   "template": "(nn),HL"
+  },
+  {
+   "addr_mode": "AbsoluteIndirect16",
+   "cycles": 20,
+   "opcode": "ED63",
+   "action": "LD",
+   "size": 4,
+   "operand_size": 2,
+   "template": "(nn),HL"
+  },
+  {
+   "addr_mode": "AbsoluteIndirect16",
+   "cycles": 20,
+   "opcode": "DD22",
+   "action": "LD",
+   "size": 4,
+   "operand_size": 2,
+   "template": "(nn),IX"
+  },
+  {
+   "addr_mode": "AbsoluteIndirect16",
+   "cycles": 20,
+   "opcode": "FD22",
+   "action": "LD",
+   "size": 4,
+   "operand_size": 2,
+   "template": "(nn),IY"
+  },
+  {
+   "addr_mode": "AbsoluteIndirect16",
+   "cycles": 20,
+   "opcode": "ED73",
+   "action": "LD",
+   "size": 4,
+   "operand_size": 2,
+   "template": "(nn),SP"
+  },
+  {
+   "addr_mode": "RegisterIndirect",
+   "cycles": 7,
+   "opcode": "000A",
+   "action": "LD",
+   "size": 1,
+   "operand_size": 0,
+   "template": "A,(BC)"
+  },
+  {
+   "addr_mode": "RegisterIndirect",
+   "cycles": 7,
+   "opcode": "001A",
+   "action": "LD",
+   "size": 1,
+   "operand_size": 0,
+   "template": "A,(DE)"
+  },
+  {
+   "addr_mode": "AbsoluteIndirect",
+   "cycles": 13,
+   "opcode": "003A",
+   "action": "LD",
+   "size": 3,
+   "operand_size": 2,
+   "template": "A,(nn)"
+  },
+  {
+   "addr_mode": "SpecialRegister",
+   "cycles": 9,
+   "opcode": "ED57",
+   "action": "LD",
+   "size": 2,
+   "operand_size": 0,
+   "template": "A,I"
+  },
+  {
+   "addr_mode": "SpecialRegister",
+   "cycles": 9,
+   "opcode": "ED5F",
+   "action": "LD",
+   "size": 2,
+   "operand_size": 0,
+   "template": "A,R"
+  },
+  {
+   "addr_mode": "AbsoluteIndirect16",
+   "cycles": 20,
+   "opcode": "ED4B",
+   "action": "LD",
+   "size": 4,
+   "operand_size": 2,
+   "template": "BC,(nn)"
+  },
+  {
+   "addr_mode": "AbsoluteIndirect16",
+   "cycles": 20,
+   "opcode": "ED5B",
+   "action": "LD",
+   "size": 4,
+   "operand_size": 2,
+   "template": "DE,(nn)"
+  },
+  {
+   "addr_mode": "AbsoluteIndirect16",
+   "cycles": 16,
+   "opcode": "002A",
+   "action": "LD",
+   "size": 3,
+   "operand_size": 2,
+   "template": "HL,(nn)"
+  },
+  {
+   "addr_mode": "AbsoluteIndirect16",
+   "cycles": 20,
+   "opcode": "ED6B",
+   "action": "LD",
+   "size": 4,
+   "operand_size": 2,
+   "template": "HL,(nn)"
+  },
+  {
+   "addr_mode": "SpecialRegister",
+   "cycles": 9,
+   "opcode": "ED47",
+   "action": "LD",
+   "size": 2,
+   "operand_size": 0,
+   "template": "I,A"
+  },
+  {
+   "addr_mode": "AbsoluteIndirect16",
+   "cycles": 20,
+   "opcode": "DD2A",
+   "action": "LD",
+   "size": 4,
+   "operand_size": 2,
+   "template": "IX,(nn)"
+  },
+  {
+   "addr_mode": "Immediate16",
+   "cycles": 14,
+   "opcode": "DD21",
+   "action": "LD",
+   "size": 4,
+   "operand_size": 2,
+   "template": "IX,nn"
+  },
+  {
+   "addr_mode": "AbsoluteIndirect16",
+   "cycles": 20,
+   "opcode": "FD2A",
+   "action": "LD",
+   "size": 4,
+   "operand_size": 2,
+   "template": "IY,(nn)"
+  },
+  {
+   "addr_mode": "Immediate16",
+   "cycles": 14,
+   "opcode": "FD21",
+   "action": "LD",
+   "size": 4,
+   "operand_size": 2,
+   "template": "IY,nn"
+  },
+  {
+   "addr_mode": "SpecialRegister",
+   "cycles": 9,
+   "opcode": "ED4F",
+   "action": "LD",
+   "size": 2,
+   "operand_size": 0,
+   "template": "R,A"
+  },
+  {
+   "addr_mode": "AbsoluteIndirect16",
+   "cycles": 20,
+   "opcode": "ED7B",
+   "action": "LD",
+   "size": 4,
+   "operand_size": 2,
+   "template": "SP,(nn)"
+  },
+  {
+   "addr_mode": "StackRegister",
+   "cycles": 6,
+   "opcode": "00F9",
+   "action": "LD",
+   "size": 1,
+   "operand_size": 0,
+   "template": "SP,HL"
+  },
+  {
+   "addr_mode": "StackRegister",
+   "cycles": 10,
+   "opcode": "DDF9",
+   "action": "LD",
+   "size": 2,
+   "operand_size": 0,
+   "template": "SP,IX"
+  },
+  {
+   "addr_mode": "StackRegister",
+   "cycles": 10,
+   "opcode": "FDF9",
+   "action": "LD",
+   "size": 2,
+   "operand_size": 0,
+   "template": "SP,IY"
+  },
+  {
+   "addr_mode": "Immediate16",
+   "cycles": 10,
+   "opcode": "0001",
+   "action": "LD",
+   "size": 3,
+   "operand_size": 2,
+   "template": "dd,nn"
+  },
+  {
+   "addr_mode": "Indirect",
+   "cycles": 7,
+   "opcode": "0046",
+   "action": "LD",
+   "size": 1,
+   "operand_size": 0,
+   "template": "r,(HL)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 19,
+   "opcode": "DD46",
+   "action": "LD",
+   "size": 3,
+   "operand_size": 1,
+   "template": "r,(IX+d)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 19,
+   "opcode": "FD46",
+   "action": "LD",
+   "size": 3,
+   "operand_size": 1,
+   "template": "r,(IY+d)"
+  },
+  {
+   "addr_mode": "Immediate8",
+   "cycles": 7,
+   "opcode": "0006",
+   "action": "LD",
+   "size": 2,
+   "operand_size": 1,
+   "template": "r,n"
+  },
+  {
+   "addr_mode": "Immediate8",
+   "cycles": 11,
+   "opcode": "DD06",
+   "action": "LD",
+   "size": 3,
+   "operand_size": 1,
+   "template": "r,n"
+  },
+  {
+   "addr_mode": "Immediate8",
+   "cycles": 11,
+   "opcode": "FD06",
+   "action": "LD",
+   "size": 3,
+   "operand_size": 1,
+   "template": "r,n"
+  },
+  {
+   "addr_mode": "RegisterRegister",
+   "cycles": 4,
+   "opcode": "0040",
+   "action": "LD",
+   "size": 1,
+   "operand_size": 0,
+   "template": "r1,r2"
+  },
+  {
+   "addr_mode": "RegisterRegister",
+   "cycles": 8,
+   "opcode": "DD40",
+   "action": "LD",
+   "size": 2,
+   "operand_size": 0,
+   "template": "r1,r2"
+  },
+  {
+   "addr_mode": "RegisterRegister",
+   "cycles": 8,
+   "opcode": "FD40",
+   "action": "LD",
+   "size": 2,
+   "operand_size": 0,
+   "template": "r1,r2"
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 16,
+   "opcode": "EDA8",
+   "action": "LDD",
+   "size": 2,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 21,
+   "opcode": "EDB8",
+   "action": "LDDR",
+   "size": 2,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 16,
+   "opcode": "EDA0",
+   "action": "LDI",
+   "size": 2,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 21,
+   "opcode": "EDB0",
+   "action": "LDIR",
+   "size": 2,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "RegisterPair",
+   "cycles": 17,
+   "opcode": "ED4C",
+   "action": "MLT",
+   "size": 2,
+   "operand_size": 0,
+   "template": "BC"
+  },
+  {
+   "addr_mode": "RegisterPair",
+   "cycles": 17,
+   "opcode": "ED5C",
+   "action": "MLT",
+   "size": 2,
+   "operand_size": 0,
+   "template": "DE"
+  },
+  {
+   "addr_mode": "RegisterPair",
+   "cycles": 17,
+   "opcode": "ED6C",
+   "action": "MLT",
+   "size": 2,
+   "operand_size": 0,
+   "template": "HL"
+  },
+  {
+   "addr_mode": "RegisterPair",
+   "cycles": 17,
+   "opcode": "ED7C",
+   "action": "MLT",
+   "size": 2,
+   "operand_size": 0,
+   "template": "SP"
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 8,
+   "opcode": "ED44",
+   "action": "NEG",
+   "size": 2,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 4,
+   "opcode": "0000",
+   "action": "NOP",
+   "size": 1,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "Indirect",
+   "cycles": 7,
+   "opcode": "00B6",
+   "action": "OR",
+   "size": 1,
+   "operand_size": 0,
+   "template": "(HL)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 19,
+   "opcode": "DDB6",
+   "action": "OR",
+   "size": 3,
+   "operand_size": 1,
+   "template": "(IX+d)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 19,
+   "opcode": "FDB6",
+   "action": "OR",
+   "size": 3,
+   "operand_size": 1,
+   "template": "(IY+d)"
+  },
+  {
+   "addr_mode": "Immediate8",
+   "cycles": 7,
+   "opcode": "00F6",
+   "action": "OR",
+   "size": 2,
+   "operand_size": 1,
+   "template": "n"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 4,
+   "opcode": "00B0",
+   "action": "OR",
+   "size": 1,
+   "operand_size": 0,
+   "template": "r"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 8,
+   "opcode": "DDB0",
+   "action": "OR",
+   "size": 2,
+   "operand_size": 0,
+   "template": "r"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 8,
+   "opcode": "FDB0",
+   "action": "OR",
+   "size": 2,
+   "operand_size": 0,
+   "template": "r"
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 14,
+   "opcode": "ED8B",
+   "action": "OTDM",
+   "size": 2,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 16,
+   "opcode": "ED9B",
+   "action": "OTDMR",
+   "size": 2,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 21,
+   "opcode": "EDBB",
+   "action": "OTDR",
+   "size": 2,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 14,
+   "opcode": "ED83",
+   "action": "OTIM",
+   "size": 2,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 16,
+   "opcode": "ED93",
+   "action": "OTIMR",
+   "size": 2,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 21,
+   "opcode": "EDB3",
+   "action": "OTIR",
+   "size": 2,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "PortRegister",
+   "cycles": 12,
+   "opcode": "ED71",
+   "action": "OUT",
+   "size": 2,
+   "operand_size": 0,
+   "template": "(C),0"
+  },
+  {
+   "addr_mode": "PortRegister",
+   "cycles": 12,
+   "opcode": "ED41",
+   "action": "OUT",
+   "size": 2,
+   "operand_size": 0,
+   "template": "(C),r"
+  },
+  {
+   "addr_mode": "Port",
+   "cycles": 11,
+   "opcode": "00D3",
+   "action": "OUT",
+   "size": 2,
+   "operand_size": 1,
+   "template": "(n),A"
+  },
+  {
+   "addr_mode": "Port",
+   "cycles": 13,
+   "opcode": "ED01",
+   "action": "OUT0",
+   "size": 3,
+   "operand_size": 1,
+   "template": "(n),r"
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 16,
+   "opcode": "EDAB",
+   "action": "OUTD",
+   "size": 2,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 16,
+   "opcode": "EDA3",
+   "action": "OUTI",
+   "size": 2,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "RegisterPair",
+   "cycles": 10,
+   "opcode": "00F1",
+   "action": "POP",
+   "size": 1,
+   "operand_size": 0,
+   "template": "AF"
+  },
+  {
+   "addr_mode": "RegisterPair",
+   "cycles": 10,
+   "opcode": "00C1",
+   "action": "POP",
+   "size": 1,
+   "operand_size": 0,
+   "template": "BC"
+  },
+  {
+   "addr_mode": "RegisterPair",
+   "cycles": 10,
+   "opcode": "00D1",
+   "action": "POP",
+   "size": 1,
+   "operand_size": 0,
+   "template": "DE"
+  },
+  {
+   "addr_mode": "RegisterPair",
+   "cycles": 10,
+   "opcode": "00E1",
+   "action": "POP",
+   "size": 1,
+   "operand_size": 0,
+   "template": "HL"
+  },
+  {
+   "addr_mode": "RegisterPair",
+   "cycles": 14,
+   "opcode": "DDE1",
+   "action": "POP",
+   "size": 2,
+   "operand_size": 0,
+   "template": "IX"
+  },
+  {
+   "addr_mode": "RegisterPair",
+   "cycles": 14,
+   "opcode": "FDE1",
+   "action": "POP",
+   "size": 2,
+   "operand_size": 0,
+   "template": "IY"
+  },
+  {
+   "addr_mode": "RegisterPair",
+   "cycles": 11,
+   "opcode": "00F5",
+   "action": "PUSH",
+   "size": 1,
+   "operand_size": 0,
+   "template": "AF"
+  },
+  {
+   "addr_mode": "RegisterPair",
+   "cycles": 11,
+   "opcode": "00C5",
+   "action": "PUSH",
+   "size": 1,
+   "operand_size": 0,
+   "template": "BC"
+  },
+  {
+   "addr_mode": "RegisterPair",
+   "cycles": 11,
+   "opcode": "00D5",
+   "action": "PUSH",
+   "size": 1,
+   "operand_size": 0,
+   "template": "DE"
+  },
+  {
+   "addr_mode": "RegisterPair",
+   "cycles": 11,
+   "opcode": "00E5",
+   "action": "PUSH",
+   "size": 1,
+   "operand_size": 0,
+   "template": "HL"
+  },
+  {
+   "addr_mode": "RegisterPair",
+   "cycles": 15,
+   "opcode": "DDE5",
+   "action": "PUSH",
+   "size": 2,
+   "operand_size": 0,
+   "template": "IX"
+  },
+  {
+   "addr_mode": "RegisterPair",
+   "cycles": 15,
+   "opcode": "FDE5",
+   "action": "PUSH",
+   "size": 2,
+   "operand_size": 0,
+   "template": "IY"
+  },
+  {
+   "addr_mode": "BitIndirect",
+   "cycles": 15,
+   "opcode": "CB86",
+   "action": "RES",
+   "size": 2,
+   "operand_size": 0,
+   "template": "b,(HL)"
+  },
+  {
+   "addr_mode": "BitIndexed",
+   "cycles": 23,
+   "opcode": "DDCB86",
+   "action": "RES",
+   "size": 4,
+   "operand_size": 1,
+   "template": "b,(IX+d)"
+  },
+  {
+   "addr_mode": "BitIndexed",
+   "cycles": 23,
+   "opcode": "DDCB80",
+   "action": "RES",
+   "size": 4,
+   "operand_size": 1,
+   "template": "b,(IX+d),r"
+  },
+  {
+   "addr_mode": "BitIndexed",
+   "cycles": 23,
+   "opcode": "FDCB86",
+   "action": "RES",
+   "size": 4,
+   "operand_size": 1,
+   "template": "b,(IY+d)"
+  },
+  {
+   "addr_mode": "BitIndexed",
+   "cycles": 23,
+   "opcode": "FDCB80",
+   "action": "RES",
+   "size": 4,
+   "operand_size": 1,
+   "template": "b,(IY+d),r"
+  },
+  {
+   "addr_mode": "BitRegister",
+   "cycles": 8,
+   "opcode": "CB80",
+   "action": "RES",
+   "size": 2,
+   "operand_size": 0,
+   "template": "b,r"
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 10,
+   "opcode": "00C9",
+   "action": "RET",
+   "size": 1,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "Condition",
+   "cycles": 11,
+   "opcode": "00D8",
+   "action": "RET",
+   "size": 1,
+   "operand_size": 0,
+   "template": "C"
+  },
+  {
+   "addr_mode": "Condition",
+   "cycles": 11,
+   "opcode": "00F8",
+   "action": "RET",
+   "size": 1,
+   "operand_size": 0,
+   "template": "M"
+  },
+  {
+   "addr_mode": "Condition",
+   "cycles": 11,
+   "opcode": "00D0",
+   "action": "RET",
+   "size": 1,
+   "operand_size": 0,
+   "template": "NC"
+  },
+  {
+   "addr_mode": "Condition",
+   "cycles": 11,
+   "opcode": "00C0",
+   "action": "RET",
+   "size": 1,
+   "operand_size": 0,
+   "template": "NZ"
+  },
+  {
+   "addr_mode": "Condition",
+   "cycles": 11,
+   "opcode": "00F0",
+   "action": "RET",
+   "size": 1,
+   "operand_size": 0,
+   "template": "P"
+  },
+  {
+   "addr_mode": "Condition",
+   "cycles": 11,
+   "opcode": "00E8",
+   "action": "RET",
+   "size": 1,
+   "operand_size": 0,
+   "template": "PE"
+  },
+  {
+   "addr_mode": "Condition",
+   "cycles": 11,
+   "opcode": "00E0",
+   "action": "RET",
+   "size": 1,
+   "operand_size": 0,
+   "template": "PO"
+  },
+  {
+   "addr_mode": "Condition",
+   "cycles": 11,
+   "opcode": "00C8",
+   "action": "RET",
+   "size": 1,
+   "operand_size": 0,
+   "template": "Z"
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 14,
+   "opcode": "ED4D",
+   "action": "RETI",
+   "size": 2,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 14,
+   "opcode": "ED45",
+   "action": "RETN",
+   "size": 2,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "Indirect",
+   "cycles": 15,
+   "opcode": "CB16",
+   "action": "RL",
+   "size": 2,
+   "operand_size": 0,
+   "template": "(HL)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 23,
+   "opcode": "DDCB16",
+   "action": "RL",
+   "size": 4,
+   "operand_size": 1,
+   "template": "(IX+d)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 23,
+   "opcode": "DDCB10",
+   "action": "RL",
+   "size": 4,
+   "operand_size": 1,
+   "template": "(IX+d),r"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 23,
+   "opcode": "FDCB16",
+   "action": "RL",
+   "size": 4,
+   "operand_size": 1,
+   "template": "(IY+d)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 23,
+   "opcode": "FDCB10",
+   "action": "RL",
+   "size": 4,
+   "operand_size": 1,
+   "template": "(IY+d),r"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 8,
+   "opcode": "CB10",
+   "action": "RL",
+   "size": 2,
+   "operand_size": 0,
+   "template": "r"
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 4,
+   "opcode": "0017",
+   "action": "RLA",
+   "size": 1,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "Indirect",
+   "cycles": 15,
+   "opcode": "CB06",
+   "action": "RLC",
+   "size": 2,
+   "operand_size": 0,
+   "template": "(HL)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 23,
+   "opcode": "DDCB06",
+   "action": "RLC",
+   "size": 4,
+   "operand_size": 1,
+   "template": "(IX+d)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 23,
+   "opcode": "DDCB00",
+   "action": "RLC",
+   "size": 4,
+   "operand_size": 1,
+   "template": "(IX+d),r"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 23,
+   "opcode": "FDCB06",
+   "action": "RLC",
+   "size": 4,
+   "operand_size": 1,
+   "template": "(IY+d)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 23,
+   "opcode": "FDCB00",
+   "action": "RLC",
+   "size": 4,
+   "operand_size": 1,
+   "template": "(IY+d),r"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 8,
+   "opcode": "CB00",
+   "action": "RLC",
+   "size": 2,
+   "operand_size": 0,
+   "template": "r"
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 4,
+   "opcode": "0007",
+   "action": "RLCA",
+   "size": 1,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 18,
+   "opcode": "ED6F",
+   "action": "RLD",
+   "size": 2,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "Indirect",
+   "cycles": 15,
+   "opcode": "CB1E",
+   "action": "RR",
+   "size": 2,
+   "operand_size": 0,
+   "template": "(HL)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 23,
+   "opcode": "DDCB1E",
+   "action": "RR",
+   "size": 4,
+   "operand_size": 1,
+   "template": "(IX+d)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 23,
+   "opcode": "DDCB18",
+   "action": "RR",
+   "size": 4,
+   "operand_size": 1,
+   "template": "(IX+d),r"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 23,
+   "opcode": "FDCB1E",
+   "action": "RR",
+   "size": 4,
+   "operand_size": 1,
+   "template": "(IY+d)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 23,
+   "opcode": "FDCB18",
+   "action": "RR",
+   "size": 4,
+   "operand_size": 1,
+   "template": "(IY+d),r"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 8,
+   "opcode": "CB18",
+   "action": "RR",
+   "size": 2,
+   "operand_size": 0,
+   "template": "r"
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 4,
+   "opcode": "001F",
+   "action": "RRA",
+   "size": 1,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "Indirect",
+   "cycles": 15,
+   "opcode": "CB0E",
+   "action": "RRC",
+   "size": 2,
+   "operand_size": 0,
+   "template": "(HL)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 23,
+   "opcode": "DDCB0E",
+   "action": "RRC",
+   "size": 4,
+   "operand_size": 1,
+   "template": "(IX+d)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 23,
+   "opcode": "DDCB08",
+   "action": "RRC",
+   "size": 4,
+   "operand_size": 1,
+   "template": "(IX+d),r"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 23,
+   "opcode": "FDCB0E",
+   "action": "RRC",
+   "size": 4,
+   "operand_size": 1,
+   "template": "(IY+d)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 23,
+   "opcode": "FDCB08",
+   "action": "RRC",
+   "size": 4,
+   "operand_size": 1,
+   "template": "(IY+d),r"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 8,
+   "opcode": "CB08",
+   "action": "RRC",
+   "size": 2,
+   "operand_size": 0,
+   "template": "r"
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 4,
+   "opcode": "000F",
+   "action": "RRCA",
+   "size": 1,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 18,
+   "opcode": "ED67",
+   "action": "RRD",
+   "size": 2,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "Restart",
+   "cycles": 11,
+   "opcode": "00C7",
+   "action": "RST",
+   "size": 1,
+   "operand_size": 0,
+   "template": "p"
+  },
+  {
+   "addr_mode": "Indirect",
+   "cycles": 7,
+   "opcode": "009E",
+   "action": "SBC",
+   "size": 1,
+   "operand_size": 0,
+   "template": "A,(HL)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 19,
+   "opcode": "DD9E",
+   "action": "SBC",
+   "size": 3,
+   "operand_size": 1,
+   "template": "A,(IX+d)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 19,
+   "opcode": "FD9E",
+   "action": "SBC",
+   "size": 3,
+   "operand_size": 1,
+   "template": "A,(IY+d)"
+  },
+  {
+   "addr_mode": "Immediate8",
+   "cycles": 7,
+   "opcode": "00DE",
+   "action": "SBC",
+   "size": 2,
+   "operand_size": 1,
+   "template": "A,n"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 4,
+   "opcode": "0098",
+   "action": "SBC",
+   "size": 1,
+   "operand_size": 0,
+   "template": "A,r"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 8,
+   "opcode": "DD98",
+   "action": "SBC",
+   "size": 2,
+   "operand_size": 0,
+   "template": "A,r"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 8,
+   "opcode": "FD98",
+   "action": "SBC",
+   "size": 2,
+   "operand_size": 0,
+   "template": "A,r"
+  },
+  {
+   "addr_mode": "RegisterPair",
+   "cycles": 15,
+   "opcode": "ED42",
+   "action": "SBC",
+   "size": 2,
+   "operand_size": 0,
+   "template": "HL,dd"
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 4,
+   "opcode": "0037",
+   "action": "SCF",
+   "size": 1,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "BitIndirect",
+   "cycles": 15,
+   "opcode": "CBC6",
+   "action": "SET",
+   "size": 2,
+   "operand_size": 0,
+   "template": "b,(HL)"
+  },
+  {
+   "addr_mode": "BitIndexed",
+   "cycles": 23,
+   "opcode": "DDCBC6",
+   "action": "SET",
+   "size": 4,
+   "operand_size": 1,
+   "template": "b,(IX+d)"
+  },
+  {
+   "addr_mode": "BitIndexed",
+   "cycles": 23,
+   "opcode": "DDCBC0",
+   "action": "SET",
+   "size": 4,
+   "operand_size": 1,
+   "template": "b,(IX+d),r"
+  },
+  {
+   "addr_mode": "BitIndexed",
+   "cycles": 23,
+   "opcode": "FDCBC6",
+   "action": "SET",
+   "size": 4,
+   "operand_size": 1,
+   "template": "b,(IY+d)"
+  },
+  {
+   "addr_mode": "BitIndexed",
+   "cycles": 23,
+   "opcode": "FDCBC0",
+   "action": "SET",
+   "size": 4,
+   "operand_size": 1,
+   "template": "b,(IY+d),r"
+  },
+  {
+   "addr_mode": "BitRegister",
+   "cycles": 8,
+   "opcode": "CBC0",
+   "action": "SET",
+   "size": 2,
+   "operand_size": 0,
+   "template": "b,r"
+  },
+  {
+   "addr_mode": "Indirect",
+   "cycles": 15,
+   "opcode": "CB26",
+   "action": "SLA",
+   "size": 2,
+   "operand_size": 0,
+   "template": "(HL)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 23,
+   "opcode": "DDCB26",
+   "action": "SLA",
+   "size": 4,
+   "operand_size": 1,
+   "template": "(IX+d)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 23,
+   "opcode": "DDCB20",
+   "action": "SLA",
+   "size": 4,
+   "operand_size": 1,
+   "template": "(IX+d),r"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 23,
+   "opcode": "FDCB26",
+   "action": "SLA",
+   "size": 4,
+   "operand_size": 1,
+   "template": "(IY+d)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 23,
+   "opcode": "FDCB20",
+   "action": "SLA",
+   "size": 4,
+   "operand_size": 1,
+   "template": "(IY+d),r"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 8,
+   "opcode": "CB20",
+   "action": "SLA",
+   "size": 2,
+   "operand_size": 0,
+   "template": "r"
+  },
+  {
+   "addr_mode": "Indirect",
+   "cycles": 15,
+   "opcode": "CB36",
+   "action": "SLL",
+   "size": 2,
+   "operand_size": 0,
+   "template": "(HL)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 23,
+   "opcode": "DDCB36",
+   "action": "SLL",
+   "size": 4,
+   "operand_size": 1,
+   "template": "(IX+d)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 23,
+   "opcode": "DDCB30",
+   "action": "SLL",
+   "size": 4,
+   "operand_size": 1,
+   "template": "(IX+d),r"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 23,
+   "opcode": "FDCB36",
+   "action": "SLL",
+   "size": 4,
+   "operand_size": 1,
+   "template": "(IY+d)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 23,
+   "opcode": "FDCB30",
+   "action": "SLL",
+   "size": 4,
+   "operand_size": 1,
+   "template": "(IY+d),r"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 8,
+   "opcode": "CB30",
+   "action": "SLL",
+   "size": 2,
+   "operand_size": 0,
+   "template": "r"
+  },
+  {
+   "addr_mode": "Inherent",
+   "cycles": 8,
+   "opcode": "ED76",
+   "action": "SLP",
+   "size": 2,
+   "operand_size": 0,
+   "template": ""
+  },
+  {
+   "addr_mode": "Indirect",
+   "cycles": 15,
+   "opcode": "CB2E",
+   "action": "SRA",
+   "size": 2,
+   "operand_size": 0,
+   "template": "(HL)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 23,
+   "opcode": "DDCB2E",
+   "action": "SRA",
+   "size": 4,
+   "operand_size": 1,
+   "template": "(IX+d)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 23,
+   "opcode": "DDCB28",
+   "action": "SRA",
+   "size": 4,
+   "operand_size": 1,
+   "template": "(IX+d),r"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 23,
+   "opcode": "FDCB2E",
+   "action": "SRA",
+   "size": 4,
+   "operand_size": 1,
+   "template": "(IY+d)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 23,
+   "opcode": "FDCB28",
+   "action": "SRA",
+   "size": 4,
+   "operand_size": 1,
+   "template": "(IY+d),r"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 8,
+   "opcode": "CB28",
+   "action": "SRA",
+   "size": 2,
+   "operand_size": 0,
+   "template": "r"
+  },
+  {
+   "addr_mode": "Indirect",
+   "cycles": 15,
+   "opcode": "CB3E",
+   "action": "SRL",
+   "size": 2,
+   "operand_size": 0,
+   "template": "(HL)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 23,
+   "opcode": "DDCB3E",
+   "action": "SRL",
+   "size": 4,
+   "operand_size": 1,
+   "template": "(IX+d)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 23,
+   "opcode": "DDCB38",
+   "action": "SRL",
+   "size": 4,
+   "operand_size": 1,
+   "template": "(IX+d),r"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 23,
+   "opcode": "FDCB3E",
+   "action": "SRL",
+   "size": 4,
+   "operand_size": 1,
+   "template": "(IY+d)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 23,
+   "opcode": "FDCB38",
+   "action": "SRL",
+   "size": 4,
+   "operand_size": 1,
+   "template": "(IY+d),r"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 8,
+   "opcode": "CB38",
+   "action": "SRL",
+   "size": 2,
+   "operand_size": 0,
+   "template": "r"
+  },
+  {
+   "addr_mode": "Indirect",
+   "cycles": 7,
+   "opcode": "0096",
+   "action": "SUB",
+   "size": 1,
+   "operand_size": 0,
+   "template": "(HL)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 19,
+   "opcode": "DD96",
+   "action": "SUB",
+   "size": 3,
+   "operand_size": 1,
+   "template": "(IX+d)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 19,
+   "opcode": "FD96",
+   "action": "SUB",
+   "size": 3,
+   "operand_size": 1,
+   "template": "(IY+d)"
+  },
+  {
+   "addr_mode": "Immediate8",
+   "cycles": 7,
+   "opcode": "00D6",
+   "action": "SUB",
+   "size": 2,
+   "operand_size": 1,
+   "template": "n"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 4,
+   "opcode": "0090",
+   "action": "SUB",
+   "size": 1,
+   "operand_size": 0,
+   "template": "r"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 8,
+   "opcode": "DD90",
+   "action": "SUB",
+   "size": 2,
+   "operand_size": 0,
+   "template": "r"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 8,
+   "opcode": "FD90",
+   "action": "SUB",
+   "size": 2,
+   "operand_size": 0,
+   "template": "r"
+  },
+  {
+   "addr_mode": "Indirect",
+   "cycles": 10,
+   "opcode": "ED34",
+   "action": "TST",
+   "size": 2,
+   "operand_size": 0,
+   "template": "(HL)"
+  },
+  {
+   "addr_mode": "Immediate8",
+   "cycles": 10,
+   "opcode": "ED64",
+   "action": "TST",
+   "size": 3,
+   "operand_size": 1,
+   "template": "n"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 10,
+   "opcode": "ED04",
+   "action": "TST",
+   "size": 2,
+   "operand_size": 0,
+   "template": "r"
+  },
+  {
+   "addr_mode": "Immediate8",
+   "cycles": 12,
+   "opcode": "ED74",
+   "action": "TSTIO",
+   "size": 3,
+   "operand_size": 1,
+   "template": "n"
+  },
+  {
+   "addr_mode": "Indirect",
+   "cycles": 7,
+   "opcode": "00AE",
+   "action": "XOR",
+   "size": 1,
+   "operand_size": 0,
+   "template": "(HL)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 19,
+   "opcode": "DDAE",
+   "action": "XOR",
+   "size": 3,
+   "operand_size": 1,
+   "template": "(IX+d)"
+  },
+  {
+   "addr_mode": "Indexed",
+   "cycles": 19,
+   "opcode": "FDAE",
+   "action": "XOR",
+   "size": 3,
+   "operand_size": 1,
+   "template": "(IY+d)"
+  },
+  {
+   "addr_mode": "Immediate8",
+   "cycles": 7,
+   "opcode": "00EE",
+   "action": "XOR",
+   "size": 2,
+   "operand_size": 1,
+   "template": "n"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 4,
+   "opcode": "00A8",
+   "action": "XOR",
+   "size": 1,
+   "operand_size": 0,
+   "template": "r"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 8,
+   "opcode": "DDA8",
+   "action": "XOR",
+   "size": 2,
+   "operand_size": 0,
+   "template": "r"
+  },
+  {
+   "addr_mode": "Register",
+   "cycles": 8,
+   "opcode": "FDA8",
+   "action": "XOR",
+   "size": 2,
+   "operand_size": 0,
+   "template": "r"
+  }
+ ]
+}
