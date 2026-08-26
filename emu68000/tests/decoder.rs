@@ -24,7 +24,10 @@ fn plain_instructions() {
     assert_eq!(diss_words(0x1000, &[0x4AFC]), ("illegal".into(), 2));
     assert_eq!(diss_words(0x1000, &[0x4E40]), ("trap #0".into(), 2));
     assert_eq!(diss_words(0x1000, &[0x4E4F]), ("trap #15".into(), 2));
-    assert_eq!(diss_words(0x1000, &[0x4E72, 0x2000]), ("stop #$2000".into(), 4));
+    assert_eq!(
+        diss_words(0x1000, &[0x4E72, 0x2000]),
+        ("stop #$2000".into(), 4)
+    );
 }
 
 #[test]
@@ -41,7 +44,10 @@ fn move_and_ea_forms() {
         diss_words(0x1000, &[0x3A7A, 0x1234]),
         ("movea.w $1234(PC),A5".into(), 4)
     );
-    assert_eq!(diss_words(0x1000, &[0x205F]), ("movea.l (A7)+,A0".into(), 2));
+    assert_eq!(
+        diss_words(0x1000, &[0x205F]),
+        ("movea.l (A7)+,A0".into(), 2)
+    );
     // move.l D7,-(A7)
     assert_eq!(diss_words(0x1000, &[0x2F07]), ("move.l D7,-(A7)".into(), 2));
 }
@@ -51,9 +57,15 @@ fn branches() {
     // bra.s with disp8 in the opcode word
     assert_eq!(diss_words(0x1000, &[0x6012]), ("bra $1014".into(), 2));
     // bra.w: disp8 = 0, 16-bit displacement follows
-    assert_eq!(diss_words(0x1000, &[0x6000, 0x1234]), ("bra.w $2236".into(), 4));
+    assert_eq!(
+        diss_words(0x1000, &[0x6000, 0x1234]),
+        ("bra.w $2236".into(), 4)
+    );
     // bsr.w negative
-    assert_eq!(diss_words(0x1000, &[0x6100, 0xFFFC]), ("bsr.w $0FFE".into(), 4));
+    assert_eq!(
+        diss_words(0x1000, &[0x6100, 0xFFFC]),
+        ("bsr.w $0FFE".into(), 4)
+    );
     // bne.s
     assert_eq!(diss_words(0x1000, &[0x6604]), ("bne $1006".into(), 2));
     // dbra: displacement relative to the displacement word
@@ -132,10 +144,19 @@ fn condition_forms() {
     assert_eq!(diss_words(0x1000, &[0x51C0]), ("sf D0".into(), 2));
     assert_eq!(diss_words(0x1000, &[0x56C0]), ("sne D0".into(), 2));
     // dbt / dbra
-    assert_eq!(diss_words(0x1000, &[0x50C8, 0x0002]), ("dbt D0, $1004".into(), 4));
-    assert_eq!(diss_words(0x1000, &[0x51C8, 0x0002]), ("dbra D0, $1004".into(), 4));
+    assert_eq!(
+        diss_words(0x1000, &[0x50C8, 0x0002]),
+        ("dbt D0, $1004".into(), 4)
+    );
+    assert_eq!(
+        diss_words(0x1000, &[0x51C8, 0x0002]),
+        ("dbra D0, $1004".into(), 4)
+    );
     // dbhi
-    assert_eq!(diss_words(0x1000, &[0x52C8, 0x0002]), ("dbhi D0, $1004".into(), 4));
+    assert_eq!(
+        diss_words(0x1000, &[0x52C8, 0x0002]),
+        ("dbhi D0, $1004".into(), 4)
+    );
 }
 
 #[test]
@@ -174,9 +195,14 @@ fn immediate_and_bit_ops() {
         diss_words(0x1000, &[0x0807, 0x0005]),
         ("btst #$0005,D7".into(), 4)
     );
-    assert_eq!(diss_words(0x1000, &[0x0800, 0x0040]),
-        ("btst #$0040,D0".into(), 4));
-    assert_eq!(diss_words(0x1000, &[0x0880, 0x0080]), ("bclr #$0080,D0".into(), 4));
+    assert_eq!(
+        diss_words(0x1000, &[0x0800, 0x0040]),
+        ("btst #$0040,D0".into(), 4)
+    );
+    assert_eq!(
+        diss_words(0x1000, &[0x0880, 0x0080]),
+        ("bclr #$0080,D0".into(), 4)
+    );
     // movep
     assert_eq!(
         diss_words(0x1000, &[0x0108, 0x1234]),

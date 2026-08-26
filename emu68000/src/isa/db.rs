@@ -245,7 +245,11 @@ impl Dbase {
             instructions: Vec<RawInsn>,
         }
         let raw: Raw = serde_json::from_str(json).expect("opcodes68000.json parse");
-        let mut entries: Vec<Insn> = raw.instructions.into_iter().map(RawInsn::into_insn).collect();
+        let mut entries: Vec<Insn> = raw
+            .instructions
+            .into_iter()
+            .map(RawInsn::into_insn)
+            .collect();
         entries.sort_by_key(|i| std::cmp::Reverse(mask_popcount(i.mask)));
         Self { entries }
     }
@@ -376,7 +380,11 @@ impl Dbase {
     pub fn shape_of(&self, word: u16) -> RawShape {
         debug_assert!(self.entries.len() < u16::MAX as usize);
         let idx = self.resolve_index(word);
-        let insn = if idx == self.entries.len() { &UNKNOWN } else { &self.entries[idx] };
+        let insn = if idx == self.entries.len() {
+            &UNKNOWN
+        } else {
+            &self.entries[idx]
+        };
         let size = insn.size;
         let (pre_w, ea_w, dst_w, post_w) = match insn.form {
             Form::ImmEa => (size.imm_words() as u8, ea_ext_words(word, size), 0, 0),
@@ -412,7 +420,14 @@ impl Dbase {
         };
         // PC-relative src EA (d16(PC) / d8(PC,Xn)); never for MOVE dst
         let pcrel = matches!(((word >> 3) & 7, word & 7), (7, 2) | (7, 3));
-        RawShape { idx, pre_w, ea_w, dst_w, post_w, pcrel }
+        RawShape {
+            idx,
+            pre_w,
+            ea_w,
+            dst_w,
+            post_w,
+            pcrel,
+        }
     }
 }
 
@@ -429,8 +444,21 @@ fn insn_literal(i: &Insn) -> String {
         "Insn {{ mnemonic: {:?}, mask: 0x{:04X}, pattern: 0x{:04X}, size: {}, form: {}, \
 src: {:?}, dst: {:?}, ea: {:?}, ext: {:?}, ea_mask: 0x{:04X}, cycles: {}, desc: {:?}, \
 mem: {:?}, cls1: {}, cls2: {} }}",
-        i.mnemonic, i.mask, i.pattern, size, form, i.src, i.dst, i.ea, i.ext, i.ea_mask,
-        i.cycles, i.desc, i.mem, i.cls1, i.cls2,
+        i.mnemonic,
+        i.mask,
+        i.pattern,
+        size,
+        form,
+        i.src,
+        i.dst,
+        i.ea,
+        i.ext,
+        i.ea_mask,
+        i.cycles,
+        i.desc,
+        i.mem,
+        i.cls1,
+        i.cls2,
     )
 }
 
@@ -475,7 +503,10 @@ fn form_variant(f: Form) -> &'static str {
 /// `build_opcode_table()` result, resolved at build time).
 impl fmt::Display for Dbase {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "// generated from resources/opcodes68000.json — do not edit")?;
+        writeln!(
+            f,
+            "// generated from resources/opcodes68000.json — do not edit"
+        )?;
         writeln!(f, "use crate::isa::{{Insn, Size, Form, DecodeShape}};")?;
         writeln!(f, "pub static INSNS: [Insn; {}] = [", self.entries.len())?;
         for insn in &self.entries {

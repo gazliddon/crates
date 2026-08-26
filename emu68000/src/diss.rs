@@ -26,7 +26,10 @@ pub struct DissCtx {
 
 impl DissCtx {
     pub fn from_slice(addr: usize, _name: &str, data: &[u8]) -> Self {
-        Self { base: addr, data: data.to_vec() }
+        Self {
+            base: addr,
+            data: data.to_vec(),
+        }
     }
 
     /// Convenience: disassemble one instruction at `addr`.
@@ -67,7 +70,9 @@ impl MemoryIO for SliceMem<'_> {
 
     #[inline(always)]
     fn inspect_word(&self, addr: usize) -> emucore::mem::MemResult<u16> {
-        let i = self.idx2(addr).ok_or(emucore::mem::MemErrorTypes::IllegalAddress(addr))?;
+        let i = self
+            .idx2(addr)
+            .ok_or(emucore::mem::MemErrorTypes::IllegalAddress(addr))?;
         Ok(u16::from_be_bytes([self.data[i], self.data[i + 1]]))
     }
 
@@ -128,7 +133,12 @@ impl Diss {
     pub fn diss<M: MemoryIO>(&self, mem: &mut M, addr: usize) -> Result<Disassembly, DecodeError> {
         let decoded = decode(mem, addr)?;
         let text = self.render(&decoded);
-        Ok(Disassembly { addr, size: decoded.size, text, decoded })
+        Ok(Disassembly {
+            addr,
+            size: decoded.size,
+            text,
+            decoded,
+        })
     }
 
     /// render one already-decoded instruction
@@ -161,26 +171,33 @@ impl Diss {
                     format!("{}{}", cls(i.cls2), d.reg2),
                 ],
             ),
-            Form::PredecPredec => {
-                fmt(mn, sz, &[format!("-(A{})", d.reg2), format!("-(A{})", d.reg1)])
-            }
-            Form::PostincPostinc => {
-                fmt(mn, sz, &[format!("(A{})+", d.reg2), format!("(A{})+", d.reg1)])
-            }
-            Form::ImmEa | Form::BitImmEa => fmt(mn, sz, &[self.imm_str(d, i.size), ea(d)]),
-            Form::ImmOnly => fmt(mn, "", &[self.imm_str(d, i.size)]),
-            Form::Move => fmt(
+            Form::PredecPredec => fmt(
                 mn,
                 sz,
-                &[ea(d), self.ea_str(d, d.ea_dst.as_ref().unwrap())],
+                &[format!("-(A{})", d.reg2), format!("-(A{})", d.reg1)],
             ),
+            Form::PostincPostinc => fmt(
+                mn,
+                sz,
+                &[format!("(A{})+", d.reg2), format!("(A{})+", d.reg1)],
+            ),
+            Form::ImmEa | Form::BitImmEa => fmt(mn, sz, &[self.imm_str(d, i.size), ea(d)]),
+            Form::ImmOnly => fmt(mn, "", &[self.imm_str(d, i.size)]),
+            Form::Move => fmt(mn, sz, &[ea(d), self.ea_str(d, d.ea_dst.as_ref().unwrap())]),
             Form::Moveq => fmt(
                 "moveq",
                 "",
-                &[format!("#{}", (d.word & 0xFF) as u8 as i8), format!("D{}", d.reg1)],
+                &[
+                    format!("#{}", (d.word & 0xFF) as u8 as i8),
+                    format!("D{}", d.reg1),
+                ],
             ),
             Form::Addq => fmt(mn, sz, &[format!("#{}", qdata(d.reg1)), ea(d)]),
-            Form::ShiftImm => fmt(mn, sz, &[format!("#{}", qdata(d.reg1)), format!("D{}", d.reg2)]),
+            Form::ShiftImm => fmt(
+                mn,
+                sz,
+                &[format!("#{}", qdata(d.reg1)), format!("D{}", d.reg2)],
+            ),
             Form::ShiftReg => fmt(mn, sz, &[format!("D{}", d.reg1), format!("D{}", d.reg2)]),
             Form::ShiftEa => fmt(mn, "w", &[ea(d)]),
             Form::Bcc8 | Form::Bcc16 => {
@@ -214,9 +231,17 @@ impl Diss {
                 let disp = format!("${:04X}", d.imm.unwrap_or(0) & 0xFFFF);
                 let er = i.src == "M_AIND"; // d16(An),Dn direction
                 if er {
-                    fmt(mn, sz, &[format!("{}(A{})", disp, d.reg2), format!("D{}", d.reg1)])
+                    fmt(
+                        mn,
+                        sz,
+                        &[format!("{}(A{})", disp, d.reg2), format!("D{}", d.reg1)],
+                    )
                 } else {
-                    fmt(mn, sz, &[format!("D{}", d.reg1), format!("{}(A{})", disp, d.reg2)])
+                    fmt(
+                        mn,
+                        sz,
+                        &[format!("D{}", d.reg1), format!("{}(A{})", disp, d.reg2)],
+                    )
                 }
             }
             Form::Trap => fmt(mn, "", &[format!("#{}", d.word & 0xF)]),
@@ -323,8 +348,11 @@ impl Diss {
         // Scan register bits in the given direction; runs keep ascending
         // names (MAME convention). For predecrement the mask is bit-reversed
         // (bit 15 = D0 .. bit 0 = A7, MAME's movem_pd handlers).
-        let emit_run = |from: usize, to: usize, name_of: fn(usize) -> usize,
-                        prefix: char, parts: &mut Vec<String>| {
+        let emit_run = |from: usize,
+                        to: usize,
+                        name_of: fn(usize) -> usize,
+                        prefix: char,
+                        parts: &mut Vec<String>| {
             let desc = from > to;
             let mut i = from;
             loop {
@@ -333,7 +361,13 @@ impl Diss {
                     loop {
                         let next = if desc { j.checked_sub(1) } else { Some(j + 1) };
                         let past = match next {
-                            Some(n) => if desc { n < to } else { n > to },
+                            Some(n) => {
+                                if desc {
+                                    n < to
+                                } else {
+                                    n > to
+                                }
+                            }
                             None => true,
                         };
                         let n = match next {
@@ -385,12 +419,20 @@ impl Diss {
 }
 
 fn cls(c: u8) -> char {
-    if c == 1 { 'A' } else { 'D' }
+    if c == 1 {
+        'A'
+    } else {
+        'D'
+    }
 }
 
 /// quick-immediate value: 0 encodes 8
 fn qdata(v: u8) -> u8 {
-    if v == 0 { 8 } else { v }
+    if v == 0 {
+        8
+    } else {
+        v
+    }
 }
 
 /// signed hex rendering: "-$4" for negative, "$4" otherwise
@@ -413,7 +455,11 @@ fn scale_str(w: u16) -> &'static str {
 
 /// "{mn}.{sz} op1,op2" — size suffix omitted when empty
 fn fmt(mn: &str, sz: &str, ops: &[String]) -> String {
-    let head = if sz.is_empty() { mn.to_string() } else { format!("{mn}.{sz}") };
+    let head = if sz.is_empty() {
+        mn.to_string()
+    } else {
+        format!("{mn}.{sz}")
+    };
     if ops.is_empty() {
         head
     } else {

@@ -57,7 +57,10 @@ impl Cpu {
             pc: chip.ram_base(),
             ppc: 0,
             // GPU code is assembled for bank 1 (GASM -R1), DSP for bank 0
-            flags: Flags { regpage: chip.default_bank() == 1, ..Flags::default() },
+            flags: Flags {
+                regpage: chip.default_bank() == 1,
+                ..Flags::default()
+            },
             stats: ExecutionStats::default(),
             accum: 0,
             div_remainder: 0,
@@ -101,7 +104,15 @@ impl Cpu {
             extra = Some(((w2 as u32) << 16) | w1 as u32);
             size = 6;
         }
-        Ok(DecodedInsn { addr: self.ppc as usize, word, insn, src, dst, extra, size })
+        Ok(DecodedInsn {
+            addr: self.ppc as usize,
+            word,
+            insn,
+            src,
+            dst,
+            extra,
+            size,
+        })
     }
 
     fn execute_with<B: JriscBus + ?Sized>(
@@ -133,35 +144,35 @@ impl Cpu {
         if d.insn.class != crate::isa::InsnClass::Branch {
             self.execute_with(&d, bus)?;
         } else {
-        match d.insn.kind {
-            Kind::Jump => {
-                let cc = d.dst;
-                let reg = d.src as usize;
-                if self.flags.condition(cc) {
-                    // target is captured BEFORE the delay slot executes (the
-                    // slot may modify the register), per MAME
-                    let target = self.regs.get_index(reg);
-                    let slot = self.fetch(bus)?;
-                    self.execute_with(&slot, bus)?;
-                    self.pc = target;
-                    extra_cycles = 3;
+            match d.insn.kind {
+                Kind::Jump => {
+                    let cc = d.dst;
+                    let reg = d.src as usize;
+                    if self.flags.condition(cc) {
+                        // target is captured BEFORE the delay slot executes (the
+                        // slot may modify the register), per MAME
+                        let target = self.regs.get_index(reg);
+                        let slot = self.fetch(bus)?;
+                        self.execute_with(&slot, bus)?;
+                        self.pc = target;
+                        extra_cycles = 3;
+                    }
                 }
-            }
-            Kind::Jr => {
-                let cc = d.dst;
-                if self.flags.condition(cc) {
-                    // offset = signed 5-bit src, in words; relative to the
-                    // pc AFTER the branch instruction (before the slot)
-                    let off = (((d.src as i8) << 3) >> 3) as i32 * 2;
-                    let target = (self.pc as i32).wrapping_add(off) as u32;
-                    let slot = self.fetch(bus)?;
-                    self.execute_with(&slot, bus)?;
-                    self.pc = target;
-                    extra_cycles = 3;
+                Kind::Jr => {
+                    let cc = d.dst;
+                    if self.flags.condition(cc) {
+                        // offset = signed 5-bit src, in words; relative to the
+                        // pc AFTER the branch instruction (before the slot)
+                        let off = (((d.src as i8) << 3) >> 3) as i32 * 2;
+                        let target = (self.pc as i32).wrapping_add(off) as u32;
+                        let slot = self.fetch(bus)?;
+                        self.execute_with(&slot, bus)?;
+                        self.pc = target;
+                        extra_cycles = 3;
+                    }
                 }
+                _ => {}
             }
-            _ => {}
-        }
         }
         self.stats.record(d.insn.cycles as u64 + extra_cycles);
         Ok(StepOutcome::Continue)

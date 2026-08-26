@@ -249,7 +249,9 @@ impl JriscBus for RamBus {
 
 impl JriscBus for SliceMem<'_> {
     fn read_byte(&self, addr: u32) -> u32 {
-        self.idx(addr as usize).map(|i| self.data[i] as u32).unwrap_or(0)
+        self.idx(addr as usize)
+            .map(|i| self.data[i] as u32)
+            .unwrap_or(0)
     }
 
     fn read_word(&self, addr: u32) -> u32 {

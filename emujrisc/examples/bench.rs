@@ -66,33 +66,33 @@ fn main() {
         i2, i2, cy2
     );
 
-/// Run `steps` instructions of the DSP program; `samples` (if set) writes
-/// the 68000-side signal: a channel record requesting that many samples.
-fn run(img: &[u8], steps: usize, samples: Option<u32>) -> (f64, f64) {
-    let mut cpu = Cpu::new(Chip::Dsp);
-    cpu.pc = 0xF1B000;
-    let mut bus = RamBus::new(Chip::Dsp, img.to_vec());
-    for _ in 0..500 {
-        cpu.step(&mut bus).expect("warm-up step");
-    }
-    if let Some(n) = samples {
-        bus.write_long(0xF1B35C, 0); // tick mailbox: zero -> mixing path
-        bus.write_long(0xF1B358, 1); // command mailbox: bit0 gate
-        bus.write_long(0xF1B800, 0); // record[0]: process
-        bus.write_long(0xF1B80C, n); // field +6 -> sample count
-        bus.write_long(0xF1B820, 0xFFFF_FFFC); // -4 terminator
-    }
-    let t1 = Instant::now();
-    let mut done = 0u64;
-    for _ in 0..steps {
-        if cpu.step(&mut bus).is_err() {
-            break;
+    /// Run `steps` instructions of the DSP program; `samples` (if set) writes
+    /// the 68000-side signal: a channel record requesting that many samples.
+    fn run(img: &[u8], steps: usize, samples: Option<u32>) -> (f64, f64) {
+        let mut cpu = Cpu::new(Chip::Dsp);
+        cpu.pc = 0xF1B000;
+        let mut bus = RamBus::new(Chip::Dsp, img.to_vec());
+        for _ in 0..500 {
+            cpu.step(&mut bus).expect("warm-up step");
         }
-        done += 1;
+        if let Some(n) = samples {
+            bus.write_long(0xF1B35C, 0); // tick mailbox: zero -> mixing path
+            bus.write_long(0xF1B358, 1); // command mailbox: bit0 gate
+            bus.write_long(0xF1B800, 0); // record[0]: process
+            bus.write_long(0xF1B80C, n); // field +6 -> sample count
+            bus.write_long(0xF1B820, 0xFFFF_FFFC); // -4 terminator
+        }
+        let t1 = Instant::now();
+        let mut done = 0u64;
+        for _ in 0..steps {
+            if cpu.step(&mut bus).is_err() {
+                break;
+            }
+            done += 1;
+        }
+        let dt1 = t1.elapsed().as_secs_f64();
+        (done as f64 / dt1, cpu.stats.cycles as f64 / dt1)
     }
-    let dt1 = t1.elapsed().as_secs_f64();
-    (done as f64 / dt1, cpu.stats.cycles as f64 / dt1)
-}
 
     // ---- disassemble ----
     let ctx = DissCtx::from_slice(base, "dsp", dsp);

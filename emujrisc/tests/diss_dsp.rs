@@ -39,7 +39,9 @@ fn decodes_the_dsp_program_entry_sequence() {
         (0xF1B056, "movei #$00F1B358,r28", 6),
     ];
     for (addr, expected, size) in cases {
-        let d = ctx.diss(&diss, addr).unwrap_or_else(|e| panic!("decode @${addr:X}: {e}"));
+        let d = ctx
+            .diss(&diss, addr)
+            .unwrap_or_else(|e| panic!("decode @${addr:X}: {e}"));
         assert_eq!(d.text, expected, "@${addr:X}");
         assert_eq!(d.size, size, "@${addr:X} size");
     }
@@ -157,11 +159,20 @@ fn metadata_fields_are_loaded() {
     assert!(imacn.mac, "imacn touches the MAC");
     assert_eq!(imacn.class, InsnClass::Mac);
     let add = db.lookup(0, Variant::Dsp).unwrap();
-    assert!(add.flags.carry && add.flags.zero && add.flags.neg, "add sets zcn");
+    assert!(
+        add.flags.carry && add.flags.zero && add.flags.neg,
+        "add sets zcn"
+    );
     let sat16s = db.lookup(33, Variant::Dsp).unwrap();
-    assert!(sat16s.flags.zero && sat16s.flags.neg && !sat16s.flags.carry, "sat16s sets zn");
+    assert!(
+        sat16s.flags.zero && sat16s.flags.neg && !sat16s.flags.carry,
+        "sat16s sets zn"
+    );
     let btst = db.lookup(13, Variant::Dsp).unwrap();
-    assert!(btst.flags.zero && !btst.flags.carry && !btst.flags.neg, "btst sets z");
+    assert!(
+        btst.flags.zero && !btst.flags.carry && !btst.flags.neg,
+        "btst sets z"
+    );
     let sat16 = db.lookup(33, Variant::Gpu).unwrap();
     assert_eq!(sat16.mnemonic, "sat16", "shared opcode resolves per chip");
     // JSON-only fields are ignored by the crate but must not break parsing:

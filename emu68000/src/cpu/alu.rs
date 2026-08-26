@@ -20,9 +20,7 @@
 //! a follow-up; state semantics are the priority here.
 
 use crate::cpu::bus::M68kBus;
-use crate::cpu::cpucore::{
-    ea_addr, read_ea, size_bytes, write_ea, write_reg, Cpu,
-};
+use crate::cpu::cpucore::{ea_addr, read_ea, size_bytes, write_ea, write_reg, Cpu};
 use crate::cpu::decoder::{DecodedInsn, Ea};
 use crate::isa::Form;
 use crate::isa::UNKNOWN;
@@ -66,7 +64,9 @@ pub fn execute<B: M68kBus + ?Sized>(
                     let a = (dst & 0xFFFF) as u16;
                     let b = (src & 0xFFFF) as u16;
                     if b == 0 {
-                        return Err(crate::cpu::ExecError { message: "divide by zero".into() });
+                        return Err(crate::cpu::ExecError {
+                            message: "divide by zero".into(),
+                        });
                     }
                     let ovf = if mn == "divs" {
                         let aa = a as i16 as i32;
@@ -102,7 +102,9 @@ pub fn execute<B: M68kBus + ?Sized>(
                         cpu.regs.set_v(false);
                         cpu.regs.set_c(false);
                         cpu.regs.set_z(false);
-                        return Err(crate::cpu::ExecError { message: "chk: out of range".into() });
+                        return Err(crate::cpu::ExecError {
+                            message: "chk: out of range".into(),
+                        });
                     }
                     cpu.regs.set_n(false);
                     cpu.regs.set_v(false);
@@ -117,7 +119,11 @@ pub fn execute<B: M68kBus + ?Sized>(
                         cpu.regs.sr = src as u16;
                     }
                 }
-                _ => return Err(crate::cpu::ExecError { message: format!("unimplemented: {mn}") }),
+                _ => {
+                    return Err(crate::cpu::ExecError {
+                        message: format!("unimplemented: {mn}"),
+                    })
+                }
             }
         }
         Form::RegEa => {
@@ -149,7 +155,11 @@ pub fn execute<B: M68kBus + ?Sized>(
                     };
                     write_ea(cpu, bus, d, e, size, v)?;
                 }
-                _ => return Err(crate::cpu::ExecError { message: format!("unimplemented: {mn}") }),
+                _ => {
+                    return Err(crate::cpu::ExecError {
+                        message: format!("unimplemented: {mn}"),
+                    })
+                }
             }
         }
         Form::EaAddr => {
@@ -158,12 +168,24 @@ pub fn execute<B: M68kBus + ?Sized>(
             let an = cpu.regs.read_a(d.reg1 as usize);
             match mn {
                 "adda" | "suba" => {
-                    let s = if size == 2 { src as i16 as i32 as u32 } else { src };
-                    let r = if mn == "adda" { an.wrapping_add(s) } else { an.wrapping_sub(s) };
+                    let s = if size == 2 {
+                        src as i16 as i32 as u32
+                    } else {
+                        src
+                    };
+                    let r = if mn == "adda" {
+                        an.wrapping_add(s)
+                    } else {
+                        an.wrapping_sub(s)
+                    };
                     cpu.set_a(d.reg1 as usize, r);
                 }
                 "cmpa" => {
-                    let s = if size == 2 { src as i16 as i32 as u32 } else { src };
+                    let s = if size == 2 {
+                        src as i16 as i32 as u32
+                    } else {
+                        src
+                    };
                     let r = an.wrapping_sub(s);
                     // compare flags like a 32-bit sub
                     let rr = r;
@@ -178,10 +200,18 @@ pub fn execute<B: M68kBus + ?Sized>(
                     cpu.set_a(d.reg1 as usize, a);
                 }
                 "movea" => {
-                    let v = if size == 2 { src as i16 as i32 as u32 } else { src };
+                    let v = if size == 2 {
+                        src as i16 as i32 as u32
+                    } else {
+                        src
+                    };
                     cpu.set_a(d.reg1 as usize, v);
                 }
-                _ => return Err(crate::cpu::ExecError { message: format!("unimplemented: {mn}") }),
+                _ => {
+                    return Err(crate::cpu::ExecError {
+                        message: format!("unimplemented: {mn}"),
+                    })
+                }
             }
         }
         Form::RegReg => {
@@ -195,8 +225,7 @@ pub fn execute<B: M68kBus + ?Sized>(
                     } else {
                         alu_subx_ret(cpu, size, s, dst, x)
                     };
-                    cpu.regs.d[d.reg1 as usize] =
-                        (dst & !mask_of(size)) | (r & mask_of(size));
+                    cpu.regs.d[d.reg1 as usize] = (dst & !mask_of(size)) | (r & mask_of(size));
                 }
                 "abcd" | "sbcd" => {
                     let x = cpu.regs.x() as u32;
@@ -225,7 +254,11 @@ pub fn execute<B: M68kBus + ?Sized>(
                     cpu.w(d.reg1 as usize, r2);
                     cpu.w(d.reg2 as usize, r1);
                 }
-                _ => return Err(crate::cpu::ExecError { message: format!("unimplemented: {mn}") }),
+                _ => {
+                    return Err(crate::cpu::ExecError {
+                        message: format!("unimplemented: {mn}"),
+                    })
+                }
             }
         }
         Form::PredecPredec => {
@@ -268,7 +301,11 @@ pub fn execute<B: M68kBus + ?Sized>(
                     cpu.regs.set_n(false);
                     cpu.regs.set_v(false);
                 }
-                _ => return Err(crate::cpu::ExecError { message: format!("unimplemented: {mn}") }),
+                _ => {
+                    return Err(crate::cpu::ExecError {
+                        message: format!("unimplemented: {mn}"),
+                    })
+                }
             }
         }
         Form::PostincPostinc => {
@@ -302,7 +339,11 @@ pub fn execute<B: M68kBus + ?Sized>(
                         alu_cmp(cpu, size, imm, dst);
                     }
                 }
-                _ => return Err(crate::cpu::ExecError { message: format!("unimplemented: {mn}") }),
+                _ => {
+                    return Err(crate::cpu::ExecError {
+                        message: format!("unimplemented: {mn}"),
+                    })
+                }
             }
         }
         Form::BitImmEa => {
@@ -331,7 +372,11 @@ pub fn execute<B: M68kBus + ?Sized>(
                     }
                     let _ = mask;
                 }
-                _ => return Err(crate::cpu::ExecError { message: format!("unimplemented: {mn}") }),
+                _ => {
+                    return Err(crate::cpu::ExecError {
+                        message: format!("unimplemented: {mn}"),
+                    })
+                }
             }
         }
         Form::Move => {
@@ -341,7 +386,11 @@ pub fn execute<B: M68kBus + ?Sized>(
             match ed.mode {
                 0 => write_reg(cpu, ed.reg, size, src),
                 1 => {
-                    let v = if size == 2 { src as i16 as i32 as u32 } else { src };
+                    let v = if size == 2 {
+                        src as i16 as i32 as u32
+                    } else {
+                        src
+                    };
                     cpu.set_a(ed.reg as usize, v);
                 }
                 _ => {
@@ -366,7 +415,11 @@ pub fn execute<B: M68kBus + ?Sized>(
             if e.mode == 1 {
                 // An destination: full 32-bit, no flags
                 let an = cpu.regs.read_a(e.reg as usize);
-                let r = if mn == "addq" { an.wrapping_add(q) } else { an.wrapping_sub(q) };
+                let r = if mn == "addq" {
+                    an.wrapping_add(q)
+                } else {
+                    an.wrapping_sub(q)
+                };
                 cpu.set_a(e.reg as usize, r);
             } else {
                 let dst = read_ea(cpu, bus, d, e, size)?;
@@ -415,8 +468,7 @@ pub fn execute<B: M68kBus + ?Sized>(
             let target = d.label.unwrap_or(0);
             if !cpu.regs.cond(cc as u8) {
                 let v = cpu.regs.d[d.reg2 as usize].wrapping_sub(1) & 0xFFFF;
-                cpu.regs.d[d.reg2 as usize] =
-                    (cpu.regs.d[d.reg2 as usize] & 0xFFFF_0000) | v;
+                cpu.regs.d[d.reg2 as usize] = (cpu.regs.d[d.reg2 as usize] & 0xFFFF_0000) | v;
                 if v != 0xFFFF {
                     cpu.regs.pc = target;
                 }
@@ -460,7 +512,9 @@ pub fn execute<B: M68kBus + ?Sized>(
             }
         }
         Form::Trap => {
-            return Err(crate::cpu::ExecError { message: format!("trap #{} unimplemented", d.word & 0xF) });
+            return Err(crate::cpu::ExecError {
+                message: format!("trap #{} unimplemented", d.word & 0xF),
+            });
         }
         Form::Ea => {
             let e = d.ea.as_ref().unwrap();
@@ -521,7 +575,11 @@ pub fn execute<B: M68kBus + ?Sized>(
                     let a = ea_addr(cpu, bus, d, e)?;
                     cpu.regs.pc = a;
                 }
-                _ => return Err(crate::cpu::ExecError { message: format!("unimplemented: {mn}") }),
+                _ => {
+                    return Err(crate::cpu::ExecError {
+                        message: format!("unimplemented: {mn}"),
+                    })
+                }
             }
         }
         Form::Dreg => match mn {
@@ -545,7 +603,11 @@ pub fn execute<B: M68kBus + ?Sized>(
                 cpu.regs.set_v(false);
                 cpu.regs.set_c(false);
             }
-            _ => return Err(crate::cpu::ExecError { message: format!("unimplemented: {mn}") }),
+            _ => {
+                return Err(crate::cpu::ExecError {
+                    message: format!("unimplemented: {mn}"),
+                })
+            }
         },
         Form::Areg => match mn {
             "unlk" => {
@@ -565,14 +627,22 @@ pub fn execute<B: M68kBus + ?Sized>(
                     cpu.set_a(d.reg2 as usize, cpu.regs.usp);
                 }
             }
-            _ => return Err(crate::cpu::ExecError { message: format!("unimplemented: {mn}") }),
+            _ => {
+                return Err(crate::cpu::ExecError {
+                    message: format!("unimplemented: {mn}"),
+                })
+            }
         },
         Form::Imm16 => match mn {
             "stop" => {
                 let _ = d.imm.unwrap_or(0);
                 cpu.halted = true;
             }
-            _ => return Err(crate::cpu::ExecError { message: format!("unimplemented: {mn}") }),
+            _ => {
+                return Err(crate::cpu::ExecError {
+                    message: format!("unimplemented: {mn}"),
+                })
+            }
         },
         Form::None => match mn {
             "nop" => {}
@@ -590,11 +660,21 @@ pub fn execute<B: M68kBus + ?Sized>(
                 cpu.regs.pc = cpu.pop_long(bus);
             }
             "reset" | "trapv" | "illegal" | "dc.w" => {
-                return Err(crate::cpu::ExecError { message: format!("{mn} unimplemented") });
+                return Err(crate::cpu::ExecError {
+                    message: format!("{mn} unimplemented"),
+                });
             }
-            _ => return Err(crate::cpu::ExecError { message: format!("unimplemented: {mn}") }),
+            _ => {
+                return Err(crate::cpu::ExecError {
+                    message: format!("unimplemented: {mn}"),
+                })
+            }
         },
-        _ => return Err(crate::cpu::ExecError { message: format!("unimplemented form for {mn}") }),
+        _ => {
+            return Err(crate::cpu::ExecError {
+                message: format!("unimplemented form for {mn}"),
+            })
+        }
     }
     let _ = UNKNOWN;
     Ok(cycles)
@@ -680,7 +760,8 @@ fn alu_negx_ret(cpu: &mut Cpu, size: u8, d: u32) -> u32 {
 fn alu_addx_ret(cpu: &mut Cpu, size: u8, s: u32, d: u32, x: u32) -> u32 {
     let m = mask_of(size);
     let r = (d & m).wrapping_add(s & m).wrapping_add(x) & m;
-    cpu.regs.set_znv_c_add(size, (d & m).wrapping_add(x), s & m, r);
+    cpu.regs
+        .set_znv_c_add(size, (d & m).wrapping_add(x), s & m, r);
     cpu.regs.set_x(cpu.regs.c());
     if r != 0 {
         cpu.regs.set_z(false);
@@ -691,7 +772,8 @@ fn alu_addx_ret(cpu: &mut Cpu, size: u8, s: u32, d: u32, x: u32) -> u32 {
 fn alu_subx_ret(cpu: &mut Cpu, size: u8, s: u32, d: u32, x: u32) -> u32 {
     let m = mask_of(size);
     let r = (d & m).wrapping_sub(s & m).wrapping_sub(x) & m;
-    cpu.regs.set_znv_c_sub(size, d & m, (s & m).wrapping_add(x), r);
+    cpu.regs
+        .set_znv_c_sub(size, d & m, (s & m).wrapping_add(x), r);
     cpu.regs.set_x(cpu.regs.c());
     if r != 0 {
         cpu.regs.set_z(false);
@@ -700,7 +782,13 @@ fn alu_subx_ret(cpu: &mut Cpu, size: u8, s: u32, d: u32, x: u32) -> u32 {
 }
 
 /// Shift/rotate semantics. `count` 0 (register form) leaves C/X alone.
-fn shift_op(cpu: &mut Cpu, mn: &str, size: u8, d: u32, count: u32) -> Result<u32, crate::cpu::ExecError> {
+fn shift_op(
+    cpu: &mut Cpu,
+    mn: &str,
+    size: u8,
+    d: u32,
+    count: u32,
+) -> Result<u32, crate::cpu::ExecError> {
     let m = mask_of(size);
     let bits = size as u32 * 8;
     let mut v = d & m;
@@ -817,7 +905,11 @@ fn movem_op<B: M68kBus + ?Sized>(
         for bit in (0..16).rev() {
             if mask & (1 << bit) != 0 {
                 let reg = 15 - bit;
-                let v = if reg == 15 { new_an } else { cpu.r(reg as usize) };
+                let v = if reg == 15 {
+                    new_an
+                } else {
+                    cpu.r(reg as usize)
+                };
                 write_mem(bus, addr, size, v)?;
                 addr += width;
             }

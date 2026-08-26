@@ -25,7 +25,10 @@ struct CountBus {
 
 impl CountBus {
     fn new(chip: Chip, data: Vec<u8>) -> Self {
-        Self { inner: RamBus::new(chip, data), out_writes: 0 }
+        Self {
+            inner: RamBus::new(chip, data),
+            out_writes: 0,
+        }
     }
 }
 
@@ -92,7 +95,11 @@ fn dsp_program_runs_busy_pipeline_when_signaled() {
         "expected sustained sample output, got {} writes",
         bus.out_writes
     );
-    assert!(counts.len() > 50, "expected a rich pc mix, got {}", counts.len());
+    assert!(
+        counts.len() > 50,
+        "expected a rich pc mix, got {}",
+        counts.len()
+    );
     // the four pipeline stages all execute
     let in_range = |lo: u32, hi: u32| counts.keys().any(|&p| p >= lo && p <= hi);
     assert!(in_range(0xF1B066, 0xF1B0B4), "record walk");

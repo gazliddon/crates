@@ -64,27 +64,21 @@ fn add_carry_and_overflow() {
 #[test]
 fn branches_and_bsr() {
     // beq taken when Z set: moveq #0,D0 ; tst.l D0 ; beq +4
-    let (cpu, _) = run_prog(
-        &[0x7000, 0x4A80, 0x6702, 0x7001, 0x7002, 0x0000],
-        4,
-    );
+    let (cpu, _) = run_prog(&[0x7000, 0x4A80, 0x6702, 0x7001, 0x7002, 0x0000], 4);
     assert_eq!(cpu.regs.d[0], 2, "beq taken past the moveq #1");
     // bsr pushes return and jumps: bsr.w +2 -> lands at nop; rts returns
-    let (cpu2, bus2) = run_prog(
-        &[0x6100, 0x0004, 0x4E71, 0x4E75, 0x0000],
-        2,
+    let (cpu2, bus2) = run_prog(&[0x6100, 0x0004, 0x4E71, 0x4E75, 0x0000], 2);
+    assert_eq!(
+        cpu2.regs.pc, 0x1004,
+        "after bsr to the rts, rts back to nop"
     );
-    assert_eq!(cpu2.regs.pc, 0x1004, "after bsr to the rts, rts back to nop");
     let _ = bus2;
 }
 
 #[test]
 fn dbra_loop() {
     // D0 = 3; loop: dbra D0, loop  (3,2,1,0 then fall through)
-    let (cpu, _) = run_prog(
-        &[0x7003, 0x51C8, 0xFFFE, 0x5240, 0x0000],
-        6,
-    );
+    let (cpu, _) = run_prog(&[0x7003, 0x51C8, 0xFFFE, 0x5240, 0x0000], 6);
     // after dbra falls through: D0 = 0xFFFF (word), addq.w #1 -> 0
     assert_eq!(cpu.regs.d[0] & 0xFFFF, 0);
 }

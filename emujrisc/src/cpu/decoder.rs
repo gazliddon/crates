@@ -49,32 +49,50 @@ impl DecodedInsn {
 
 /// Split a 16-bit word into (opcode, src, dst).
 pub fn decode_word(word: u16) -> (u8, u8, u8) {
-    (((word >> 10) & 0x3F) as u8, ((word >> 5) & 0x1F) as u8, (word & 0x1F) as u8)
+    (
+        ((word >> 10) & 0x3F) as u8,
+        ((word >> 5) & 0x1F) as u8,
+        (word & 0x1F) as u8,
+    )
 }
 
 /// Decode one instruction at `addr` in `mem` for `chip`.
-pub fn decode<M: MemoryIO>(mem: &mut M, addr: usize, chip: Chip) -> Result<DecodedInsn, DecodeError> {
+pub fn decode<M: MemoryIO>(
+    mem: &mut M,
+    addr: usize,
+    chip: Chip,
+) -> Result<DecodedInsn, DecodeError> {
     let mut reader = MemReader::new(mem);
     reader.set_addr(addr);
-    let word = reader
-        .next_word()
-        .map_err(|_| DecodeError { message: format!("truncated instruction at ${addr:08X}") })?;
+    let word = reader.next_word().map_err(|_| DecodeError {
+        message: format!("truncated instruction at ${addr:08X}"),
+    })?;
     let (op, src, dst) = decode_word(word);
-    let insn = Dbase::get().lookup(op as usize, chip.variant()).unwrap_or(&Dbase::get().unknown);
+    let insn = Dbase::get()
+        .lookup(op as usize, chip.variant())
+        .unwrap_or(&Dbase::get().unknown);
     let mut size = 2;
     let mut extra = None;
     if insn.extra32 {
-        let w1 = reader
-            .next_word()
-            .map_err(|_| DecodeError { message: format!("truncated movei at ${addr:08X}") })?;
-        let w2 = reader
-            .next_word()
-            .map_err(|_| DecodeError { message: format!("truncated movei at ${addr:08X}") })?;
+        let w1 = reader.next_word().map_err(|_| DecodeError {
+            message: format!("truncated movei at ${addr:08X}"),
+        })?;
+        let w2 = reader.next_word().map_err(|_| DecodeError {
+            message: format!("truncated movei at ${addr:08X}"),
+        })?;
         // word-swapped: low word first
         extra = Some(((w2 as u32) << 16) | w1 as u32);
         size = 6;
     }
-    Ok(DecodedInsn { addr, word, insn, src, dst, extra, size })
+    Ok(DecodedInsn {
+        addr,
+        word,
+        insn,
+        src,
+        dst,
+        extra,
+        size,
+    })
 }
 
 /// Built-in condition-code names (5-bit values, from the MadMac addendum:

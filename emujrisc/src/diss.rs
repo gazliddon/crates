@@ -26,7 +26,10 @@ pub struct DissCtx {
 
 impl DissCtx {
     pub fn from_slice(addr: usize, _name: &str, data: &[u8]) -> Self {
-        Self { base: addr, data: data.to_vec() }
+        Self {
+            base: addr,
+            data: data.to_vec(),
+        }
     }
 
     /// Convenience: disassemble one instruction at `addr`.
@@ -50,7 +53,12 @@ impl Diss {
     pub fn diss<M: MemoryIO>(&self, mem: &mut M, addr: usize) -> Result<Disassembly, DecodeError> {
         let decoded = decode(mem, addr, self.chip)?;
         let text = self.render(&decoded);
-        Ok(Disassembly { addr, size: decoded.size, text, decoded })
+        Ok(Disassembly {
+            addr,
+            size: decoded.size,
+            text,
+            decoded,
+        })
     }
 
     fn render(&self, d: &DecodedInsn) -> String {

@@ -16,7 +16,10 @@ impl Dbase {
         for insn in ALL {
             by_opcode[insn.opcode].push(*insn);
         }
-        Self { unknown: generated::UNKNOWN, by_opcode }
+        Self {
+            unknown: generated::UNKNOWN,
+            by_opcode,
+        }
     }
 
     /// The process-wide database (populated once from the generated table).

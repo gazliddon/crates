@@ -19,7 +19,11 @@ use crate::mem::JriscBus;
 
 /// `convert_zero`: quick-immediate fields where raw 0 means 32.
 fn convert_zero(n: usize) -> u32 {
-    if n == 0 { 32 } else { n as u32 }
+    if n == 0 {
+        32
+    } else {
+        n as u32
+    }
 }
 
 fn in_internal(cpu: &Cpu, a: u32) -> bool {
@@ -42,7 +46,11 @@ fn store_value<B: JriscBus + ?Sized>(cpu: &mut Cpu, addr: u32, width: u8, v: u32
 
 /// Execute a non-branch instruction (`jump`/`jr` are handled by
 /// [`Cpu::step`] because of the branch delay slot).
-pub fn execute<B: JriscBus + ?Sized>(cpu: &mut Cpu, d: &DecodedInsn, bus: &mut B) -> Result<(), String> {
+pub fn execute<B: JriscBus + ?Sized>(
+    cpu: &mut Cpu,
+    d: &DecodedInsn,
+    bus: &mut B,
+) -> Result<(), String> {
     let src = d.src as usize;
     let dst = d.dst as usize;
     let mn = d.insn.mnemonic;
@@ -205,7 +213,8 @@ pub fn execute<B: JriscBus + ?Sized>(cpu: &mut Cpu, d: &DecodedInsn, bus: &mut B
         }
         Kind::Mirror => {
             let r = cpu.r(dst);
-            let res = (mirror16((r & 0xffff) as u16) as u32) << 16 | mirror16((r >> 16) as u16) as u32;
+            let res =
+                (mirror16((r & 0xffff) as u16) as u32) << 16 | mirror16((r >> 16) as u16) as u32;
             cpu.w(dst, res);
             cpu.flags.set_zn(res);
         }
@@ -327,7 +336,10 @@ pub fn execute<B: JriscBus + ?Sized>(cpu: &mut Cpu, d: &DecodedInsn, bus: &mut B
         }
         Kind::Mtoi => {
             let r1 = cpu.r(src);
-            cpu.w(dst, (((r1 as i32) >> 8) as u32 & 0xff80_0000) | (r1 & 0x007f_ffff));
+            cpu.w(
+                dst,
+                (((r1 as i32) >> 8) as u32 & 0xff80_0000) | (r1 & 0x007f_ffff),
+            );
         }
         Kind::Normi => {
             let mut r1 = cpu.r(src);
@@ -368,25 +380,49 @@ pub fn execute<B: JriscBus + ?Sized>(cpu: &mut Cpu, d: &DecodedInsn, bus: &mut B
         // ---- saturation / pack ----
         Kind::Sat8 => {
             let r = cpu.r(dst) as i32;
-            let res = if r < 0 { 0 } else if r > 255 { 255 } else { r };
+            let res = if r < 0 {
+                0
+            } else if r > 255 {
+                255
+            } else {
+                r
+            };
             cpu.w(dst, res as u32);
             cpu.flags.set_zn(res as u32);
         }
         Kind::Sat16 => {
             let r = cpu.r(dst) as i32;
-            let res = if r < 0 { 0 } else if r > 65535 { 65535 } else { r };
+            let res = if r < 0 {
+                0
+            } else if r > 65535 {
+                65535
+            } else {
+                r
+            };
             cpu.w(dst, res as u32);
             cpu.flags.set_zn(res as u32);
         }
         Kind::Sat16s => {
             let r = cpu.r(dst) as i32;
-            let res = if r < -32768 { -32768 } else if r > 32767 { 32767 } else { r };
+            let res = if r < -32768 {
+                -32768
+            } else if r > 32767 {
+                32767
+            } else {
+                r
+            };
             cpu.w(dst, res as u32);
             cpu.flags.set_zn(res as u32);
         }
         Kind::Sat24 => {
             let r = cpu.r(dst) as i32;
-            let res = if r < 0 { 0 } else if r > 16_777_215 { 16_777_215 } else { r };
+            let res = if r < 0 {
+                0
+            } else if r > 16_777_215 {
+                16_777_215
+            } else {
+                r
+            };
             cpu.w(dst, res as u32);
             cpu.flags.set_zn(res as u32);
         }

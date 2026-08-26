@@ -2,8 +2,8 @@
 //!
 //! Usage: `cargo run --release -p emu68000 --example bench -- [passes]`
 
-use emu68000::cpu::{bus::Ram68k, Cpu, M68kBus};
 use emu68000::cpu::decode;
+use emu68000::cpu::{bus::Ram68k, Cpu, M68kBus};
 use emu68000::diss::SliceMem;
 use std::time::Instant;
 

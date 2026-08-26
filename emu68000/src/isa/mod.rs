@@ -12,7 +12,9 @@ impl Dbase {
     /// Build from the generated static table (OUT_DIR).
     pub fn new() -> Self {
         use generated::INSNS;
-        Self { entries: INSNS.to_vec() }
+        Self {
+            entries: INSNS.to_vec(),
+        }
     }
 
     /// The process-wide database (populated once from the generated table).
@@ -39,8 +41,6 @@ pub fn shape_insn(s: &DecodeShape) -> &'static Insn {
         &generated::INSNS[s.idx as usize]
     }
 }
-
-
 
 impl Default for Dbase {
     fn default() -> Self {

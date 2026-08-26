@@ -124,7 +124,10 @@ pub struct Registers {
 
 impl Registers {
     pub fn new(bank: usize) -> Self {
-        Self { banks: [[0; 32]; 2], active: bank & 1 }
+        Self {
+            banks: [[0; 32]; 2],
+            active: bank & 1,
+        }
     }
 
     pub fn bank(&self) -> usize {

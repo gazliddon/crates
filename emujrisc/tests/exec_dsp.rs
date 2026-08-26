@@ -165,7 +165,11 @@ fn load_store_long_and_internal_ram_byte_quirk() {
     step_n(&mut cpu, &mut bus, 3);
     // stored via store (long path, aligned)...
     cpu.step(&mut bus).expect("loadb");
-    assert_eq!(cpu.r(1), 0x1234_5678, "loadb on internal RAM returns the aligned long");
+    assert_eq!(
+        cpu.r(1),
+        0x1234_5678,
+        "loadb on internal RAM returns the aligned long"
+    );
 }
 
 #[test]
@@ -230,7 +234,11 @@ fn dsp_program_smoke_run_reaches_init() {
     cpu.pc = 0xF1B000;
     let mut bus = RamBus::new(Chip::Dsp, dsp.to_vec());
     step_n(&mut cpu, &mut bus, 10);
-    assert_eq!(cpu.r(31), 0x00F1_B010, "stack pointer set by the real program");
+    assert_eq!(
+        cpu.r(31),
+        0x00F1_B010,
+        "stack pointer set by the real program"
+    );
     assert_eq!(cpu.r(9), 0x00F1_A100, "D_FLAGS address loaded");
     assert_eq!(cpu.r(27), 0x00F1_B800, "TABLESTA address loaded");
     // keep going through the channel setup without faults

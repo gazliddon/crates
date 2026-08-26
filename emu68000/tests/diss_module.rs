@@ -144,21 +144,25 @@ fn module_disassembles_with_labels() {
         .collect();
     for &(lo, hi) in DATA_SPANS {
         assert!(
-            missed.iter().any(|&m| (m as usize) >= lo && (m as usize) < hi),
+            missed
+                .iter()
+                .any(|&m| (m as usize) >= lo && (m as usize) < hi),
             "data span {lo:04X}..{hi:04X} explains no missed symbol"
         );
     }
 
     // golden instructions (hand-verified from the module)
-    let at = |a: usize| listing.iter().find(|(pc, _, _)| *pc == a).map(|(_, t, _)| t.clone());
+    let at = |a: usize| {
+        listing
+            .iter()
+            .find(|(pc, _, _)| *pc == a)
+            .map(|(_, t, _)| t.clone())
+    };
     assert_eq!(
         at(0x4D46).unwrap(), // INITDSP
         "movem.l D0-D7/A0-A6,-(A7)"
     );
-    assert_eq!(
-        at(0x4D4A).unwrap(),
-        "move.l #$00000000,$00F1A114.l"
-    );
+    assert_eq!(at(0x4D4A).unwrap(), "move.l #$00000000,$00F1A114.l");
     assert_eq!(
         at(0x4E1A).unwrap(), // INIT_SOUND
         "movem.l D0-D7/A0-A6,-(A7)"
@@ -222,7 +226,10 @@ fn label_rendering_resolves_targets() {
         }
     }
     // the module is full of bsr/jmp to exported routines; require a handful
-    assert!(resolved >= 5, "expected label-resolved branches, got {resolved}");
+    assert!(
+        resolved >= 5,
+        "expected label-resolved branches, got {resolved}"
+    );
 }
 
 #[test]

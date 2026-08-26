@@ -29,7 +29,9 @@ impl std::error::Error for DecodeError {}
 
 impl From<MemErrorTypes> for DecodeError {
     fn from(e: MemErrorTypes) -> Self {
-        Self { message: format!("{e}") }
+        Self {
+            message: format!("{e}"),
+        }
     }
 }
 
@@ -62,7 +64,13 @@ impl Ea {
     }
 
     pub fn from_parts(mode: u8, reg: u8) -> Self {
-        Self { mode, reg, ext: [0; 2], ext_len: 0, ref_pc: None }
+        Self {
+            mode,
+            reg,
+            ext: [0; 2],
+            ext_len: 0,
+            ref_pc: None,
+        }
     }
 
     /// number of extension words for this EA (immediate mode counts the
@@ -171,12 +179,7 @@ where
 
     /// fetch `n` words into an EA's extension array, advancing `at`
     #[inline(always)]
-    fn fetch_ea_ext<F>(
-        fetch: &mut F,
-        at: &mut usize,
-        e: &mut Ea,
-        n: u8,
-    ) -> Result<(), DecodeError>
+    fn fetch_ea_ext<F>(fetch: &mut F, at: &mut usize, e: &mut Ea, n: u8) -> Result<(), DecodeError>
     where
         F: FnMut(usize) -> Result<u16, DecodeError>,
     {

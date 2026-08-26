@@ -33,7 +33,11 @@ pub struct Cpu {
 
 impl Cpu {
     pub fn new() -> Self {
-        Self { regs: Registers::new(), stats: ExecutionStats::default(), halted: false }
+        Self {
+            regs: Registers::new(),
+            stats: ExecutionStats::default(),
+            halted: false,
+        }
     }
 
     /// Fetch + decode the instruction at `pc`, advancing `pc` past it.
@@ -107,7 +111,11 @@ pub fn ea_addr<B: M68kBus + ?Sized>(
             let w = e.ext[0];
             let d8 = (w & 0x7F) as u8 as i8 as i32;
             let idx = index_value(cpu, w);
-            Ok(cpu.regs.read_a(e.reg as usize).wrapping_add(d8 as u32).wrapping_add(idx))
+            Ok(cpu
+                .regs
+                .read_a(e.reg as usize)
+                .wrapping_add(d8 as u32)
+                .wrapping_add(idx))
         }
         7 => match e.reg {
             0 => Ok(e.ext[0] as i16 as i32 as u32),
@@ -123,9 +131,13 @@ pub fn ea_addr<B: M68kBus + ?Sized>(
                 let idx = index_value(cpu, w);
                 Ok(ref_pc.wrapping_add(d8 as u32).wrapping_add(idx))
             }
-            _ => Err(ExecError { message: format!("invalid EA mode 7/{}", e.reg) }),
+            _ => Err(ExecError {
+                message: format!("invalid EA mode 7/{}", e.reg),
+            }),
         },
-        _ => Err(ExecError { message: format!("invalid EA mode {}", e.mode) }),
+        _ => Err(ExecError {
+            message: format!("invalid EA mode {}", e.mode),
+        }),
     }
 }
 
@@ -135,7 +147,11 @@ fn index_value(cpu: &Cpu, w: u16) -> u32 {
     let reg = ((w >> 8) & 7) as usize;
     let long = w & 0x8000 != 0;
     let scale = 1u32 << ((w >> 12) & 3);
-    let base = if w & 0x0080 != 0 { cpu.regs.read_a(reg) } else { cpu.regs.read_d(reg) };
+    let base = if w & 0x0080 != 0 {
+        cpu.regs.read_a(reg)
+    } else {
+        cpu.regs.read_d(reg)
+    };
     if long {
         base.wrapping_mul(scale)
     } else {
@@ -219,9 +235,13 @@ pub fn write_ea<B: M68kBus + ?Sized>(
                 let a = ea_addr(cpu, bus, d, e)?;
                 write_mem(bus, a, size, v)
             }
-            _ => Err(ExecError { message: format!("cannot write EA mode 7/{}", e.reg) }),
+            _ => Err(ExecError {
+                message: format!("cannot write EA mode 7/{}", e.reg),
+            }),
         },
-        _ => Err(ExecError { message: format!("cannot write EA mode {}", e.mode) }),
+        _ => Err(ExecError {
+            message: format!("cannot write EA mode {}", e.mode),
+        }),
     }
 }
 
@@ -233,7 +253,12 @@ fn read_mem<B: M68kBus + ?Sized>(bus: &mut B, addr: u32, size: u8) -> u32 {
     }
 }
 
-fn write_mem<B: M68kBus + ?Sized>(bus: &mut B, addr: u32, size: u8, v: u32) -> Result<(), ExecError> {
+fn write_mem<B: M68kBus + ?Sized>(
+    bus: &mut B,
+    addr: u32,
+    size: u8,
+    v: u32,
+) -> Result<(), ExecError> {
     match size {
         1 => bus.write_byte(addr, v as u8),
         2 => bus.write_word(addr, v as u16),

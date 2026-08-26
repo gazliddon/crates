@@ -235,20 +235,20 @@ impl Registers {
     /// The 16 condition codes against the current flags.
     pub fn cond(&self, cc: u8) -> bool {
         match cc & 0xF {
-            0x0 => true,                      // T
-            0x1 => false,                     // F
-            0x2 => !self.c() && !self.z(),    // HI
-            0x3 => self.c() || self.z(),      // LS
-            0x4 => !self.c(),                 // CC
-            0x5 => self.c(),                  // CS
-            0x6 => !self.z(),                 // NE
-            0x7 => self.z(),                  // EQ
-            0x8 => !self.v(),                 // VC
-            0x9 => self.v(),                  // VS
-            0xA => !self.n(),                 // PL
-            0xB => self.n(),                  // MI
-            0xC => self.n() == self.v(),      // GE
-            0xD => self.n() != self.v(),      // LT
+            0x0 => true,                              // T
+            0x1 => false,                             // F
+            0x2 => !self.c() && !self.z(),            // HI
+            0x3 => self.c() || self.z(),              // LS
+            0x4 => !self.c(),                         // CC
+            0x5 => self.c(),                          // CS
+            0x6 => !self.z(),                         // NE
+            0x7 => self.z(),                          // EQ
+            0x8 => !self.v(),                         // VC
+            0x9 => self.v(),                          // VS
+            0xA => !self.n(),                         // PL
+            0xB => self.n(),                          // MI
+            0xC => self.n() == self.v(),              // GE
+            0xD => self.n() != self.v(),              // LT
             0xE => !self.z() && self.n() == self.v(), // GT
             _ => self.z() || self.n() != self.v(),    // LE
         }

@@ -14,7 +14,7 @@
 #![allow(dead_code)]
 pub mod cpu;
 pub mod diss;
-pub mod mem;
 pub mod isa;
+pub mod mem;
 pub use byteorder;
 pub use emucore;

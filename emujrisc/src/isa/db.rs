@@ -108,10 +108,16 @@ pub enum MemAccess {
 
 impl MemAccess {
     pub fn is_read(self) -> bool {
-        matches!(self, MemAccess::Read8 | MemAccess::Read16 | MemAccess::Read32)
+        matches!(
+            self,
+            MemAccess::Read8 | MemAccess::Read16 | MemAccess::Read32
+        )
     }
     pub fn is_write(self) -> bool {
-        matches!(self, MemAccess::Write8 | MemAccess::Write16 | MemAccess::Write32)
+        matches!(
+            self,
+            MemAccess::Write8 | MemAccess::Write16 | MemAccess::Write32
+        )
     }
     pub fn width_bytes(self) -> usize {
         match self {
@@ -428,7 +434,10 @@ impl Dbase {
             let insn = insn.into_insn();
             by_opcode[insn.opcode].push(insn);
         }
-        Self { unknown: raw.unknown.into_insn(), by_opcode }
+        Self {
+            unknown: raw.unknown.into_insn(),
+            by_opcode,
+        }
     }
 
     /// Look up an opcode for a variant. `Any` matches both; shared opcode
@@ -468,20 +477,47 @@ fn insn_literal(i: &Insn) -> String {
         "Insn {{ mnemonic: {:?}, kind: Kind::{}, opcode: {}, variant: {}, src: {}, dst: {}, \
 extra32: {}, opswap: {}, class: {}, mem: {}, flags: FlagSet {{ zero: {}, carry: {}, neg: {} }}, \
 mac: {}, cycles: {}, size: {}, reloc: {}, pad: {} }}",
-        i.mnemonic, cap(i.mnemonic), i.opcode, v, src, dst, i.extra32, i.opswap, class, mem,
-        i.flags.zero, i.flags.carry, i.flags.neg, i.mac, i.cycles, i.size, reloc, i.pad,
+        i.mnemonic,
+        cap(i.mnemonic),
+        i.opcode,
+        v,
+        src,
+        dst,
+        i.extra32,
+        i.opswap,
+        class,
+        mem,
+        i.flags.zero,
+        i.flags.carry,
+        i.flags.neg,
+        i.mac,
+        i.cycles,
+        i.size,
+        reloc,
+        i.pad,
     )
 }
 
 /// Emits the generated static tables consumed by `Dbase::new()`.
 impl fmt::Display for Dbase {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "// generated from resources/opcodes_jrisc.json — do not edit")?;
+        writeln!(
+            f,
+            "// generated from resources/opcodes_jrisc.json — do not edit"
+        )?;
         writeln!(f, "use crate::isa::{{Insn, Kind, FlagSet, OperandClass, Variant, InsnClass, MemAccess, Reloc}};")?;
-        writeln!(f, "pub static UNKNOWN: Insn = {};", insn_literal(&self.unknown))?;
+        writeln!(
+            f,
+            "pub static UNKNOWN: Insn = {};",
+            insn_literal(&self.unknown)
+        )?;
         // entries in opcode order (all variants interleaved)
         let mut flat: Vec<&Insn> = Vec::new();
-        writeln!(f, "pub static INSNS: [Insn; {}] = [", self.by_opcode.iter().map(Vec::len).sum::<usize>())?;
+        writeln!(
+            f,
+            "pub static INSNS: [Insn; {}] = [",
+            self.by_opcode.iter().map(Vec::len).sum::<usize>()
+        )?;
         for op in 0..64 {
             for insn in &self.by_opcode[op] {
                 writeln!(f, "    {},", insn_literal(insn))?;

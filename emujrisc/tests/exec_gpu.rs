@@ -36,7 +36,11 @@ fn movei(reg: u8, imm: u32) -> [u16; 3] {
 fn gpu_ram_base_and_pc() {
     let mut cpu = Cpu::new(Chip::Gpu);
     assert_eq!(cpu.pc, 0xF03000);
-    assert_eq!(cpu.regs.bank(), 1, "GPU code is assembled for bank 1 (GASM -R1)");
+    assert_eq!(
+        cpu.regs.bank(),
+        1,
+        "GPU code is assembled for bank 1 (GASM -R1)"
+    );
     let mut bus = RamBus::new(Chip::Gpu, vec![0; Chip::Gpu.ram_size() as usize]);
     cpu.step(&mut bus).expect("nop from zeroed ram");
 }
@@ -86,7 +90,10 @@ fn gpu_loadp_stashes_hidata_then_loads_next_long() {
     let (mut cpu, bus) = cpu_ram(Chip::Gpu, &code);
     let mut bus = bus.with_external(0x1000, ext);
     step_n(&mut cpu, &mut bus, 2);
-    assert_eq!(cpu.hidata, 0xAABB_CCDD, "loadp stashes the first long in hidata");
+    assert_eq!(
+        cpu.hidata, 0xAABB_CCDD,
+        "loadp stashes the first long in hidata"
+    );
     assert_eq!(cpu.r(2), 0x1122_3344);
 }
 
@@ -162,7 +169,11 @@ fn dsp_addqmod_wraps_with_modulo_mask() {
     cpu.modulo = 0x0000_00ff; // low byte masked
     step_n(&mut cpu, &mut bus, 2);
     // MAME: res = (sum & ~modulo) | (r2 & modulo) = (0x100 & ~0xff) | (0xff & 0xff)
-    assert_eq!(cpu.r(2), 0x0000_01ff, "addqmod preserves the masked bits of r2");
+    assert_eq!(
+        cpu.r(2),
+        0x0000_01ff,
+        "addqmod preserves the masked bits of r2"
+    );
 }
 
 #[test]
@@ -176,7 +187,11 @@ fn gpu_moveta_movefa_cross_bank_under_default_bank1() {
     let mut bus = bus;
     step_n(&mut cpu, &mut bus, 3);
     assert_eq!(cpu.r(6), 0x1234_5678, "round trip through the other bank");
-    assert_eq!(cpu.regs.alt_get(5), 0x1234_5678, "bank 0 still holds the value");
+    assert_eq!(
+        cpu.regs.alt_get(5),
+        0x1234_5678,
+        "bank 0 still holds the value"
+    );
     // with REGPAGE set, the active bank flips to 0
     let (mut cpu, bus) = cpu_ram(Chip::Gpu, &code);
     let mut bus = bus;
