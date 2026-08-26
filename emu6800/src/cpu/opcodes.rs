@@ -4,15 +4,11 @@ use emucore::sha1::digest::typenum::operator_aliases;
 use super::{Bus, RegisterFileTrait, StatusRegTrait};
 use super::{CpuResult, Machine};
 use crate::cpu::{AccA, AccB};
-use crate::cpu_core::{AddrModeEnum, Isa, IsaDatabase, RegEnum};
+use crate::cpu_core::{AddrModeEnum, RegEnum};
 
-lazy_static::lazy_static! {
-    pub static ref ISA_DBASE : IsaDatabase = {
-        let txt = include_str!("../../resources/opcodes6800.json");
-        let isa: Isa = serde_json::from_str(txt).unwrap();
-        IsaDatabase::new(&isa)
-    };
-}
+// One database instance for the crate: `cpu_core::DBASE` loads the v2
+// table; this re-export keeps the historical `cpu::ISA_DBASE` path.
+pub use crate::cpu_core::DBASE as ISA_DBASE;
 ////////////////////////////////////////////////////////////////////////////////
 // Helpers
 
