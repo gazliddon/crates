@@ -280,16 +280,19 @@ impl Diss {
             5 => format!("{}(A{})", signed_hex(e.ext[0] as i16), e.reg),
             6 => {
                 let w = e.ext[0];
-                let long = w & 0x8000 != 0;
+                // Real 68000 index word: D/A<<15 | reg<<12 | long<<11 |
+                // scale<<9 | d8 (M68000PRM/MAME).
+                let ar = w & 0x8000 != 0;
+                let reg = (w >> 12) & 7;
+                let long = w & 0x0800 != 0;
                 let scale = scale_str(w);
-                let idx = if w & 0x0080 != 0 { 'A' } else { 'D' };
-                let d8 = (w & 0x7F) as u8 as i8;
+                let d8 = w as u8 as i8;
                 format!(
                     "{}(A{},{}{}.{}{})",
                     signed_hex(d8 as i16),
                     e.reg,
-                    idx,
-                    (w >> 8) & 7,
+                    if ar { 'A' } else { 'D' },
+                    reg,
                     if long { "l" } else { "w" },
                     scale
                 )
@@ -306,15 +309,18 @@ impl Diss {
                 }
                 3 => {
                     let w = e.ext[0];
-                    let long = w & 0x8000 != 0;
+                    // Real 68000 index word: D/A<<15 | reg<<12 | long<<11 |
+                    // scale<<9 | d8 (M68000PRM/MAME).
+                    let ar = w & 0x8000 != 0;
+                    let reg = (w >> 12) & 7;
+                    let long = w & 0x0800 != 0;
                     let scale = scale_str(w);
-                    let idx = if w & 0x0080 != 0 { 'A' } else { 'D' };
-                    let d8 = (w & 0x7F) as u8 as i8;
+                    let d8 = w as u8 as i8;
                     format!(
                         "{}(PC,{}{}.{}{})",
                         signed_hex(d8 as i16),
-                        idx,
-                        (w >> 8) & 7,
+                        if ar { 'A' } else { 'D' },
+                        reg,
                         if long { "l" } else { "w" },
                         scale
                     )
@@ -445,7 +451,7 @@ fn signed_hex(v: i16) -> String {
 }
 
 fn scale_str(w: u16) -> &'static str {
-    match (w >> 12) & 3 {
+    match (w >> 9) & 3 {
         0 => "",
         1 => "*2",
         2 => "*4",

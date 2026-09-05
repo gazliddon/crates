@@ -141,13 +141,13 @@ pub fn ea_addr<B: M68kBus + ?Sized>(
     }
 }
 
-/// d8(An,Xn) / d8(PC,Xn) index contribution: register bits 11-8, class
-/// bit 7, size bit 15, scale bits 13-12.
+/// d8(An,Xn) / d8(PC,Xn) index contribution: D/A bit 15, register bits
+/// 14-12, size bit 11, scale bits 10-9.
 fn index_value(cpu: &Cpu, w: u16) -> u32 {
-    let reg = ((w >> 8) & 7) as usize;
-    let long = w & 0x8000 != 0;
-    let scale = 1u32 << ((w >> 12) & 3);
-    let base = if w & 0x0080 != 0 {
+    let reg = ((w >> 12) & 7) as usize;
+    let long = w & 0x0800 != 0;
+    let scale = 1u32 << ((w >> 9) & 3);
+    let base = if w & 0x8000 != 0 {
         cpu.regs.read_a(reg)
     } else {
         cpu.regs.read_d(reg)
