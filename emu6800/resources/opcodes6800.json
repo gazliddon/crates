@@ -1,3821 +1,3798 @@
 {
-  "version": 2,
-  "comment": "M6800 instruction table v2. Cycle counts verified against MAME's m6800 core (cycles_6800): all 197 documented opcodes matched exactly. flags_hnzvc / flags_read_hnzvc are 6-char HINZVC effects ('-' unaffected, '*' set by result, '0' cleared, '1' set), per the Motorola M6800 manual \u2014 shifts set V = N xor C (MAME's core leaves V untouched there; the manual is authoritative). The 'undocumented' array covers the remaining 59 opcodes (MAME illegl1/2/3 NOP behavior plus the real-silicon quirks 0x21 BRN, 0x87/0xC7 STA, 0x8F/0xCF STX/STS with EA=PC, 0x9D JSR direct) for a complete 256-opcode picture; the emu6800 crate only loads the documented 'instructions' map. flags_read / regs_read / regs_written / memory_read / memory_write are consumed by the crate.",
-  "instructions": {
-    "ComB": {
-      "flags_written": "N|V|C|Z",
-      "flags_read": "",
-      "flags_hnzvc": "--**01",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 83,
-          "cycles": 2,
-          "size": 1,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "ComA": {
-      "flags_written": "N|V|C|Z",
-      "flags_read": "",
-      "flags_hnzvc": "--**01",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 67,
-          "cycles": 2,
-          "size": 1,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "Com": {
-      "flags_written": "N|V|C|Z",
-      "flags_read": "",
-      "flags_hnzvc": "--**01",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Extended": {
-          "opcode": 115,
-          "cycles": 6,
-          "size": 3,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": true,
-          "memory_write": true
-        },
-        "Indexed": {
-          "opcode": 99,
-          "cycles": 7,
-          "size": 2,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": true,
-          "memory_write": true
-        }
-      }
-    },
-    "Bsr": {
-      "flags_written": "",
-      "flags_read": "",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Relative": {
-          "opcode": 141,
-          "cycles": 8,
-          "size": 2,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": false,
-          "memory_write": false
-        }
-      },
-      "branch_condition": "always (subroutine)"
-    },
-    "AddA": {
-      "flags_written": "H|N|V|C|Z",
-      "flags_read": "",
-      "flags_hnzvc": "*-****",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Immediate8": {
-          "opcode": 139,
-          "cycles": 2,
-          "size": 2,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        },
-        "Extended": {
-          "opcode": 187,
-          "cycles": 4,
-          "size": 3,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Direct": {
-          "opcode": 155,
-          "cycles": 3,
-          "size": 2,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Indexed": {
-          "opcode": 171,
-          "cycles": 5,
-          "size": 2,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        }
-      }
-    },
-    "AddB": {
-      "flags_written": "H|N|V|C|Z",
-      "flags_read": "",
-      "flags_hnzvc": "*-****",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Immediate8": {
-          "opcode": 203,
-          "cycles": 2,
-          "size": 2,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        },
-        "Extended": {
-          "opcode": 251,
-          "cycles": 4,
-          "size": 3,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Direct": {
-          "opcode": 219,
-          "cycles": 3,
-          "size": 2,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Indexed": {
-          "opcode": 235,
-          "cycles": 5,
-          "size": 2,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        }
-      }
-    },
-    "LdaA": {
-      "flags_written": "N|Z|V",
-      "flags_read": "",
-      "flags_hnzvc": "--**0-",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Immediate8": {
-          "opcode": 134,
-          "cycles": 2,
-          "size": 2,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        },
-        "Indexed": {
-          "opcode": 166,
-          "cycles": 5,
-          "size": 2,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Extended": {
-          "opcode": 182,
-          "cycles": 4,
-          "size": 3,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Direct": {
-          "opcode": 150,
-          "cycles": 3,
-          "size": 2,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        }
-      }
-    },
-    "LdaB": {
-      "flags_written": "N|Z|V",
-      "flags_read": "",
-      "flags_hnzvc": "--**0-",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Immediate8": {
-          "opcode": 198,
-          "cycles": 2,
-          "size": 2,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        },
-        "Indexed": {
-          "opcode": 230,
-          "cycles": 5,
-          "size": 2,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Extended": {
-          "opcode": 246,
-          "cycles": 4,
-          "size": 3,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Direct": {
-          "opcode": 214,
-          "cycles": 3,
-          "size": 2,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        }
-      }
-    },
-    "LsrA": {
-      "flags_written": "N|Z|V|C",
-      "flags_read": "",
-      "flags_hnzvc": "--0*-*",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 68,
-          "cycles": 2,
-          "size": 1,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "LsrB": {
-      "flags_written": "N|Z|V|C",
-      "flags_read": "",
-      "flags_hnzvc": "--0*-*",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 84,
-          "cycles": 2,
-          "size": 1,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "Lsr": {
-      "flags_written": "N|Z|V|C",
-      "flags_read": "",
-      "flags_hnzvc": "--0***",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Extended": {
-          "opcode": 116,
-          "cycles": 6,
-          "size": 3,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": true,
-          "memory_write": true
-        },
-        "Indexed": {
-          "opcode": 100,
-          "cycles": 7,
-          "size": 2,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": true,
-          "memory_write": true
-        }
-      }
-    },
-    "Sec": {
-      "flags_written": "C",
-      "flags_read": "C",
-      "flags_hnzvc": "-----1",
-      "flags_read_hnzvc": "-----*",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 13,
-          "cycles": 2,
-          "size": 1,
-          "regs_read": [
-            "SR"
-          ],
-          "regs_written": [
-            "SR"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "Rol": {
-      "flags_written": "N|Z|V|C",
-      "flags_read": "",
-      "flags_hnzvc": "--****",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Indexed": {
-          "opcode": 105,
-          "cycles": 7,
-          "size": 2,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": true,
-          "memory_write": true
-        },
-        "Extended": {
-          "opcode": 121,
-          "cycles": 6,
-          "size": 3,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": true,
-          "memory_write": true
-        }
-      }
-    },
-    "RolA": {
-      "flags_written": "N|Z|V|C",
-      "flags_read": "",
-      "flags_hnzvc": "--****",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 73,
-          "cycles": 2,
-          "size": 1,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "RolB": {
-      "flags_written": "N|Z|V|C",
-      "flags_read": "",
-      "flags_hnzvc": "--****",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 89,
-          "cycles": 2,
-          "size": 1,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "Sts": {
-      "flags_written": "N|Z|V",
-      "flags_read": "",
-      "flags_hnzvc": "--**0-",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Extended": {
-          "opcode": 191,
-          "cycles": 6,
-          "size": 3,
-          "regs_read": [
-            "SP"
-          ],
-          "regs_written": [
-            "SP"
-          ],
-          "memory_read": false,
-          "memory_write": true
-        },
-        "Direct": {
-          "opcode": 159,
-          "cycles": 5,
-          "size": 2,
-          "regs_read": [
-            "SP"
-          ],
-          "regs_written": [
-            "SP"
-          ],
-          "memory_read": false,
-          "memory_write": true
-        },
-        "Indexed": {
-          "opcode": 175,
-          "cycles": 7,
-          "size": 2,
-          "regs_read": [
-            "SP"
-          ],
-          "regs_written": [
-            "SP"
-          ],
-          "memory_read": false,
-          "memory_write": true
-        }
-      }
-    },
-    "Tba": {
-      "flags_written": "N|Z|V",
-      "flags_read": "",
-      "flags_hnzvc": "--**0-",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 23,
-          "cycles": 2,
-          "size": 1,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "Bcs": {
-      "flags_written": "",
-      "flags_read": "C",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "-----*",
-      "undocumented": false,
-      "addr_modes": {
-        "Relative": {
-          "opcode": 37,
-          "cycles": 4,
-          "size": 2,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": false,
-          "memory_write": false
-        }
-      },
-      "branch_condition": "C=1"
-    },
-    "Ldx": {
-      "flags_written": "N|Z|V",
-      "flags_read": "",
-      "flags_hnzvc": "--**0-",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Indexed": {
-          "opcode": 238,
-          "cycles": 6,
-          "size": 2,
-          "regs_read": [
-            "X"
-          ],
-          "regs_written": [
-            "X"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Extended": {
-          "opcode": 254,
-          "cycles": 5,
-          "size": 3,
-          "regs_read": [
-            "X"
-          ],
-          "regs_written": [
-            "X"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Immediate16": {
-          "opcode": 206,
-          "cycles": 3,
-          "size": 3,
-          "regs_read": [
-            "X"
-          ],
-          "regs_written": [
-            "X"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        },
-        "Direct": {
-          "opcode": 222,
-          "cycles": 4,
-          "size": 2,
-          "regs_read": [
-            "X"
-          ],
-          "regs_written": [
-            "X"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        }
-      }
-    },
-    "Sba": {
-      "flags_written": "N|Z|V|C",
-      "flags_read": "",
-      "flags_hnzvc": "--****",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 16,
-          "cycles": 2,
-          "size": 1,
-          "regs_read": [
-            "A",
-            "B"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "Bvc": {
-      "flags_written": "",
-      "flags_read": "V",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "----*-",
-      "undocumented": false,
-      "addr_modes": {
-        "Relative": {
-          "opcode": 40,
-          "cycles": 4,
-          "size": 2,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": false,
-          "memory_write": false
-        }
-      },
-      "branch_condition": "V=0"
-    },
-    "Cba": {
-      "flags_written": "N|Z|V|C",
-      "flags_read": "",
-      "flags_hnzvc": "--****",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 17,
-          "cycles": 2,
-          "size": 1,
-          "regs_read": [
-            "A",
-            "B"
-          ],
-          "regs_written": [],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "Cli": {
-      "flags_written": "I",
-      "flags_read": "I",
-      "flags_hnzvc": "-0----",
-      "flags_read_hnzvc": "-*----",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 14,
-          "cycles": 2,
-          "size": 1,
-          "regs_read": [
-            "SR"
-          ],
-          "regs_written": [
-            "SR"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "Bne": {
-      "flags_written": "",
-      "flags_read": "Z",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "---*--",
-      "undocumented": false,
-      "addr_modes": {
-        "Relative": {
-          "opcode": 38,
-          "cycles": 4,
-          "size": 2,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": false,
-          "memory_write": false
-        }
-      },
-      "branch_condition": "Z=0"
-    },
-    "Clc": {
-      "flags_written": "C",
-      "flags_read": "C",
-      "flags_hnzvc": "-----0",
-      "flags_read_hnzvc": "-----*",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 12,
-          "cycles": 2,
-          "size": 1,
-          "regs_read": [
-            "SR"
-          ],
-          "regs_written": [
-            "SR"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "Ins": {
-      "flags_written": "",
-      "flags_read": "",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 49,
-          "cycles": 4,
-          "size": 1,
-          "regs_read": [
-            "SP"
-          ],
-          "regs_written": [
-            "SP"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "Nop": {
-      "flags_written": "",
-      "flags_read": "",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 1,
-          "cycles": 2,
-          "size": 1,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "EorA": {
-      "flags_written": "N|Z|V",
-      "flags_read": "",
-      "flags_hnzvc": "--**0-",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Immediate8": {
-          "opcode": 136,
-          "cycles": 2,
-          "size": 2,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        },
-        "Direct": {
-          "opcode": 152,
-          "cycles": 3,
-          "size": 2,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Extended": {
-          "opcode": 184,
-          "cycles": 4,
-          "size": 3,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Indexed": {
-          "opcode": 168,
-          "cycles": 5,
-          "size": 2,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        }
-      }
-    },
-    "EorB": {
-      "flags_written": "N|Z|V",
-      "flags_read": "",
-      "flags_hnzvc": "--**0-",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Immediate8": {
-          "opcode": 200,
-          "cycles": 2,
-          "size": 2,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        },
-        "Direct": {
-          "opcode": 216,
-          "cycles": 3,
-          "size": 2,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Extended": {
-          "opcode": 248,
-          "cycles": 4,
-          "size": 3,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Indexed": {
-          "opcode": 232,
-          "cycles": 5,
-          "size": 2,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        }
-      }
-    },
-    "Swi": {
-      "flags_written": "I",
-      "flags_read": "",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 63,
-          "cycles": 12,
-          "size": 1,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "Cpx": {
-      "flags_written": "N|Z|V",
-      "flags_read": "",
-      "flags_hnzvc": "--***-",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Extended": {
-          "opcode": 188,
-          "cycles": 5,
-          "size": 3,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Direct": {
-          "opcode": 156,
-          "cycles": 4,
-          "size": 2,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Indexed": {
-          "opcode": 172,
-          "cycles": 6,
-          "size": 2,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Immediate16": {
-          "opcode": 140,
-          "cycles": 3,
-          "size": 3,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "Rti": {
-      "flags_written": "N|Z|V|C|H|I",
-      "flags_read": "",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 59,
-          "cycles": 10,
-          "size": 1,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "Stx": {
-      "flags_written": "N|Z|V",
-      "flags_read": "",
-      "flags_hnzvc": "--**0-",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Direct": {
-          "opcode": 223,
-          "cycles": 5,
-          "size": 2,
-          "regs_read": [
-            "X"
-          ],
-          "regs_written": [
-            "X"
-          ],
-          "memory_read": false,
-          "memory_write": true
-        },
-        "Indexed": {
-          "opcode": 239,
-          "cycles": 7,
-          "size": 2,
-          "regs_read": [
-            "X"
-          ],
-          "regs_written": [
-            "X"
-          ],
-          "memory_read": false,
-          "memory_write": true
-        },
-        "Extended": {
-          "opcode": 255,
-          "cycles": 6,
-          "size": 3,
-          "regs_read": [
-            "X"
-          ],
-          "regs_written": [
-            "X"
-          ],
-          "memory_read": false,
-          "memory_write": true
-        }
-      }
-    },
-    "DecB": {
-      "flags_written": "N|Z|V",
-      "flags_read": "",
-      "flags_hnzvc": "--***-",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 90,
-          "cycles": 2,
-          "size": 1,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "DecA": {
-      "flags_written": "N|Z|V",
-      "flags_read": "",
-      "flags_hnzvc": "--***-",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 74,
-          "cycles": 2,
-          "size": 1,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "Dec": {
-      "flags_written": "N|Z|V",
-      "flags_read": "",
-      "flags_hnzvc": "--***-",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Extended": {
-          "opcode": 122,
-          "cycles": 6,
-          "size": 3,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": true,
-          "memory_write": true
-        },
-        "Indexed": {
-          "opcode": 106,
-          "cycles": 7,
-          "size": 2,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": true,
-          "memory_write": true
-        }
-      }
-    },
-    "Beq": {
-      "flags_written": "",
-      "flags_read": "Z",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "---*--",
-      "undocumented": false,
-      "addr_modes": {
-        "Relative": {
-          "opcode": 39,
-          "cycles": 4,
-          "size": 2,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": false,
-          "memory_write": false
-        }
-      },
-      "branch_condition": "Z=1"
-    },
-    "Daa": {
-      "flags_written": "N|Z|C",
-      "flags_read": "H|N|Z|V|C",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "-*****",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 25,
-          "cycles": 2,
-          "size": 1,
-          "regs_read": [
-            "A",
-            "SR"
-          ],
-          "regs_written": [
-            "A",
-            "SR"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "BitA": {
-      "flags_written": "N|Z|V",
-      "flags_read": "",
-      "flags_hnzvc": "--**0-",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Immediate8": {
-          "opcode": 133,
-          "cycles": 2,
-          "size": 2,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        },
-        "Direct": {
-          "opcode": 149,
-          "cycles": 3,
-          "size": 2,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Extended": {
-          "opcode": 181,
-          "cycles": 4,
-          "size": 3,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Indexed": {
-          "opcode": 165,
-          "cycles": 5,
-          "size": 2,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        }
-      }
-    },
-    "BitB": {
-      "flags_written": "N|Z|V",
-      "flags_read": "",
-      "flags_hnzvc": "--**0-",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Immediate8": {
-          "opcode": 197,
-          "cycles": 2,
-          "size": 2,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        },
-        "Direct": {
-          "opcode": 213,
-          "cycles": 3,
-          "size": 2,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Extended": {
-          "opcode": 245,
-          "cycles": 4,
-          "size": 3,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Indexed": {
-          "opcode": 229,
-          "cycles": 5,
-          "size": 2,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        }
-      }
-    },
-    "Bls": {
-      "flags_written": "",
-      "flags_read": "C|Z",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "---*-*",
-      "undocumented": false,
-      "addr_modes": {
-        "Relative": {
-          "opcode": 35,
-          "cycles": 4,
-          "size": 2,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": false,
-          "memory_write": false
-        }
-      },
-      "branch_condition": "C=1 or Z=1"
-    },
-    "Des": {
-      "flags_written": "",
-      "flags_read": "",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 52,
-          "cycles": 4,
-          "size": 1,
-          "regs_read": [
-            "SP"
-          ],
-          "regs_written": [
-            "SP"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "PulA": {
-      "flags_written": "",
-      "flags_read": "",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 50,
-          "cycles": 4,
-          "size": 1,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "PulB": {
-      "flags_written": "",
-      "flags_read": "",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 51,
-          "cycles": 4,
-          "size": 1,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "SubA": {
-      "flags_written": "N|Z|V|C",
-      "flags_read": "",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Extended": {
-          "opcode": 176,
-          "cycles": 4,
-          "size": 3,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Indexed": {
-          "opcode": 160,
-          "cycles": 5,
-          "size": 2,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Immediate8": {
-          "opcode": 128,
-          "cycles": 2,
-          "size": 2,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        },
-        "Direct": {
-          "opcode": 144,
-          "cycles": 3,
-          "size": 2,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        }
-      }
-    },
-    "SubB": {
-      "flags_written": "N|Z|V|C",
-      "flags_read": "",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Extended": {
-          "opcode": 240,
-          "cycles": 4,
-          "size": 3,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Indexed": {
-          "opcode": 224,
-          "cycles": 5,
-          "size": 2,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Immediate8": {
-          "opcode": 192,
-          "cycles": 2,
-          "size": 2,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        },
-        "Direct": {
-          "opcode": 208,
-          "cycles": 3,
-          "size": 2,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        }
-      }
-    },
-    "AndA": {
-      "flags_written": "N|Z|V",
-      "flags_read": "",
-      "flags_hnzvc": "--**0-",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Extended": {
-          "opcode": 180,
-          "cycles": 4,
-          "size": 3,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Direct": {
-          "opcode": 148,
-          "cycles": 3,
-          "size": 2,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Immediate8": {
-          "opcode": 132,
-          "cycles": 2,
-          "size": 2,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        },
-        "Indexed": {
-          "opcode": 164,
-          "cycles": 5,
-          "size": 2,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        }
-      }
-    },
-    "AndB": {
-      "flags_written": "N|Z|V",
-      "flags_read": "",
-      "flags_hnzvc": "--**0-",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Extended": {
-          "opcode": 244,
-          "cycles": 4,
-          "size": 3,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Direct": {
-          "opcode": 212,
-          "cycles": 3,
-          "size": 2,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Immediate8": {
-          "opcode": 196,
-          "cycles": 2,
-          "size": 2,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        },
-        "Indexed": {
-          "opcode": 228,
-          "cycles": 5,
-          "size": 2,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        }
-      }
-    },
-    "Bpl": {
-      "flags_written": "",
-      "flags_read": "N",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "--*---",
-      "undocumented": false,
-      "addr_modes": {
-        "Relative": {
-          "opcode": 42,
-          "cycles": 4,
-          "size": 2,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": false,
-          "memory_write": false
-        }
-      },
-      "branch_condition": "N=0"
-    },
-    "Lds": {
-      "flags_written": "N|Z|V",
-      "flags_read": "",
-      "flags_hnzvc": "--**0-",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Extended": {
-          "opcode": 190,
-          "cycles": 5,
-          "size": 3,
-          "regs_read": [
-            "SP"
-          ],
-          "regs_written": [
-            "SP"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Direct": {
-          "opcode": 158,
-          "cycles": 4,
-          "size": 2,
-          "regs_read": [
-            "SP"
-          ],
-          "regs_written": [
-            "SP"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Indexed": {
-          "opcode": 174,
-          "cycles": 6,
-          "size": 2,
-          "regs_read": [
-            "SP"
-          ],
-          "regs_written": [
-            "SP"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Immediate16": {
-          "opcode": 142,
-          "cycles": 3,
-          "size": 3,
-          "regs_read": [
-            "SP"
-          ],
-          "regs_written": [
-            "SP"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "Bge": {
-      "flags_written": "",
-      "flags_read": "N|V",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "--*-*-",
-      "undocumented": false,
-      "addr_modes": {
-        "Relative": {
-          "opcode": 44,
-          "cycles": 4,
-          "size": 2,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": false,
-          "memory_write": false
-        }
-      },
-      "branch_condition": "N=V"
-    },
-    "Bgt": {
-      "flags_written": "",
-      "flags_read": "N|V",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "--*-*-",
-      "undocumented": false,
-      "addr_modes": {
-        "Relative": {
-          "opcode": 46,
-          "cycles": 4,
-          "size": 2,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": false,
-          "memory_write": false
-        }
-      },
-      "branch_condition": "Z=0 and N=V"
-    },
-    "Txs": {
-      "flags_written": "",
-      "flags_read": "",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 53,
-          "cycles": 4,
-          "size": 1,
-          "regs_read": [
-            "X"
-          ],
-          "regs_written": [
-            "X"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "Blt": {
-      "flags_written": "",
-      "flags_read": "N|V",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "--*-*-",
-      "undocumented": false,
-      "addr_modes": {
-        "Relative": {
-          "opcode": 45,
-          "cycles": 4,
-          "size": 2,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": false,
-          "memory_write": false
-        }
-      },
-      "branch_condition": "N!=V"
-    },
-    "Tab": {
-      "flags_written": "N|Z|V",
-      "flags_read": "",
-      "flags_hnzvc": "--**0-",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 22,
-          "cycles": 2,
-          "size": 1,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "Jmp": {
-      "flags_written": "",
-      "flags_read": "",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Indexed": {
-          "opcode": 110,
-          "cycles": 4,
-          "size": 2,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": false,
-          "memory_write": false
-        },
-        "Extended": {
-          "opcode": 126,
-          "cycles": 3,
-          "size": 3,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "NegA": {
-      "flags_written": "N|Z|V|C",
-      "flags_read": "",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 64,
-          "cycles": 2,
-          "size": 1,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "NegB": {
-      "flags_written": "N|Z|V|C",
-      "flags_read": "",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 80,
-          "cycles": 2,
-          "size": 1,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "Neg": {
-      "flags_written": "N|Z|V|C",
-      "flags_read": "",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Extended": {
-          "opcode": 112,
-          "cycles": 6,
-          "size": 3,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": true,
-          "memory_write": true
-        },
-        "Indexed": {
-          "opcode": 96,
-          "cycles": 7,
-          "size": 2,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": true,
-          "memory_write": true
-        }
-      }
-    },
-    "Tpa": {
-      "flags_written": "",
-      "flags_read": "H|I|N|Z|V|C",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "******",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 7,
-          "cycles": 2,
-          "size": 1,
-          "regs_read": [
-            "SR"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "Rts": {
-      "flags_written": "",
-      "flags_read": "",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 57,
-          "cycles": 5,
-          "size": 1,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "Bhi": {
-      "flags_written": "",
-      "flags_read": "C|Z",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "---*-*",
-      "undocumented": false,
-      "addr_modes": {
-        "Relative": {
-          "opcode": 34,
-          "cycles": 4,
-          "size": 2,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": false,
-          "memory_write": false
-        }
-      },
-      "branch_condition": "C=0 and Z=0"
-    },
-    "Jsr": {
-      "flags_written": "",
-      "flags_read": "",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Extended": {
-          "opcode": 189,
-          "cycles": 9,
-          "size": 3,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": false,
-          "memory_write": false
-        },
-        "Indexed": {
-          "opcode": 173,
-          "cycles": 8,
-          "size": 2,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "PshB": {
-      "flags_written": "",
-      "flags_read": "",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 55,
-          "cycles": 4,
-          "size": 1,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "PshA": {
-      "flags_written": "",
-      "flags_read": "",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 54,
-          "cycles": 4,
-          "size": 1,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "Sev": {
-      "flags_written": "V",
-      "flags_read": "V",
-      "flags_hnzvc": "----1-",
-      "flags_read_hnzvc": "----*-",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 11,
-          "cycles": 2,
-          "size": 1,
-          "regs_read": [
-            "SR"
-          ],
-          "regs_written": [
-            "SR"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "Tsx": {
-      "flags_written": "",
-      "flags_read": "",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 48,
-          "cycles": 4,
-          "size": 1,
-          "regs_read": [
-            "X"
-          ],
-          "regs_written": [
-            "X"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "Tap": {
-      "flags_written": "H|I|N|Z|V|C",
-      "flags_read": "H|I|N|Z|V|C",
-      "flags_hnzvc": "******",
-      "flags_read_hnzvc": "******",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 6,
-          "cycles": 2,
-          "size": 1,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "SR"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "AdcA": {
-      "flags_written": "H|N|Z|V|C",
-      "flags_read": "",
-      "flags_hnzvc": "*-****",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Immediate8": {
-          "opcode": 137,
-          "cycles": 2,
-          "size": 2,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        },
-        "Direct": {
-          "opcode": 153,
-          "cycles": 3,
-          "size": 2,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Indexed": {
-          "opcode": 169,
-          "cycles": 5,
-          "size": 2,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Extended": {
-          "opcode": 185,
-          "cycles": 4,
-          "size": 3,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        }
-      }
-    },
-    "AdcB": {
-      "flags_written": "H|N|Z|V|C",
-      "flags_read": "",
-      "flags_hnzvc": "*-****",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Immediate8": {
-          "opcode": 201,
-          "cycles": 2,
-          "size": 2,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        },
-        "Direct": {
-          "opcode": 217,
-          "cycles": 3,
-          "size": 2,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Indexed": {
-          "opcode": 233,
-          "cycles": 5,
-          "size": 2,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Extended": {
-          "opcode": 249,
-          "cycles": 4,
-          "size": 3,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        }
-      }
-    },
-    "SbcA": {
-      "flags_written": "N|Z|V|C",
-      "flags_read": "",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Indexed": {
-          "opcode": 162,
-          "cycles": 5,
-          "size": 2,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Direct": {
-          "opcode": 146,
-          "cycles": 3,
-          "size": 2,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Extended": {
-          "opcode": 178,
-          "cycles": 4,
-          "size": 3,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Immediate8": {
-          "opcode": 130,
-          "cycles": 2,
-          "size": 2,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "SbcB": {
-      "flags_written": "N|Z|V|C",
-      "flags_read": "",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Indexed": {
-          "opcode": 226,
-          "cycles": 5,
-          "size": 2,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Direct": {
-          "opcode": 210,
-          "cycles": 3,
-          "size": 2,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Extended": {
-          "opcode": 242,
-          "cycles": 4,
-          "size": 3,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Immediate8": {
-          "opcode": 194,
-          "cycles": 2,
-          "size": 2,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "StaA": {
-      "flags_written": "N|Z|V",
-      "flags_read": "",
-      "flags_hnzvc": "--**0-",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Direct": {
-          "opcode": 151,
-          "cycles": 4,
-          "size": 2,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": false,
-          "memory_write": true
-        },
-        "Indexed": {
-          "opcode": 167,
-          "cycles": 6,
-          "size": 2,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": false,
-          "memory_write": true
-        },
-        "Extended": {
-          "opcode": 183,
-          "cycles": 5,
-          "size": 3,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": false,
-          "memory_write": true
-        }
-      }
-    },
-    "StaB": {
-      "flags_written": "N|Z|V",
-      "flags_read": "",
-      "flags_hnzvc": "--**0-",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Direct": {
-          "opcode": 215,
-          "cycles": 4,
-          "size": 2,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": false,
-          "memory_write": true
-        },
-        "Indexed": {
-          "opcode": 231,
-          "cycles": 6,
-          "size": 2,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": false,
-          "memory_write": true
-        },
-        "Extended": {
-          "opcode": 247,
-          "cycles": 5,
-          "size": 3,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": false,
-          "memory_write": true
-        }
-      }
-    },
-    "AslA": {
-      "flags_written": "N|Z|V|C",
-      "flags_read": "",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 72,
-          "cycles": 2,
-          "size": 1,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "AslB": {
-      "flags_written": "N|Z|V|C",
-      "flags_read": "",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 88,
-          "cycles": 2,
-          "size": 1,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "Asl": {
-      "flags_written": "N|Z|V|C",
-      "flags_read": "",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Extended": {
-          "opcode": 120,
-          "cycles": 6,
-          "size": 3,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": true,
-          "memory_write": true
-        },
-        "Indexed": {
-          "opcode": 104,
-          "cycles": 7,
-          "size": 2,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": true,
-          "memory_write": true
-        }
-      }
-    },
-    "Aba": {
-      "flags_written": "H|N|V|C|Z",
-      "flags_read": "",
-      "flags_hnzvc": "*-****",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 27,
-          "cycles": 2,
-          "size": 1,
-          "regs_read": [
-            "A",
-            "B"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "Ble": {
-      "flags_written": "",
-      "flags_read": "N|V",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "--*-*-",
-      "undocumented": false,
-      "addr_modes": {
-        "Relative": {
-          "opcode": 47,
-          "cycles": 4,
-          "size": 2,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": false,
-          "memory_write": false
-        }
-      },
-      "branch_condition": "Z=1 or N!=V"
-    },
-    "Bcc": {
-      "flags_written": "",
-      "flags_read": "C",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "-----*",
-      "undocumented": false,
-      "addr_modes": {
-        "Relative": {
-          "opcode": 36,
-          "cycles": 4,
-          "size": 2,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": false,
-          "memory_write": false
-        }
-      },
-      "branch_condition": "C=0"
-    },
-    "Inx": {
-      "flags_written": "Z",
-      "flags_read": "",
-      "flags_hnzvc": "---*--",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 8,
-          "cycles": 4,
-          "size": 1,
-          "regs_read": [
-            "X"
-          ],
-          "regs_written": [
-            "X"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "AsrA": {
-      "flags_written": "N|Z|V|C",
-      "flags_read": "",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 71,
-          "cycles": 2,
-          "size": 1,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "AsrB": {
-      "flags_written": "N|Z|V|C",
-      "flags_read": "",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 87,
-          "cycles": 2,
-          "size": 1,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "Asr": {
-      "flags_written": "N|Z|V|C",
-      "flags_read": "",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Extended": {
-          "opcode": 119,
-          "cycles": 6,
-          "size": 3,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": true,
-          "memory_write": true
-        },
-        "Indexed": {
-          "opcode": 103,
-          "cycles": 7,
-          "size": 2,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": true,
-          "memory_write": true
-        }
-      }
-    },
-    "RorA": {
-      "flags_written": "N|Z|V|C",
-      "flags_read": "",
-      "flags_hnzvc": "--****",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 70,
-          "cycles": 2,
-          "size": 1,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "RorB": {
-      "flags_written": "N|Z|V|C",
-      "flags_read": "",
-      "flags_hnzvc": "--****",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 86,
-          "cycles": 2,
-          "size": 1,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "Ror": {
-      "flags_written": "N|Z|V|C",
-      "flags_read": "",
-      "flags_hnzvc": "--****",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Indexed": {
-          "opcode": 102,
-          "cycles": 7,
-          "size": 2,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": true,
-          "memory_write": true
-        },
-        "Extended": {
-          "opcode": 118,
-          "cycles": 6,
-          "size": 3,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": true,
-          "memory_write": true
-        }
-      }
-    },
-    "OraA": {
-      "flags_written": "N|Z|V",
-      "flags_read": "",
-      "flags_hnzvc": "--**0-",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Extended": {
-          "opcode": 186,
-          "cycles": 4,
-          "size": 3,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Direct": {
-          "opcode": 154,
-          "cycles": 3,
-          "size": 2,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Immediate8": {
-          "opcode": 138,
-          "cycles": 2,
-          "size": 2,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        },
-        "Indexed": {
-          "opcode": 170,
-          "cycles": 5,
-          "size": 2,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        }
-      }
-    },
-    "OraB": {
-      "flags_written": "N|Z|V",
-      "flags_read": "",
-      "flags_hnzvc": "--**0-",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Extended": {
-          "opcode": 250,
-          "cycles": 4,
-          "size": 3,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Direct": {
-          "opcode": 218,
-          "cycles": 3,
-          "size": 2,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Immediate8": {
-          "opcode": 202,
-          "cycles": 2,
-          "size": 2,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        },
-        "Indexed": {
-          "opcode": 234,
-          "cycles": 5,
-          "size": 2,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        }
-      }
-    },
-    "IncA": {
-      "flags_written": "N|Z|V",
-      "flags_read": "",
-      "flags_hnzvc": "--***-",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 76,
-          "cycles": 2,
-          "size": 1,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "IncB": {
-      "flags_written": "N|Z|V",
-      "flags_read": "",
-      "flags_hnzvc": "--***-",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 92,
-          "cycles": 2,
-          "size": 1,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "Inc": {
-      "flags_written": "N|Z|V",
-      "flags_read": "",
-      "flags_hnzvc": "--***-",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Extended": {
-          "opcode": 124,
-          "cycles": 6,
-          "size": 3,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": true,
-          "memory_write": true
-        },
-        "Indexed": {
-          "opcode": 108,
-          "cycles": 7,
-          "size": 2,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": true,
-          "memory_write": true
-        }
-      }
-    },
-    "CmpA": {
-      "flags_written": "N|Z|V|C",
-      "flags_read": "",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Extended": {
-          "opcode": 177,
-          "cycles": 4,
-          "size": 3,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Immediate8": {
-          "opcode": 129,
-          "cycles": 2,
-          "size": 2,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        },
-        "Indexed": {
-          "opcode": 161,
-          "cycles": 5,
-          "size": 2,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Direct": {
-          "opcode": 145,
-          "cycles": 3,
-          "size": 2,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        }
-      }
-    },
-    "CmpB": {
-      "flags_written": "N|Z|V|C",
-      "flags_read": "",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Extended": {
-          "opcode": 241,
-          "cycles": 4,
-          "size": 3,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Immediate8": {
-          "opcode": 193,
-          "cycles": 2,
-          "size": 2,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        },
-        "Indexed": {
-          "opcode": 225,
-          "cycles": 5,
-          "size": 2,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Direct": {
-          "opcode": 209,
-          "cycles": 3,
-          "size": 2,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": true,
-          "memory_write": false
-        }
-      }
-    },
-    "TstA": {
-      "flags_written": "N|Z|V",
-      "flags_read": "",
-      "flags_hnzvc": "--**0-",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 77,
-          "cycles": 2,
-          "size": 1,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "TstB": {
-      "flags_written": "N|Z|V",
-      "flags_read": "",
-      "flags_hnzvc": "--**0-",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 93,
-          "cycles": 2,
-          "size": 1,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "Tst": {
-      "flags_written": "N|Z|V",
-      "flags_read": "",
-      "flags_hnzvc": "--**0-",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Indexed": {
-          "opcode": 109,
-          "cycles": 7,
-          "size": 2,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": true,
-          "memory_write": false
-        },
-        "Extended": {
-          "opcode": 125,
-          "cycles": 6,
-          "size": 3,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": true,
-          "memory_write": false
-        }
-      }
-    },
-    "ClrA": {
-      "flags_written": "N|Z|V|C",
-      "flags_read": "",
-      "flags_hnzvc": "--0100",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 79,
-          "cycles": 2,
-          "size": 1,
-          "regs_read": [
-            "A"
-          ],
-          "regs_written": [
-            "A"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "ClrB": {
-      "flags_written": "N|Z|V|C",
-      "flags_read": "",
-      "flags_hnzvc": "--0100",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 95,
-          "cycles": 2,
-          "size": 1,
-          "regs_read": [
-            "B"
-          ],
-          "regs_written": [
-            "B"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "Clr": {
-      "flags_written": "N|Z|V|C",
-      "flags_read": "",
-      "flags_hnzvc": "--0100",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Indexed": {
-          "opcode": 111,
-          "cycles": 7,
-          "size": 2,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": true,
-          "memory_write": true
-        },
-        "Extended": {
-          "opcode": 127,
-          "cycles": 6,
-          "size": 3,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": true,
-          "memory_write": true
-        }
-      }
-    },
-    "Bmi": {
-      "flags_written": "",
-      "flags_read": "N",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "--*---",
-      "undocumented": false,
-      "addr_modes": {
-        "Relative": {
-          "opcode": 43,
-          "cycles": 4,
-          "size": 2,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": false,
-          "memory_write": false
-        }
-      },
-      "branch_condition": "N=1"
-    },
-    "Bra": {
-      "flags_written": "",
-      "flags_read": "",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Relative": {
-          "opcode": 32,
-          "cycles": 4,
-          "size": 2,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": false,
-          "memory_write": false
-        }
-      },
-      "branch_condition": "always"
-    },
-    "Clv": {
-      "flags_written": "V",
-      "flags_read": "V",
-      "flags_hnzvc": "----0-",
-      "flags_read_hnzvc": "----*-",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 10,
-          "cycles": 2,
-          "size": 1,
-          "regs_read": [
-            "SR"
-          ],
-          "regs_written": [
-            "SR"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "Sei": {
-      "flags_written": "I",
-      "flags_read": "I",
-      "flags_hnzvc": "-1----",
-      "flags_read_hnzvc": "-*----",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 15,
-          "cycles": 2,
-          "size": 1,
-          "regs_read": [
-            "SR"
-          ],
-          "regs_written": [
-            "SR"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "Bvs": {
-      "flags_written": "",
-      "flags_read": "V",
-      "flags_hnzvc": "------",
-      "flags_read_hnzvc": "----*-",
-      "undocumented": false,
-      "addr_modes": {
-        "Relative": {
-          "opcode": 41,
-          "cycles": 4,
-          "size": 2,
-          "regs_read": [],
-          "regs_written": [],
-          "memory_read": false,
-          "memory_write": false
-        }
-      },
-      "branch_condition": "V=1"
-    },
-    "Wai": {
-      "flags_written": "",
-      "flags_read": "",
-      "flags_hnzvc": "-1----",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 62,
-          "cycles": 9,
-          "size": 1,
-          "regs_read": [],
-          "regs_written": [
-            "SR"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
-    },
-    "Dex": {
-      "flags_written": "Z",
-      "flags_read": "",
-      "flags_hnzvc": "---*--",
-      "flags_read_hnzvc": "------",
-      "undocumented": false,
-      "addr_modes": {
-        "Inherent": {
-          "opcode": 9,
-          "cycles": 4,
-          "size": 1,
-          "regs_read": [
-            "X"
-          ],
-          "regs_written": [
-            "X"
-          ],
-          "memory_read": false,
-          "memory_write": false
-        }
-      }
+ "version": 2,
+ "comment": "M6800 instruction table v2. Cycle counts verified against MAME's m6800 core (cycles_6800): all 197 documented opcodes matched exactly. flags_hnzvc / flags_read_hnzvc are 6-char HINZVC effects ('-' unaffected, '*' set by result, '0' cleared, '1' set), per the Motorola M6800 manual \u2014 shifts set V = N xor C (MAME's core leaves V untouched there; the manual is authoritative). The 'undocumented' array covers the remaining 59 opcodes (MAME illegl1/2/3 NOP behavior plus the real-silicon quirks 0x21 BRN, 0x87/0xC7 STA, 0x8F/0xCF STX/STS with EA=PC, 0x9D JSR direct) for a complete 256-opcode picture; the emu6800 crate only loads the documented 'instructions' map. flags_read / regs_read / regs_written / memory_read / memory_write are consumed by the crate.",
+ "instructions": {
+  "ComB": {
+   "flags_written": "N|V|C|Z",
+   "flags_read": "",
+   "flags_hnzvc": "--**01",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 83,
+     "cycles": 2,
+     "size": 1,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": false,
+     "memory_write": false
     }
+   }
   },
-  "undocumented": [
-    {
-      "mnemonic": "Illegal00",
-      "opcode": 0,
-      "cycles": 4,
-      "size": 1,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
-    },
-    {
-      "mnemonic": "Illegal02",
-      "opcode": 2,
-      "cycles": 4,
-      "size": 1,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
-    },
-    {
-      "mnemonic": "Illegal03",
-      "opcode": 3,
-      "cycles": 4,
-      "size": 1,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
-    },
-    {
-      "mnemonic": "Illegal04",
-      "opcode": 4,
-      "cycles": 4,
-      "size": 1,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
-    },
-    {
-      "mnemonic": "Illegal05",
-      "opcode": 5,
-      "cycles": 4,
-      "size": 1,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
-    },
-    {
-      "mnemonic": "Illegal12",
-      "opcode": 18,
-      "cycles": 4,
-      "size": 1,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
-    },
-    {
-      "mnemonic": "Illegal13",
-      "opcode": 19,
-      "cycles": 4,
-      "size": 1,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
-    },
-    {
-      "mnemonic": "Illegal14",
-      "opcode": 20,
-      "cycles": 4,
-      "size": 1,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
-    },
-    {
-      "mnemonic": "Illegal15",
-      "opcode": 21,
-      "cycles": 4,
-      "size": 1,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
-    },
-    {
-      "mnemonic": "Illegal18",
-      "opcode": 24,
-      "cycles": 4,
-      "size": 1,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
-    },
-    {
-      "mnemonic": "Illegal1A",
-      "opcode": 26,
-      "cycles": 4,
-      "size": 1,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
-    },
-    {
-      "mnemonic": "Illegal1C",
-      "opcode": 28,
-      "cycles": 4,
-      "size": 1,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
-    },
-    {
-      "mnemonic": "Illegal1D",
-      "opcode": 29,
-      "cycles": 4,
-      "size": 1,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
-    },
-    {
-      "mnemonic": "Illegal1E",
-      "opcode": 30,
-      "cycles": 4,
-      "size": 1,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
-    },
-    {
-      "mnemonic": "Illegal1F",
-      "opcode": 31,
-      "cycles": 4,
-      "size": 1,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
-    },
-    {
-      "mnemonic": "Brn",
-      "opcode": 33,
-      "cycles": 4,
-      "size": 2,
-      "flags_hnzvc": "------",
-      "behavior": "branch never (undocumented on the 6800; MAME brn)"
-    },
-    {
-      "mnemonic": "Illegal38",
-      "opcode": 56,
-      "cycles": 4,
-      "size": 1,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
-    },
-    {
-      "mnemonic": "Illegal3A",
-      "opcode": 58,
-      "cycles": 4,
-      "size": 1,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
-    },
-    {
-      "mnemonic": "Illegal3C",
-      "opcode": 60,
-      "cycles": 4,
-      "size": 1,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
-    },
-    {
-      "mnemonic": "Illegal3D",
-      "opcode": 61,
-      "cycles": 4,
-      "size": 1,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
-    },
-    {
-      "mnemonic": "Illegal41",
-      "opcode": 65,
-      "cycles": 4,
-      "size": 1,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
-    },
-    {
-      "mnemonic": "Illegal42",
-      "opcode": 66,
-      "cycles": 4,
-      "size": 1,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
-    },
-    {
-      "mnemonic": "Illegal45",
-      "opcode": 69,
-      "cycles": 4,
-      "size": 1,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
-    },
-    {
-      "mnemonic": "Illegal4B",
-      "opcode": 75,
-      "cycles": 4,
-      "size": 1,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
-    },
-    {
-      "mnemonic": "Illegal4E",
-      "opcode": 78,
-      "cycles": 4,
-      "size": 1,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
-    },
-    {
-      "mnemonic": "Illegal51",
-      "opcode": 81,
-      "cycles": 4,
-      "size": 1,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
-    },
-    {
-      "mnemonic": "Illegal52",
-      "opcode": 82,
-      "cycles": 4,
-      "size": 1,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
-    },
-    {
-      "mnemonic": "Illegal55",
-      "opcode": 85,
-      "cycles": 4,
-      "size": 1,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
-    },
-    {
-      "mnemonic": "Illegal5B",
-      "opcode": 91,
-      "cycles": 4,
-      "size": 1,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
-    },
-    {
-      "mnemonic": "Illegal5E",
-      "opcode": 94,
-      "cycles": 4,
-      "size": 1,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
-    },
-    {
-      "mnemonic": "Illegal61",
-      "opcode": 97,
-      "cycles": 4,
-      "size": 2,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 2-byte NOP (MAME illegl2)"
-    },
-    {
-      "mnemonic": "Illegal62",
-      "opcode": 98,
-      "cycles": 4,
-      "size": 2,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 2-byte NOP (MAME illegl2)"
-    },
-    {
-      "mnemonic": "Illegal65",
-      "opcode": 101,
-      "cycles": 4,
-      "size": 2,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 2-byte NOP (MAME illegl2)"
-    },
-    {
-      "mnemonic": "Illegal6B",
-      "opcode": 107,
-      "cycles": 4,
-      "size": 2,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 2-byte NOP (MAME illegl2)"
-    },
-    {
-      "mnemonic": "Illegal71",
-      "opcode": 113,
-      "cycles": 4,
-      "size": 3,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 3-byte NOP (MAME illegl3)"
-    },
-    {
-      "mnemonic": "Illegal72",
-      "opcode": 114,
-      "cycles": 4,
-      "size": 3,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 3-byte NOP (MAME illegl3)"
-    },
-    {
-      "mnemonic": "Illegal75",
-      "opcode": 117,
-      "cycles": 4,
-      "size": 3,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 3-byte NOP (MAME illegl3)"
-    },
-    {
-      "mnemonic": "Illegal7B",
-      "opcode": 123,
-      "cycles": 4,
-      "size": 3,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 3-byte NOP (MAME illegl3)"
-    },
-    {
-      "mnemonic": "Illegal83",
-      "opcode": 131,
-      "cycles": 4,
-      "size": 2,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 2-byte NOP (MAME illegl2)"
-    },
-    {
-      "mnemonic": "StaIm",
-      "opcode": 135,
-      "cycles": 3,
-      "size": 2,
-      "flags_hnzvc": "--**0-",
-      "behavior": "undocumented silicon quirk: STA A with EA=PC (MAME sta_im)"
-    },
-    {
-      "mnemonic": "StsIm",
-      "opcode": 143,
-      "cycles": 4,
-      "size": 3,
-      "flags_hnzvc": "--**0-",
-      "behavior": "undocumented silicon quirk: STS with EA=PC (MAME sts_im)"
-    },
-    {
-      "mnemonic": "Illegal93",
-      "opcode": 147,
-      "cycles": 4,
-      "size": 2,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 2-byte NOP (MAME illegl2)"
-    },
-    {
-      "mnemonic": "JsrUndoc",
-      "opcode": 157,
-      "cycles": 6,
-      "size": 2,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented silicon quirk: JSR direct-page (MAME jsr_di)"
-    },
-    {
-      "mnemonic": "IllegalA3",
-      "opcode": 163,
-      "cycles": 4,
-      "size": 2,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 2-byte NOP (MAME illegl2)"
-    },
-    {
-      "mnemonic": "IllegalB3",
-      "opcode": 179,
-      "cycles": 4,
-      "size": 3,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 3-byte NOP (MAME illegl3)"
-    },
-    {
-      "mnemonic": "IllegalC3",
-      "opcode": 195,
-      "cycles": 4,
-      "size": 2,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 2-byte NOP (MAME illegl2)"
-    },
-    {
-      "mnemonic": "StbIm",
-      "opcode": 199,
-      "cycles": 3,
-      "size": 2,
-      "flags_hnzvc": "--**0-",
-      "behavior": "undocumented silicon quirk: STA B with EA=PC (MAME stb_im)"
-    },
-    {
-      "mnemonic": "IllegalCC",
-      "opcode": 204,
-      "cycles": 4,
-      "size": 3,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 3-byte NOP (MAME illegl3)"
-    },
-    {
-      "mnemonic": "IllegalCD",
-      "opcode": 205,
-      "cycles": 4,
-      "size": 3,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 3-byte NOP (MAME illegl3)"
-    },
-    {
-      "mnemonic": "StxIm",
-      "opcode": 207,
-      "cycles": 4,
-      "size": 3,
-      "flags_hnzvc": "--**0-",
-      "behavior": "undocumented silicon quirk: STX with EA=PC (MAME stx_im)"
-    },
-    {
-      "mnemonic": "IllegalD3",
-      "opcode": 211,
-      "cycles": 4,
-      "size": 2,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 2-byte NOP (MAME illegl2)"
-    },
-    {
-      "mnemonic": "IllegalDC",
-      "opcode": 220,
-      "cycles": 4,
-      "size": 2,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 2-byte NOP (MAME illegl2)"
-    },
-    {
-      "mnemonic": "IllegalDD",
-      "opcode": 221,
-      "cycles": 4,
-      "size": 2,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 2-byte NOP (MAME illegl2)"
-    },
-    {
-      "mnemonic": "IllegalE3",
-      "opcode": 227,
-      "cycles": 4,
-      "size": 2,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 2-byte NOP (MAME illegl2)"
-    },
-    {
-      "mnemonic": "IllegalEC",
-      "opcode": 236,
-      "cycles": 4,
-      "size": 2,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 2-byte NOP (MAME illegl2)"
-    },
-    {
-      "mnemonic": "IllegalED",
-      "opcode": 237,
-      "cycles": 4,
-      "size": 2,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 2-byte NOP (MAME illegl2)"
-    },
-    {
-      "mnemonic": "IllegalF3",
-      "opcode": 243,
-      "cycles": 4,
-      "size": 3,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 3-byte NOP (MAME illegl3)"
-    },
-    {
-      "mnemonic": "IllegalFC",
-      "opcode": 252,
-      "cycles": 4,
-      "size": 3,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 3-byte NOP (MAME illegl3)"
-    },
-    {
-      "mnemonic": "IllegalFD",
-      "opcode": 253,
-      "cycles": 4,
-      "size": 3,
-      "flags_hnzvc": "------",
-      "behavior": "undocumented: behaves as 3-byte NOP (MAME illegl3)"
+  "ComA": {
+   "flags_written": "N|V|C|Z",
+   "flags_read": "",
+   "flags_hnzvc": "--**01",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 67,
+     "cycles": 2,
+     "size": 1,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": false,
+     "memory_write": false
     }
-  ]
+   }
+  },
+  "Com": {
+   "flags_written": "N|V|C|Z",
+   "flags_read": "",
+   "flags_hnzvc": "--**01",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Extended": {
+     "opcode": 115,
+     "cycles": 6,
+     "size": 3,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": true,
+     "memory_write": true
+    },
+    "Indexed": {
+     "opcode": 99,
+     "cycles": 7,
+     "size": 2,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": true,
+     "memory_write": true
+    }
+   }
+  },
+  "Bsr": {
+   "flags_written": "",
+   "flags_read": "",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Relative": {
+     "opcode": 141,
+     "cycles": 8,
+     "size": 2,
+     "regs_read": [
+      "SP"
+     ],
+     "regs_written": [
+      "SP"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   },
+   "branch_condition": "always (subroutine)"
+  },
+  "AddA": {
+   "flags_written": "H|N|V|C|Z",
+   "flags_read": "",
+   "flags_hnzvc": "*-****",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Immediate8": {
+     "opcode": 139,
+     "cycles": 2,
+     "size": 2,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    },
+    "Extended": {
+     "opcode": 187,
+     "cycles": 4,
+     "size": 3,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Direct": {
+     "opcode": 155,
+     "cycles": 3,
+     "size": 2,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Indexed": {
+     "opcode": 171,
+     "cycles": 5,
+     "size": 2,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    }
+   }
+  },
+  "AddB": {
+   "flags_written": "H|N|V|C|Z",
+   "flags_read": "",
+   "flags_hnzvc": "*-****",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Immediate8": {
+     "opcode": 203,
+     "cycles": 2,
+     "size": 2,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    },
+    "Extended": {
+     "opcode": 251,
+     "cycles": 4,
+     "size": 3,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Direct": {
+     "opcode": 219,
+     "cycles": 3,
+     "size": 2,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Indexed": {
+     "opcode": 235,
+     "cycles": 5,
+     "size": 2,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    }
+   }
+  },
+  "LdaA": {
+   "flags_written": "N|Z|V",
+   "flags_read": "",
+   "flags_hnzvc": "--**0-",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Immediate8": {
+     "opcode": 134,
+     "cycles": 2,
+     "size": 2,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    },
+    "Indexed": {
+     "opcode": 166,
+     "cycles": 5,
+     "size": 2,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Extended": {
+     "opcode": 182,
+     "cycles": 4,
+     "size": 3,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Direct": {
+     "opcode": 150,
+     "cycles": 3,
+     "size": 2,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    }
+   }
+  },
+  "LdaB": {
+   "flags_written": "N|Z|V",
+   "flags_read": "",
+   "flags_hnzvc": "--**0-",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Immediate8": {
+     "opcode": 198,
+     "cycles": 2,
+     "size": 2,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    },
+    "Indexed": {
+     "opcode": 230,
+     "cycles": 5,
+     "size": 2,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Extended": {
+     "opcode": 246,
+     "cycles": 4,
+     "size": 3,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Direct": {
+     "opcode": 214,
+     "cycles": 3,
+     "size": 2,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    }
+   }
+  },
+  "LsrA": {
+   "flags_written": "N|Z|V|C",
+   "flags_read": "",
+   "flags_hnzvc": "--0*-*",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 68,
+     "cycles": 2,
+     "size": 1,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "LsrB": {
+   "flags_written": "N|Z|V|C",
+   "flags_read": "",
+   "flags_hnzvc": "--0*-*",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 84,
+     "cycles": 2,
+     "size": 1,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "Lsr": {
+   "flags_written": "N|Z|V|C",
+   "flags_read": "",
+   "flags_hnzvc": "--0***",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Extended": {
+     "opcode": 116,
+     "cycles": 6,
+     "size": 3,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": true,
+     "memory_write": true
+    },
+    "Indexed": {
+     "opcode": 100,
+     "cycles": 7,
+     "size": 2,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": true,
+     "memory_write": true
+    }
+   }
+  },
+  "Sec": {
+   "flags_written": "C",
+   "flags_read": "C",
+   "flags_hnzvc": "-----1",
+   "flags_read_hnzvc": "-----*",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 13,
+     "cycles": 2,
+     "size": 1,
+     "regs_read": [
+      "SR"
+     ],
+     "regs_written": [
+      "SR"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "Rol": {
+   "flags_written": "N|Z|V|C",
+   "flags_read": "",
+   "flags_hnzvc": "--****",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Indexed": {
+     "opcode": 105,
+     "cycles": 7,
+     "size": 2,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": true,
+     "memory_write": true
+    },
+    "Extended": {
+     "opcode": 121,
+     "cycles": 6,
+     "size": 3,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": true,
+     "memory_write": true
+    }
+   }
+  },
+  "RolA": {
+   "flags_written": "N|Z|V|C",
+   "flags_read": "",
+   "flags_hnzvc": "--****",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 73,
+     "cycles": 2,
+     "size": 1,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "RolB": {
+   "flags_written": "N|Z|V|C",
+   "flags_read": "",
+   "flags_hnzvc": "--****",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 89,
+     "cycles": 2,
+     "size": 1,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "Sts": {
+   "flags_written": "N|Z|V",
+   "flags_read": "",
+   "flags_hnzvc": "--**0-",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Extended": {
+     "opcode": 191,
+     "cycles": 6,
+     "size": 3,
+     "regs_read": [
+      "SP"
+     ],
+     "regs_written": [],
+     "memory_read": false,
+     "memory_write": true
+    },
+    "Direct": {
+     "opcode": 159,
+     "cycles": 5,
+     "size": 2,
+     "regs_read": [
+      "SP"
+     ],
+     "regs_written": [],
+     "memory_read": false,
+     "memory_write": true
+    },
+    "Indexed": {
+     "opcode": 175,
+     "cycles": 7,
+     "size": 2,
+     "regs_read": [
+      "SP"
+     ],
+     "regs_written": [],
+     "memory_read": false,
+     "memory_write": true
+    }
+   }
+  },
+  "Tba": {
+   "flags_written": "N|Z|V",
+   "flags_read": "",
+   "flags_hnzvc": "--**0-",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 23,
+     "cycles": 2,
+     "size": 1,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "Bcs": {
+   "flags_written": "",
+   "flags_read": "C",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "-----*",
+   "undocumented": false,
+   "addr_modes": {
+    "Relative": {
+     "opcode": 37,
+     "cycles": 4,
+     "size": 2,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": false,
+     "memory_write": false
+    }
+   },
+   "branch_condition": "C=1"
+  },
+  "Ldx": {
+   "flags_written": "N|Z|V",
+   "flags_read": "",
+   "flags_hnzvc": "--**0-",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Indexed": {
+     "opcode": 238,
+     "cycles": 6,
+     "size": 2,
+     "regs_read": [
+      "X"
+     ],
+     "regs_written": [
+      "X"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Extended": {
+     "opcode": 254,
+     "cycles": 5,
+     "size": 3,
+     "regs_read": [
+      "X"
+     ],
+     "regs_written": [
+      "X"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Immediate16": {
+     "opcode": 206,
+     "cycles": 3,
+     "size": 3,
+     "regs_read": [
+      "X"
+     ],
+     "regs_written": [
+      "X"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    },
+    "Direct": {
+     "opcode": 222,
+     "cycles": 4,
+     "size": 2,
+     "regs_read": [
+      "X"
+     ],
+     "regs_written": [
+      "X"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    }
+   }
+  },
+  "Sba": {
+   "flags_written": "N|Z|V|C",
+   "flags_read": "",
+   "flags_hnzvc": "--****",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 16,
+     "cycles": 2,
+     "size": 1,
+     "regs_read": [
+      "A",
+      "B"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "Bvc": {
+   "flags_written": "",
+   "flags_read": "V",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "----*-",
+   "undocumented": false,
+   "addr_modes": {
+    "Relative": {
+     "opcode": 40,
+     "cycles": 4,
+     "size": 2,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": false,
+     "memory_write": false
+    }
+   },
+   "branch_condition": "V=0"
+  },
+  "Cba": {
+   "flags_written": "H|I|N|Z|V|C",
+   "flags_read": "",
+   "flags_hnzvc": "--****",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 17,
+     "cycles": 2,
+     "size": 1,
+     "regs_read": [
+      "A",
+      "B"
+     ],
+     "regs_written": [],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "Cli": {
+   "flags_written": "I",
+   "flags_read": "I",
+   "flags_hnzvc": "-0----",
+   "flags_read_hnzvc": "-*----",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 14,
+     "cycles": 2,
+     "size": 1,
+     "regs_read": [
+      "SR"
+     ],
+     "regs_written": [
+      "SR"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "Bne": {
+   "flags_written": "",
+   "flags_read": "Z",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "---*--",
+   "undocumented": false,
+   "addr_modes": {
+    "Relative": {
+     "opcode": 38,
+     "cycles": 4,
+     "size": 2,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": false,
+     "memory_write": false
+    }
+   },
+   "branch_condition": "Z=0"
+  },
+  "Clc": {
+   "flags_written": "C",
+   "flags_read": "C",
+   "flags_hnzvc": "-----0",
+   "flags_read_hnzvc": "-----*",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 12,
+     "cycles": 2,
+     "size": 1,
+     "regs_read": [
+      "SR"
+     ],
+     "regs_written": [
+      "SR"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "Ins": {
+   "flags_written": "",
+   "flags_read": "",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 49,
+     "cycles": 4,
+     "size": 1,
+     "regs_read": [
+      "SP"
+     ],
+     "regs_written": [
+      "SP"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "Nop": {
+   "flags_written": "",
+   "flags_read": "",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 1,
+     "cycles": 2,
+     "size": 1,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "EorA": {
+   "flags_written": "N|Z|V",
+   "flags_read": "",
+   "flags_hnzvc": "--**0-",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Immediate8": {
+     "opcode": 136,
+     "cycles": 2,
+     "size": 2,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    },
+    "Direct": {
+     "opcode": 152,
+     "cycles": 3,
+     "size": 2,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Extended": {
+     "opcode": 184,
+     "cycles": 4,
+     "size": 3,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Indexed": {
+     "opcode": 168,
+     "cycles": 5,
+     "size": 2,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    }
+   }
+  },
+  "EorB": {
+   "flags_written": "N|Z|V",
+   "flags_read": "",
+   "flags_hnzvc": "--**0-",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Immediate8": {
+     "opcode": 200,
+     "cycles": 2,
+     "size": 2,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    },
+    "Direct": {
+     "opcode": 216,
+     "cycles": 3,
+     "size": 2,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Extended": {
+     "opcode": 248,
+     "cycles": 4,
+     "size": 3,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Indexed": {
+     "opcode": 232,
+     "cycles": 5,
+     "size": 2,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    }
+   }
+  },
+  "Swi": {
+   "flags_written": "H|I|N|Z|V|C",
+   "flags_read": "",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 63,
+     "cycles": 12,
+     "size": 1,
+     "regs_read": [
+      "SP"
+     ],
+     "regs_written": [
+      "SP",
+      "SR"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "Cpx": {
+   "flags_written": "N|Z|V",
+   "flags_read": "",
+   "flags_hnzvc": "--***-",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Extended": {
+     "opcode": 188,
+     "cycles": 5,
+     "size": 3,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Direct": {
+     "opcode": 156,
+     "cycles": 4,
+     "size": 2,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Indexed": {
+     "opcode": 172,
+     "cycles": 6,
+     "size": 2,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Immediate16": {
+     "opcode": 140,
+     "cycles": 3,
+     "size": 3,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "Rti": {
+   "flags_written": "H|I|N|Z|V|C",
+   "flags_read": "",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 59,
+     "cycles": 10,
+     "size": 1,
+     "regs_read": [
+      "SP"
+     ],
+     "regs_written": [
+      "SP",
+      "SR"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "Stx": {
+   "flags_written": "N|Z|V",
+   "flags_read": "",
+   "flags_hnzvc": "--**0-",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Direct": {
+     "opcode": 223,
+     "cycles": 5,
+     "size": 2,
+     "regs_read": [
+      "X"
+     ],
+     "regs_written": [],
+     "memory_read": false,
+     "memory_write": true
+    },
+    "Indexed": {
+     "opcode": 239,
+     "cycles": 7,
+     "size": 2,
+     "regs_read": [
+      "X"
+     ],
+     "regs_written": [],
+     "memory_read": false,
+     "memory_write": true
+    },
+    "Extended": {
+     "opcode": 255,
+     "cycles": 6,
+     "size": 3,
+     "regs_read": [
+      "X"
+     ],
+     "regs_written": [],
+     "memory_read": false,
+     "memory_write": true
+    }
+   }
+  },
+  "DecB": {
+   "flags_written": "N|Z|V",
+   "flags_read": "",
+   "flags_hnzvc": "--***-",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 90,
+     "cycles": 2,
+     "size": 1,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "DecA": {
+   "flags_written": "N|Z|V",
+   "flags_read": "",
+   "flags_hnzvc": "--***-",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 74,
+     "cycles": 2,
+     "size": 1,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "Dec": {
+   "flags_written": "N|Z|V",
+   "flags_read": "",
+   "flags_hnzvc": "--***-",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Extended": {
+     "opcode": 122,
+     "cycles": 6,
+     "size": 3,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": true,
+     "memory_write": true
+    },
+    "Indexed": {
+     "opcode": 106,
+     "cycles": 7,
+     "size": 2,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": true,
+     "memory_write": true
+    }
+   }
+  },
+  "Beq": {
+   "flags_written": "",
+   "flags_read": "Z",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "---*--",
+   "undocumented": false,
+   "addr_modes": {
+    "Relative": {
+     "opcode": 39,
+     "cycles": 4,
+     "size": 2,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": false,
+     "memory_write": false
+    }
+   },
+   "branch_condition": "Z=1"
+  },
+  "Daa": {
+   "flags_written": "N|Z|C",
+   "flags_read": "H|N|Z|V|C",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "-*****",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 25,
+     "cycles": 2,
+     "size": 1,
+     "regs_read": [
+      "A",
+      "SR"
+     ],
+     "regs_written": [
+      "A",
+      "SR"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "BitA": {
+   "flags_written": "H|I|N|Z|V|C",
+   "flags_read": "",
+   "flags_hnzvc": "--**0-",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Immediate8": {
+     "opcode": 133,
+     "cycles": 2,
+     "size": 2,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [],
+     "memory_read": false,
+     "memory_write": false
+    },
+    "Direct": {
+     "opcode": 149,
+     "cycles": 3,
+     "size": 2,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Extended": {
+     "opcode": 181,
+     "cycles": 4,
+     "size": 3,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Indexed": {
+     "opcode": 165,
+     "cycles": 5,
+     "size": 2,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [],
+     "memory_read": true,
+     "memory_write": false
+    }
+   }
+  },
+  "BitB": {
+   "flags_written": "H|I|N|Z|V|C",
+   "flags_read": "",
+   "flags_hnzvc": "--**0-",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Immediate8": {
+     "opcode": 197,
+     "cycles": 2,
+     "size": 2,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [],
+     "memory_read": false,
+     "memory_write": false
+    },
+    "Direct": {
+     "opcode": 213,
+     "cycles": 3,
+     "size": 2,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Extended": {
+     "opcode": 245,
+     "cycles": 4,
+     "size": 3,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Indexed": {
+     "opcode": 229,
+     "cycles": 5,
+     "size": 2,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [],
+     "memory_read": true,
+     "memory_write": false
+    }
+   }
+  },
+  "Bls": {
+   "flags_written": "",
+   "flags_read": "C|Z",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "---*-*",
+   "undocumented": false,
+   "addr_modes": {
+    "Relative": {
+     "opcode": 35,
+     "cycles": 4,
+     "size": 2,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": false,
+     "memory_write": false
+    }
+   },
+   "branch_condition": "C=1 or Z=1"
+  },
+  "Des": {
+   "flags_written": "",
+   "flags_read": "",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 52,
+     "cycles": 4,
+     "size": 1,
+     "regs_read": [
+      "SP"
+     ],
+     "regs_written": [
+      "SP"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "PulA": {
+   "flags_written": "",
+   "flags_read": "",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 50,
+     "cycles": 4,
+     "size": 1,
+     "regs_read": [
+      "A",
+      "SP"
+     ],
+     "regs_written": [
+      "A",
+      "SP"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "PulB": {
+   "flags_written": "",
+   "flags_read": "",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 51,
+     "cycles": 4,
+     "size": 1,
+     "regs_read": [
+      "B",
+      "SP"
+     ],
+     "regs_written": [
+      "B",
+      "SP"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "SubA": {
+   "flags_written": "N|Z|V|C",
+   "flags_read": "",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Extended": {
+     "opcode": 176,
+     "cycles": 4,
+     "size": 3,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Indexed": {
+     "opcode": 160,
+     "cycles": 5,
+     "size": 2,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Immediate8": {
+     "opcode": 128,
+     "cycles": 2,
+     "size": 2,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    },
+    "Direct": {
+     "opcode": 144,
+     "cycles": 3,
+     "size": 2,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    }
+   }
+  },
+  "SubB": {
+   "flags_written": "N|Z|V|C",
+   "flags_read": "",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Extended": {
+     "opcode": 240,
+     "cycles": 4,
+     "size": 3,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Indexed": {
+     "opcode": 224,
+     "cycles": 5,
+     "size": 2,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Immediate8": {
+     "opcode": 192,
+     "cycles": 2,
+     "size": 2,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    },
+    "Direct": {
+     "opcode": 208,
+     "cycles": 3,
+     "size": 2,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    }
+   }
+  },
+  "AndA": {
+   "flags_written": "N|Z|V",
+   "flags_read": "",
+   "flags_hnzvc": "--**0-",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Extended": {
+     "opcode": 180,
+     "cycles": 4,
+     "size": 3,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Direct": {
+     "opcode": 148,
+     "cycles": 3,
+     "size": 2,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Immediate8": {
+     "opcode": 132,
+     "cycles": 2,
+     "size": 2,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    },
+    "Indexed": {
+     "opcode": 164,
+     "cycles": 5,
+     "size": 2,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    }
+   }
+  },
+  "AndB": {
+   "flags_written": "N|Z|V",
+   "flags_read": "",
+   "flags_hnzvc": "--**0-",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Extended": {
+     "opcode": 244,
+     "cycles": 4,
+     "size": 3,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Direct": {
+     "opcode": 212,
+     "cycles": 3,
+     "size": 2,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Immediate8": {
+     "opcode": 196,
+     "cycles": 2,
+     "size": 2,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    },
+    "Indexed": {
+     "opcode": 228,
+     "cycles": 5,
+     "size": 2,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    }
+   }
+  },
+  "Bpl": {
+   "flags_written": "",
+   "flags_read": "N",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "--*---",
+   "undocumented": false,
+   "addr_modes": {
+    "Relative": {
+     "opcode": 42,
+     "cycles": 4,
+     "size": 2,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": false,
+     "memory_write": false
+    }
+   },
+   "branch_condition": "N=0"
+  },
+  "Lds": {
+   "flags_written": "N|Z|V",
+   "flags_read": "",
+   "flags_hnzvc": "--**0-",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Extended": {
+     "opcode": 190,
+     "cycles": 5,
+     "size": 3,
+     "regs_read": [
+      "SP"
+     ],
+     "regs_written": [
+      "SP"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Direct": {
+     "opcode": 158,
+     "cycles": 4,
+     "size": 2,
+     "regs_read": [
+      "SP"
+     ],
+     "regs_written": [
+      "SP"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Indexed": {
+     "opcode": 174,
+     "cycles": 6,
+     "size": 2,
+     "regs_read": [
+      "SP"
+     ],
+     "regs_written": [
+      "SP"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Immediate16": {
+     "opcode": 142,
+     "cycles": 3,
+     "size": 3,
+     "regs_read": [
+      "SP"
+     ],
+     "regs_written": [
+      "SP"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "Bge": {
+   "flags_written": "",
+   "flags_read": "N|V",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "--*-*-",
+   "undocumented": false,
+   "addr_modes": {
+    "Relative": {
+     "opcode": 44,
+     "cycles": 4,
+     "size": 2,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": false,
+     "memory_write": false
+    }
+   },
+   "branch_condition": "N=V"
+  },
+  "Bgt": {
+   "flags_written": "",
+   "flags_read": "N|V",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "--*-*-",
+   "undocumented": false,
+   "addr_modes": {
+    "Relative": {
+     "opcode": 46,
+     "cycles": 4,
+     "size": 2,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": false,
+     "memory_write": false
+    }
+   },
+   "branch_condition": "Z=0 and N=V"
+  },
+  "Txs": {
+   "flags_written": "",
+   "flags_read": "",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 53,
+     "cycles": 4,
+     "size": 1,
+     "regs_read": [
+      "X"
+     ],
+     "regs_written": [
+      "SP"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "Blt": {
+   "flags_written": "",
+   "flags_read": "N|V",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "--*-*-",
+   "undocumented": false,
+   "addr_modes": {
+    "Relative": {
+     "opcode": 45,
+     "cycles": 4,
+     "size": 2,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": false,
+     "memory_write": false
+    }
+   },
+   "branch_condition": "N!=V"
+  },
+  "Tab": {
+   "flags_written": "N|Z|V",
+   "flags_read": "",
+   "flags_hnzvc": "--**0-",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 22,
+     "cycles": 2,
+     "size": 1,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "Jmp": {
+   "flags_written": "",
+   "flags_read": "",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Indexed": {
+     "opcode": 110,
+     "cycles": 4,
+     "size": 2,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": false,
+     "memory_write": false
+    },
+    "Extended": {
+     "opcode": 126,
+     "cycles": 3,
+     "size": 3,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "NegA": {
+   "flags_written": "N|Z|V|C",
+   "flags_read": "",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 64,
+     "cycles": 2,
+     "size": 1,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "NegB": {
+   "flags_written": "N|Z|V|C",
+   "flags_read": "",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 80,
+     "cycles": 2,
+     "size": 1,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "Neg": {
+   "flags_written": "N|Z|V|C",
+   "flags_read": "",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Extended": {
+     "opcode": 112,
+     "cycles": 6,
+     "size": 3,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": true,
+     "memory_write": true
+    },
+    "Indexed": {
+     "opcode": 96,
+     "cycles": 7,
+     "size": 2,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": true,
+     "memory_write": true
+    }
+   }
+  },
+  "Tpa": {
+   "flags_written": "H|I|N|Z|V|C",
+   "flags_read": "H|I|N|Z|V|C",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "******",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 7,
+     "cycles": 2,
+     "size": 1,
+     "regs_read": [
+      "SR"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "Rts": {
+   "flags_written": "",
+   "flags_read": "",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 57,
+     "cycles": 5,
+     "size": 1,
+     "regs_read": [
+      "SP"
+     ],
+     "regs_written": [
+      "SP"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "Bhi": {
+   "flags_written": "",
+   "flags_read": "C|Z",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "---*-*",
+   "undocumented": false,
+   "addr_modes": {
+    "Relative": {
+     "opcode": 34,
+     "cycles": 4,
+     "size": 2,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": false,
+     "memory_write": false
+    }
+   },
+   "branch_condition": "C=0 and Z=0"
+  },
+  "Jsr": {
+   "flags_written": "",
+   "flags_read": "",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Extended": {
+     "opcode": 189,
+     "cycles": 9,
+     "size": 3,
+     "regs_read": [
+      "SP"
+     ],
+     "regs_written": [
+      "SP"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    },
+    "Indexed": {
+     "opcode": 173,
+     "cycles": 8,
+     "size": 2,
+     "regs_read": [
+      "SP"
+     ],
+     "regs_written": [
+      "SP"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "PshB": {
+   "flags_written": "",
+   "flags_read": "",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 55,
+     "cycles": 4,
+     "size": 1,
+     "regs_read": [
+      "B",
+      "SP"
+     ],
+     "regs_written": [
+      "B",
+      "SP"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "PshA": {
+   "flags_written": "",
+   "flags_read": "",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 54,
+     "cycles": 4,
+     "size": 1,
+     "regs_read": [
+      "A",
+      "SP"
+     ],
+     "regs_written": [
+      "A",
+      "SP"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "Sev": {
+   "flags_written": "V",
+   "flags_read": "V",
+   "flags_hnzvc": "----1-",
+   "flags_read_hnzvc": "----*-",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 11,
+     "cycles": 2,
+     "size": 1,
+     "regs_read": [
+      "SR"
+     ],
+     "regs_written": [
+      "SR"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "Tsx": {
+   "flags_written": "",
+   "flags_read": "",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 48,
+     "cycles": 4,
+     "size": 1,
+     "regs_read": [
+      "SP"
+     ],
+     "regs_written": [
+      "X"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "Tap": {
+   "flags_written": "H|I|N|Z|V|C",
+   "flags_read": "H|I|N|Z|V|C",
+   "flags_hnzvc": "******",
+   "flags_read_hnzvc": "******",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 6,
+     "cycles": 2,
+     "size": 1,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "SR"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "AdcA": {
+   "flags_written": "H|N|Z|V|C",
+   "flags_read": "",
+   "flags_hnzvc": "*-****",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Immediate8": {
+     "opcode": 137,
+     "cycles": 2,
+     "size": 2,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    },
+    "Direct": {
+     "opcode": 153,
+     "cycles": 3,
+     "size": 2,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Indexed": {
+     "opcode": 169,
+     "cycles": 5,
+     "size": 2,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Extended": {
+     "opcode": 185,
+     "cycles": 4,
+     "size": 3,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    }
+   }
+  },
+  "AdcB": {
+   "flags_written": "H|N|Z|V|C",
+   "flags_read": "",
+   "flags_hnzvc": "*-****",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Immediate8": {
+     "opcode": 201,
+     "cycles": 2,
+     "size": 2,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    },
+    "Direct": {
+     "opcode": 217,
+     "cycles": 3,
+     "size": 2,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Indexed": {
+     "opcode": 233,
+     "cycles": 5,
+     "size": 2,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Extended": {
+     "opcode": 249,
+     "cycles": 4,
+     "size": 3,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    }
+   }
+  },
+  "SbcA": {
+   "flags_written": "N|Z|V|C",
+   "flags_read": "",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Indexed": {
+     "opcode": 162,
+     "cycles": 5,
+     "size": 2,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Direct": {
+     "opcode": 146,
+     "cycles": 3,
+     "size": 2,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Extended": {
+     "opcode": 178,
+     "cycles": 4,
+     "size": 3,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Immediate8": {
+     "opcode": 130,
+     "cycles": 2,
+     "size": 2,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "SbcB": {
+   "flags_written": "N|Z|V|C",
+   "flags_read": "",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Indexed": {
+     "opcode": 226,
+     "cycles": 5,
+     "size": 2,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Direct": {
+     "opcode": 210,
+     "cycles": 3,
+     "size": 2,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Extended": {
+     "opcode": 242,
+     "cycles": 4,
+     "size": 3,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Immediate8": {
+     "opcode": 194,
+     "cycles": 2,
+     "size": 2,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "StaA": {
+   "flags_written": "N|Z|V",
+   "flags_read": "",
+   "flags_hnzvc": "--**0-",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Direct": {
+     "opcode": 151,
+     "cycles": 4,
+     "size": 2,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [],
+     "memory_read": false,
+     "memory_write": true
+    },
+    "Indexed": {
+     "opcode": 167,
+     "cycles": 6,
+     "size": 2,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [],
+     "memory_read": false,
+     "memory_write": true
+    },
+    "Extended": {
+     "opcode": 183,
+     "cycles": 5,
+     "size": 3,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [],
+     "memory_read": false,
+     "memory_write": true
+    }
+   }
+  },
+  "StaB": {
+   "flags_written": "N|Z|V",
+   "flags_read": "",
+   "flags_hnzvc": "--**0-",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Direct": {
+     "opcode": 215,
+     "cycles": 4,
+     "size": 2,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [],
+     "memory_read": false,
+     "memory_write": true
+    },
+    "Indexed": {
+     "opcode": 231,
+     "cycles": 6,
+     "size": 2,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [],
+     "memory_read": false,
+     "memory_write": true
+    },
+    "Extended": {
+     "opcode": 247,
+     "cycles": 5,
+     "size": 3,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [],
+     "memory_read": false,
+     "memory_write": true
+    }
+   }
+  },
+  "AslA": {
+   "flags_written": "N|Z|V|C",
+   "flags_read": "",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 72,
+     "cycles": 2,
+     "size": 1,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "AslB": {
+   "flags_written": "N|Z|V|C",
+   "flags_read": "",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 88,
+     "cycles": 2,
+     "size": 1,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "Asl": {
+   "flags_written": "N|Z|V|C",
+   "flags_read": "",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Extended": {
+     "opcode": 120,
+     "cycles": 6,
+     "size": 3,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": true,
+     "memory_write": true
+    },
+    "Indexed": {
+     "opcode": 104,
+     "cycles": 7,
+     "size": 2,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": true,
+     "memory_write": true
+    }
+   }
+  },
+  "Aba": {
+   "flags_written": "H|N|V|C|Z",
+   "flags_read": "",
+   "flags_hnzvc": "*-****",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 27,
+     "cycles": 2,
+     "size": 1,
+     "regs_read": [
+      "A",
+      "B"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "Ble": {
+   "flags_written": "",
+   "flags_read": "N|V",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "--*-*-",
+   "undocumented": false,
+   "addr_modes": {
+    "Relative": {
+     "opcode": 47,
+     "cycles": 4,
+     "size": 2,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": false,
+     "memory_write": false
+    }
+   },
+   "branch_condition": "Z=1 or N!=V"
+  },
+  "Bcc": {
+   "flags_written": "",
+   "flags_read": "C",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "-----*",
+   "undocumented": false,
+   "addr_modes": {
+    "Relative": {
+     "opcode": 36,
+     "cycles": 4,
+     "size": 2,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": false,
+     "memory_write": false
+    }
+   },
+   "branch_condition": "C=0"
+  },
+  "Inx": {
+   "flags_written": "Z",
+   "flags_read": "",
+   "flags_hnzvc": "---*--",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 8,
+     "cycles": 4,
+     "size": 1,
+     "regs_read": [
+      "X"
+     ],
+     "regs_written": [
+      "X"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "AsrA": {
+   "flags_written": "N|Z|V|C",
+   "flags_read": "",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 71,
+     "cycles": 2,
+     "size": 1,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "AsrB": {
+   "flags_written": "N|Z|V|C",
+   "flags_read": "",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 87,
+     "cycles": 2,
+     "size": 1,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "Asr": {
+   "flags_written": "N|Z|V|C",
+   "flags_read": "",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Extended": {
+     "opcode": 119,
+     "cycles": 6,
+     "size": 3,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": true,
+     "memory_write": true
+    },
+    "Indexed": {
+     "opcode": 103,
+     "cycles": 7,
+     "size": 2,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": true,
+     "memory_write": true
+    }
+   }
+  },
+  "RorA": {
+   "flags_written": "N|Z|V|C",
+   "flags_read": "",
+   "flags_hnzvc": "--****",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 70,
+     "cycles": 2,
+     "size": 1,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "RorB": {
+   "flags_written": "N|Z|V|C",
+   "flags_read": "",
+   "flags_hnzvc": "--****",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 86,
+     "cycles": 2,
+     "size": 1,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "Ror": {
+   "flags_written": "N|Z|V|C",
+   "flags_read": "",
+   "flags_hnzvc": "--****",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Indexed": {
+     "opcode": 102,
+     "cycles": 7,
+     "size": 2,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": true,
+     "memory_write": true
+    },
+    "Extended": {
+     "opcode": 118,
+     "cycles": 6,
+     "size": 3,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": true,
+     "memory_write": true
+    }
+   }
+  },
+  "OraA": {
+   "flags_written": "N|Z|V",
+   "flags_read": "",
+   "flags_hnzvc": "--**0-",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Extended": {
+     "opcode": 186,
+     "cycles": 4,
+     "size": 3,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Direct": {
+     "opcode": 154,
+     "cycles": 3,
+     "size": 2,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Immediate8": {
+     "opcode": 138,
+     "cycles": 2,
+     "size": 2,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    },
+    "Indexed": {
+     "opcode": 170,
+     "cycles": 5,
+     "size": 2,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    }
+   }
+  },
+  "OraB": {
+   "flags_written": "N|Z|V",
+   "flags_read": "",
+   "flags_hnzvc": "--**0-",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Extended": {
+     "opcode": 250,
+     "cycles": 4,
+     "size": 3,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Direct": {
+     "opcode": 218,
+     "cycles": 3,
+     "size": 2,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Immediate8": {
+     "opcode": 202,
+     "cycles": 2,
+     "size": 2,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    },
+    "Indexed": {
+     "opcode": 234,
+     "cycles": 5,
+     "size": 2,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": true,
+     "memory_write": false
+    }
+   }
+  },
+  "IncA": {
+   "flags_written": "N|Z|V",
+   "flags_read": "",
+   "flags_hnzvc": "--***-",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 76,
+     "cycles": 2,
+     "size": 1,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "IncB": {
+   "flags_written": "N|Z|V",
+   "flags_read": "",
+   "flags_hnzvc": "--***-",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 92,
+     "cycles": 2,
+     "size": 1,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "Inc": {
+   "flags_written": "N|Z|V",
+   "flags_read": "",
+   "flags_hnzvc": "--***-",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Extended": {
+     "opcode": 124,
+     "cycles": 6,
+     "size": 3,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": true,
+     "memory_write": true
+    },
+    "Indexed": {
+     "opcode": 108,
+     "cycles": 7,
+     "size": 2,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": true,
+     "memory_write": true
+    }
+   }
+  },
+  "CmpA": {
+   "flags_written": "H|I|N|Z|V|C",
+   "flags_read": "",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Extended": {
+     "opcode": 177,
+     "cycles": 4,
+     "size": 3,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Immediate8": {
+     "opcode": 129,
+     "cycles": 2,
+     "size": 2,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [],
+     "memory_read": false,
+     "memory_write": false
+    },
+    "Indexed": {
+     "opcode": 161,
+     "cycles": 5,
+     "size": 2,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Direct": {
+     "opcode": 145,
+     "cycles": 3,
+     "size": 2,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [],
+     "memory_read": true,
+     "memory_write": false
+    }
+   }
+  },
+  "CmpB": {
+   "flags_written": "H|I|N|Z|V|C",
+   "flags_read": "",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Extended": {
+     "opcode": 241,
+     "cycles": 4,
+     "size": 3,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Immediate8": {
+     "opcode": 193,
+     "cycles": 2,
+     "size": 2,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [],
+     "memory_read": false,
+     "memory_write": false
+    },
+    "Indexed": {
+     "opcode": 225,
+     "cycles": 5,
+     "size": 2,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Direct": {
+     "opcode": 209,
+     "cycles": 3,
+     "size": 2,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [],
+     "memory_read": true,
+     "memory_write": false
+    }
+   }
+  },
+  "TstA": {
+   "flags_written": "H|I|N|Z|V|C",
+   "flags_read": "",
+   "flags_hnzvc": "--**0-",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 77,
+     "cycles": 2,
+     "size": 1,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "TstB": {
+   "flags_written": "H|I|N|Z|V|C",
+   "flags_read": "",
+   "flags_hnzvc": "--**0-",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 93,
+     "cycles": 2,
+     "size": 1,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "Tst": {
+   "flags_written": "H|I|N|Z|V|C",
+   "flags_read": "",
+   "flags_hnzvc": "--**0-",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Indexed": {
+     "opcode": 109,
+     "cycles": 7,
+     "size": 2,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": true,
+     "memory_write": false
+    },
+    "Extended": {
+     "opcode": 125,
+     "cycles": 6,
+     "size": 3,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": true,
+     "memory_write": false
+    }
+   }
+  },
+  "ClrA": {
+   "flags_written": "N|Z|V|C",
+   "flags_read": "",
+   "flags_hnzvc": "--0100",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 79,
+     "cycles": 2,
+     "size": 1,
+     "regs_read": [
+      "A"
+     ],
+     "regs_written": [
+      "A"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "ClrB": {
+   "flags_written": "N|Z|V|C",
+   "flags_read": "",
+   "flags_hnzvc": "--0100",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 95,
+     "cycles": 2,
+     "size": 1,
+     "regs_read": [
+      "B"
+     ],
+     "regs_written": [
+      "B"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "Clr": {
+   "flags_written": "N|Z|V|C",
+   "flags_read": "",
+   "flags_hnzvc": "--0100",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Indexed": {
+     "opcode": 111,
+     "cycles": 7,
+     "size": 2,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": true,
+     "memory_write": true
+    },
+    "Extended": {
+     "opcode": 127,
+     "cycles": 6,
+     "size": 3,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": true,
+     "memory_write": true
+    }
+   }
+  },
+  "Bmi": {
+   "flags_written": "",
+   "flags_read": "N",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "--*---",
+   "undocumented": false,
+   "addr_modes": {
+    "Relative": {
+     "opcode": 43,
+     "cycles": 4,
+     "size": 2,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": false,
+     "memory_write": false
+    }
+   },
+   "branch_condition": "N=1"
+  },
+  "Bra": {
+   "flags_written": "",
+   "flags_read": "",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Relative": {
+     "opcode": 32,
+     "cycles": 4,
+     "size": 2,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": false,
+     "memory_write": false
+    }
+   },
+   "branch_condition": "always"
+  },
+  "Clv": {
+   "flags_written": "V",
+   "flags_read": "V",
+   "flags_hnzvc": "----0-",
+   "flags_read_hnzvc": "----*-",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 10,
+     "cycles": 2,
+     "size": 1,
+     "regs_read": [
+      "SR"
+     ],
+     "regs_written": [
+      "SR"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "Sei": {
+   "flags_written": "I",
+   "flags_read": "I",
+   "flags_hnzvc": "-1----",
+   "flags_read_hnzvc": "-*----",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 15,
+     "cycles": 2,
+     "size": 1,
+     "regs_read": [
+      "SR"
+     ],
+     "regs_written": [
+      "SR"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "Bvs": {
+   "flags_written": "",
+   "flags_read": "V",
+   "flags_hnzvc": "------",
+   "flags_read_hnzvc": "----*-",
+   "undocumented": false,
+   "addr_modes": {
+    "Relative": {
+     "opcode": 41,
+     "cycles": 4,
+     "size": 2,
+     "regs_read": [],
+     "regs_written": [],
+     "memory_read": false,
+     "memory_write": false
+    }
+   },
+   "branch_condition": "V=1"
+  },
+  "Wai": {
+   "flags_written": "",
+   "flags_read": "",
+   "flags_hnzvc": "-1----",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 62,
+     "cycles": 9,
+     "size": 1,
+     "regs_read": [
+      "SP"
+     ],
+     "regs_written": [
+      "SP",
+      "SR"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  },
+  "Dex": {
+   "flags_written": "Z",
+   "flags_read": "",
+   "flags_hnzvc": "---*--",
+   "flags_read_hnzvc": "------",
+   "undocumented": false,
+   "addr_modes": {
+    "Inherent": {
+     "opcode": 9,
+     "cycles": 4,
+     "size": 1,
+     "regs_read": [
+      "X"
+     ],
+     "regs_written": [
+      "X"
+     ],
+     "memory_read": false,
+     "memory_write": false
+    }
+   }
+  }
+ },
+ "undocumented": [
+  {
+   "mnemonic": "Illegal00",
+   "opcode": 0,
+   "cycles": 4,
+   "size": 1,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
+  },
+  {
+   "mnemonic": "Illegal02",
+   "opcode": 2,
+   "cycles": 4,
+   "size": 1,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
+  },
+  {
+   "mnemonic": "Illegal03",
+   "opcode": 3,
+   "cycles": 4,
+   "size": 1,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
+  },
+  {
+   "mnemonic": "Illegal04",
+   "opcode": 4,
+   "cycles": 4,
+   "size": 1,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
+  },
+  {
+   "mnemonic": "Illegal05",
+   "opcode": 5,
+   "cycles": 4,
+   "size": 1,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
+  },
+  {
+   "mnemonic": "Illegal12",
+   "opcode": 18,
+   "cycles": 4,
+   "size": 1,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
+  },
+  {
+   "mnemonic": "Illegal13",
+   "opcode": 19,
+   "cycles": 4,
+   "size": 1,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
+  },
+  {
+   "mnemonic": "Illegal14",
+   "opcode": 20,
+   "cycles": 4,
+   "size": 1,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
+  },
+  {
+   "mnemonic": "Illegal15",
+   "opcode": 21,
+   "cycles": 4,
+   "size": 1,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
+  },
+  {
+   "mnemonic": "Illegal18",
+   "opcode": 24,
+   "cycles": 4,
+   "size": 1,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
+  },
+  {
+   "mnemonic": "Illegal1A",
+   "opcode": 26,
+   "cycles": 4,
+   "size": 1,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
+  },
+  {
+   "mnemonic": "Illegal1C",
+   "opcode": 28,
+   "cycles": 4,
+   "size": 1,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
+  },
+  {
+   "mnemonic": "Illegal1D",
+   "opcode": 29,
+   "cycles": 4,
+   "size": 1,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
+  },
+  {
+   "mnemonic": "Illegal1E",
+   "opcode": 30,
+   "cycles": 4,
+   "size": 1,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
+  },
+  {
+   "mnemonic": "Illegal1F",
+   "opcode": 31,
+   "cycles": 4,
+   "size": 1,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
+  },
+  {
+   "mnemonic": "Brn",
+   "opcode": 33,
+   "cycles": 4,
+   "size": 2,
+   "flags_hnzvc": "------",
+   "behavior": "branch never (undocumented on the 6800; MAME brn)"
+  },
+  {
+   "mnemonic": "Illegal38",
+   "opcode": 56,
+   "cycles": 4,
+   "size": 1,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
+  },
+  {
+   "mnemonic": "Illegal3A",
+   "opcode": 58,
+   "cycles": 4,
+   "size": 1,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
+  },
+  {
+   "mnemonic": "Illegal3C",
+   "opcode": 60,
+   "cycles": 4,
+   "size": 1,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
+  },
+  {
+   "mnemonic": "Illegal3D",
+   "opcode": 61,
+   "cycles": 4,
+   "size": 1,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
+  },
+  {
+   "mnemonic": "Illegal41",
+   "opcode": 65,
+   "cycles": 4,
+   "size": 1,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
+  },
+  {
+   "mnemonic": "Illegal42",
+   "opcode": 66,
+   "cycles": 4,
+   "size": 1,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
+  },
+  {
+   "mnemonic": "Illegal45",
+   "opcode": 69,
+   "cycles": 4,
+   "size": 1,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
+  },
+  {
+   "mnemonic": "Illegal4B",
+   "opcode": 75,
+   "cycles": 4,
+   "size": 1,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
+  },
+  {
+   "mnemonic": "Illegal4E",
+   "opcode": 78,
+   "cycles": 4,
+   "size": 1,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
+  },
+  {
+   "mnemonic": "Illegal51",
+   "opcode": 81,
+   "cycles": 4,
+   "size": 1,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
+  },
+  {
+   "mnemonic": "Illegal52",
+   "opcode": 82,
+   "cycles": 4,
+   "size": 1,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
+  },
+  {
+   "mnemonic": "Illegal55",
+   "opcode": 85,
+   "cycles": 4,
+   "size": 1,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
+  },
+  {
+   "mnemonic": "Illegal5B",
+   "opcode": 91,
+   "cycles": 4,
+   "size": 1,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
+  },
+  {
+   "mnemonic": "Illegal5E",
+   "opcode": 94,
+   "cycles": 4,
+   "size": 1,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 1-byte NOP (MAME illegl1)"
+  },
+  {
+   "mnemonic": "Illegal61",
+   "opcode": 97,
+   "cycles": 4,
+   "size": 2,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 2-byte NOP (MAME illegl2)"
+  },
+  {
+   "mnemonic": "Illegal62",
+   "opcode": 98,
+   "cycles": 4,
+   "size": 2,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 2-byte NOP (MAME illegl2)"
+  },
+  {
+   "mnemonic": "Illegal65",
+   "opcode": 101,
+   "cycles": 4,
+   "size": 2,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 2-byte NOP (MAME illegl2)"
+  },
+  {
+   "mnemonic": "Illegal6B",
+   "opcode": 107,
+   "cycles": 4,
+   "size": 2,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 2-byte NOP (MAME illegl2)"
+  },
+  {
+   "mnemonic": "Illegal71",
+   "opcode": 113,
+   "cycles": 4,
+   "size": 3,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 3-byte NOP (MAME illegl3)"
+  },
+  {
+   "mnemonic": "Illegal72",
+   "opcode": 114,
+   "cycles": 4,
+   "size": 3,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 3-byte NOP (MAME illegl3)"
+  },
+  {
+   "mnemonic": "Illegal75",
+   "opcode": 117,
+   "cycles": 4,
+   "size": 3,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 3-byte NOP (MAME illegl3)"
+  },
+  {
+   "mnemonic": "Illegal7B",
+   "opcode": 123,
+   "cycles": 4,
+   "size": 3,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 3-byte NOP (MAME illegl3)"
+  },
+  {
+   "mnemonic": "Illegal83",
+   "opcode": 131,
+   "cycles": 4,
+   "size": 2,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 2-byte NOP (MAME illegl2)"
+  },
+  {
+   "mnemonic": "StaIm",
+   "opcode": 135,
+   "cycles": 3,
+   "size": 2,
+   "flags_hnzvc": "--**0-",
+   "behavior": "undocumented silicon quirk: STA A with EA=PC (MAME sta_im)"
+  },
+  {
+   "mnemonic": "StsIm",
+   "opcode": 143,
+   "cycles": 4,
+   "size": 3,
+   "flags_hnzvc": "--**0-",
+   "behavior": "undocumented silicon quirk: STS with EA=PC (MAME sts_im)"
+  },
+  {
+   "mnemonic": "Illegal93",
+   "opcode": 147,
+   "cycles": 4,
+   "size": 2,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 2-byte NOP (MAME illegl2)"
+  },
+  {
+   "mnemonic": "JsrUndoc",
+   "opcode": 157,
+   "cycles": 6,
+   "size": 2,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented silicon quirk: JSR direct-page (MAME jsr_di)"
+  },
+  {
+   "mnemonic": "IllegalA3",
+   "opcode": 163,
+   "cycles": 4,
+   "size": 2,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 2-byte NOP (MAME illegl2)"
+  },
+  {
+   "mnemonic": "IllegalB3",
+   "opcode": 179,
+   "cycles": 4,
+   "size": 3,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 3-byte NOP (MAME illegl3)"
+  },
+  {
+   "mnemonic": "IllegalC3",
+   "opcode": 195,
+   "cycles": 4,
+   "size": 2,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 2-byte NOP (MAME illegl2)"
+  },
+  {
+   "mnemonic": "StbIm",
+   "opcode": 199,
+   "cycles": 3,
+   "size": 2,
+   "flags_hnzvc": "--**0-",
+   "behavior": "undocumented silicon quirk: STA B with EA=PC (MAME stb_im)"
+  },
+  {
+   "mnemonic": "IllegalCC",
+   "opcode": 204,
+   "cycles": 4,
+   "size": 3,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 3-byte NOP (MAME illegl3)"
+  },
+  {
+   "mnemonic": "IllegalCD",
+   "opcode": 205,
+   "cycles": 4,
+   "size": 3,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 3-byte NOP (MAME illegl3)"
+  },
+  {
+   "mnemonic": "StxIm",
+   "opcode": 207,
+   "cycles": 4,
+   "size": 3,
+   "flags_hnzvc": "--**0-",
+   "behavior": "undocumented silicon quirk: STX with EA=PC (MAME stx_im)"
+  },
+  {
+   "mnemonic": "IllegalD3",
+   "opcode": 211,
+   "cycles": 4,
+   "size": 2,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 2-byte NOP (MAME illegl2)"
+  },
+  {
+   "mnemonic": "IllegalDC",
+   "opcode": 220,
+   "cycles": 4,
+   "size": 2,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 2-byte NOP (MAME illegl2)"
+  },
+  {
+   "mnemonic": "IllegalDD",
+   "opcode": 221,
+   "cycles": 4,
+   "size": 2,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 2-byte NOP (MAME illegl2)"
+  },
+  {
+   "mnemonic": "IllegalE3",
+   "opcode": 227,
+   "cycles": 4,
+   "size": 2,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 2-byte NOP (MAME illegl2)"
+  },
+  {
+   "mnemonic": "IllegalEC",
+   "opcode": 236,
+   "cycles": 4,
+   "size": 2,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 2-byte NOP (MAME illegl2)"
+  },
+  {
+   "mnemonic": "IllegalED",
+   "opcode": 237,
+   "cycles": 4,
+   "size": 2,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 2-byte NOP (MAME illegl2)"
+  },
+  {
+   "mnemonic": "IllegalF3",
+   "opcode": 243,
+   "cycles": 4,
+   "size": 3,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 3-byte NOP (MAME illegl3)"
+  },
+  {
+   "mnemonic": "IllegalFC",
+   "opcode": 252,
+   "cycles": 4,
+   "size": 3,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 3-byte NOP (MAME illegl3)"
+  },
+  {
+   "mnemonic": "IllegalFD",
+   "opcode": 253,
+   "cycles": 4,
+   "size": 3,
+   "flags_hnzvc": "------",
+   "behavior": "undocumented: behaves as 3-byte NOP (MAME illegl3)"
+  }
+ ]
 }

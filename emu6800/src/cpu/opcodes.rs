@@ -471,7 +471,20 @@ where
 
     #[inline]
     pub fn post_com(&mut self, new: u8) -> CpuResult<()> {
-        self.set_nz_from_u8(new).clc().clv();
+        // 6800 COM: N/Z from the result, V cleared, C always set.
+        self.set_nz_from_u8(new).sec().clv();
+        Ok(())
+    }
+
+    /// Flags for NEG/NEGA/NEGB (0 - operand): N/Z from the result,
+    /// V when negating 0x80 overflows, C set whenever a borrow occurred
+    /// (the result is non-zero).
+    #[inline]
+    pub fn post_neg(&mut self, old: u8, new: u8) -> CpuResult<()> {
+        self.m.regs.set_n(new.is_neg());
+        self.m.regs.set_z(new == 0);
+        self.m.regs.set_v(old == 0x80);
+        self.m.regs.set_c(new != 0);
         Ok(())
     }
 
@@ -565,47 +578,58 @@ where
     R: RegisterFileTrait + StatusRegTrait,
     M: MemoryIO,
 {
-    fn post_math(&mut self, c: bool, new_val: u8, val: u8) -> CpuResult<u8> {
+    fn post_math(&mut self, r: u16, new_val: u8, val: u8, op: u8, add: bool) -> CpuResult<u8> {
         let n = new_val.is_neg();
         let z = new_val == 0;
-        let v = c && (new_val.is_neg() != val.is_neg());
+        // ADD-family: MAME's m6800 SET_V8 formula on the 16-bit sum;
+        // SUB-family: signed overflow (signs of operand and result
+        // differ from the accumulator).
+        let v = if add {
+            ((val as u16) ^ (op as u16) ^ r ^ (r >> 1)) & 0x80 != 0
+        } else {
+            ((op ^ val) & 0x80 != 0) && ((new_val ^ val) & 0x80 != 0)
+        };
         self.m.regs.set_n(n);
         self.m.regs.set_z(z);
         self.m.regs.set_v(v);
-        self.m.regs.set_c(c);
+        self.m.regs.set_c(r > 0xff);
         Ok(new_val)
     }
 
     fn do_sub(&mut self, c: bool, val: u8, op: u8) -> CpuResult<u8> {
         let new_val = val.wrapping_sub(op).wrapping_sub(bool_as_u8(c));
-        let c = new_val > val;
-        self.post_math(c, new_val, val)
+        let r = (val as u16).wrapping_sub(op as u16).wrapping_sub(c as u16);
+        self.post_math(r, new_val, val, op, false)
     }
 
     fn do_add(&mut self, c: bool, val: u8, op: u8) -> CpuResult<u8> {
         let new_val = val.wrapping_add(op).wrapping_add(bool_as_u8(c));
-        let c = new_val < val;
-        self.post_math(c, new_val, val)
+        let r = (val as u16).wrapping_add(op as u16).wrapping_add(c as u16);
+        // The 6800's ADD/ADC/ABA set H (half-carry out of bit 3);
+        // SUB/SBC/CMP leave it alone (MAME's m6800 does the same).
+        let half = (val & 0x0f)
+            .wrapping_add(op & 0x0f)
+            .wrapping_add(bool_as_u8(c))
+            > 0x0f;
+        self.m.regs.set_h(half);
+        self.post_math(r, new_val, val, op, true)
     }
 
     #[inline]
     pub fn neg(&mut self) -> CpuResult<()> {
-        let (_, new) = A::read_mod_write(self.m, |v| (-(v as i8)) as u8)?;
-        A::store_byte(self.m, new as u8)?;
-        panic!()
+        let (old, new) = A::read_mod_write(self.m, |v| (v as i8).wrapping_neg() as u8)?;
+        self.post_neg(old, new)
     }
 
     #[inline]
     pub fn nega(&mut self) -> CpuResult<()> {
-        let (_, new) = AccA::read_mod_write(self.m, |v| (-(v as i8)) as u8)?;
-        A::store_byte(self.m, new as u8)?;
-        panic!()
+        let (old, new) = AccA::read_mod_write(self.m, |v| (v as i8).wrapping_neg() as u8)?;
+        self.post_neg(old, new)
     }
     #[inline]
     pub fn negb(&mut self) -> CpuResult<()> {
-        let (_, new) = AccB::read_mod_write(self.m, |v| (-(v as i8)) as u8)?;
-        A::store_byte(self.m, new as u8)?;
-        panic!()
+        let (old, new) = AccB::read_mod_write(self.m, |v| (v as i8).wrapping_neg() as u8)?;
+        self.post_neg(old, new)
     }
 
     #[inline]
@@ -759,9 +783,11 @@ where
         Ok(())
     }
     #[inline]
-    pub fn post_inc(&mut self, old: u8, new: u8) -> CpuResult<()> {
+    pub fn post_inc(&mut self, _old: u8, new: u8) -> CpuResult<()> {
         self.m.regs.set_nz_from_u8(new);
-        self.m.regs.set_v(new < old);
+        // Motorola 6800 INC sets V only for the $7F -> $80 step
+        // (MAME's m6800 SET_V8 with b=1), not for the $FF -> $00 wrap.
+        self.m.regs.set_v(new == 0x80);
         Ok(())
     }
 
@@ -784,23 +810,25 @@ where
 
     #[inline]
     pub fn dec(&mut self) -> CpuResult<()> {
-        let (old, new) = A::read_mod_write(self.m, |v| v.wrapping_sub(1))?;
+        let (_old, new) = A::read_mod_write(self.m, |v| v.wrapping_sub(1))?;
+        // Motorola 6800 DEC sets V only for the $80 -> $7F step,
+        // not for the $00 -> $FF wrap.
         self.m.regs.set_nz_from_u8(new);
-        self.m.regs.set_v(new > old);
+        self.m.regs.set_v(new == 0x7f);
         Ok(())
     }
     #[inline]
     pub fn deca(&mut self) -> CpuResult<()> {
-        let (old, new) = AccA::read_mod_write(self.m, |v| v.wrapping_sub(1))?;
+        let (_old, new) = AccA::read_mod_write(self.m, |v| v.wrapping_sub(1))?;
         self.m.regs.set_nz_from_u8(new);
-        self.m.regs.set_v(new > old);
+        self.m.regs.set_v(new == 0x7f);
         Ok(())
     }
     #[inline]
     pub fn decb(&mut self) -> CpuResult<()> {
-        let (old, new) = AccB::read_mod_write(self.m, |v| v.wrapping_sub(1))?;
+        let (_old, new) = AccB::read_mod_write(self.m, |v| v.wrapping_sub(1))?;
         self.m.regs.set_nz_from_u8(new);
-        self.m.regs.set_v(new > old);
+        self.m.regs.set_v(new == 0x7f);
         Ok(())
     }
 }
@@ -1146,7 +1174,31 @@ where
 
     #[inline]
     pub fn daa(&mut self) -> CpuResult<()> {
-        panic!()
+        // Decimal adjust A after an ADD/ADC.  Mirrors MAME's m6800
+        // daa: correct each nibble using the latched H/C, then add the
+        // adjustment; C comes out of that final addition, N/Z from the
+        // result, V cleared.
+        let a = self.m.regs.a();
+        let msn = a & 0xf0;
+        let lsn = a & 0x0f;
+        let mut cf: u16 = 0;
+        if lsn > 0x09 || self.m.regs.h() {
+            cf |= 0x06;
+        }
+        if msn > 0x80 && lsn > 0x09 {
+            cf |= 0x60;
+        }
+        if msn > 0x90 || self.m.regs.c() {
+            cf |= 0x60;
+        }
+        let t = cf + a as u16;
+        let result = t as u8;
+        self.m.regs.set_a(result);
+        self.m.regs.set_n(result.is_neg());
+        self.m.regs.set_z(result == 0);
+        self.m.regs.set_v(false);
+        self.m.regs.set_c(t > 0xff);
+        Ok(())
     }
 
     #[inline]

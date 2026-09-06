@@ -784,11 +784,14 @@ impl<'a, M: MemoryIO> Context<'a, M> {
     ////////////////////////////////////////////////////////////////////////////////
     #[allow(clippy::extra_unused_type_parameters)]
     fn daa<A: AddressLines>(&mut self) -> CpuResult<()> {
-        // fuck sakes
+        // Decimal adjust A after an ADD/ADC, mirroring MAME's m6809
+        // daa(): correct each BCD nibble using the latched H/C, add the
+        // adjustment, N/Z from the result, V cleared, and C set when the
+        // adjustment carries out (otherwise the previous C is kept).
         let a = u32::from(self.regs.a);
 
         let msn = a & 0xf0;
-        let lsn = a & 0xf0;
+        let lsn = a & 0x0f;
 
         let mut cf = 0u32;
 
@@ -806,8 +809,10 @@ impl<'a, M: MemoryIO> Context<'a, M> {
 
         let temp = cf.wrapping_add(a);
 
-        self.regs.flags.set(Flags::C, temp & 0x100 != 0);
-        self.regs.flags.set(Flags::V | Flags::N, false);
+        if temp & 0x100 != 0 {
+            self.regs.flags.set(Flags::C, true);
+        }
+        self.regs.flags.set(Flags::V, false);
 
         let new_a = alu::nz::<u8>(&mut self.regs.flags, Flags::NZ.bits(), temp);
 
@@ -1246,7 +1251,12 @@ impl<'a, M: MemoryIO> Context<'a, M> {
     }
 
     fn tst<A: AddressLines>(&mut self) -> CpuResult<()> {
-        self.rwmod8::<A>(Flags::NZV.bits(), u8::tst)?;
+        // TST is a pure read: it must NOT write the byte back.  A
+        // read-modify-write here (rwmod8) would copy the ROM into the
+        // VRAM underneath the banked window (the Stargate terrain
+        // scanner's `TST ,Y+` at $7378 reads ROM with the bank on).
+        let b = self.fetch_byte::<A>()?;
+        u8::tst(&mut self.regs.flags, Flags::NZV.bits(), u32::from(b));
         Ok(())
     }
 

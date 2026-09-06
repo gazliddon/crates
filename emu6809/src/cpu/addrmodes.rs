@@ -370,13 +370,15 @@ impl Indexed {
 
             IndexModes::RAddB(r) => {
                 // format!("B,{:?}", r)
-                let add_r = u16::from(regs.b);
+                // MAME's 6x09 (and real silicon) sign-extends the A/B
+                // accumulator offsets: ireg() + (int8_t)acc.
+                let add_r = (regs.b as i8 as i16) as u16;
                 Ok((regs.get(&r).wrapping_add(add_r), index_mode))
             }
 
             IndexModes::RAddA(r) => {
                 // format!("A,{:?}", r)
-                let add_r = u16::from(regs.a);
+                let add_r = (regs.a as i8 as i16) as u16;
                 Ok((regs.get(&r).wrapping_add(add_r), index_mode))
             }
 
