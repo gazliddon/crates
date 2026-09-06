@@ -187,12 +187,14 @@ impl InstructionDecoder {
 
     pub fn fetch_byte<M: MemoryIO>(&mut self, mem: &mut M) -> u8 {
         let b = mem.load_byte(self.operand_addr).unwrap();
+        mem.advance_cycles(1);
         self.operand_addr += 1;
         b
     }
 
     pub fn fetch_word<M: MemoryIO>(&mut self, mem: &mut M) -> Result<u16, CpuErr> {
         let w = mem.load_word(self.operand_addr)?;
+        mem.advance_cycles(2);
         self.operand_addr += 1;
         Ok(w)
     }

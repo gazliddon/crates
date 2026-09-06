@@ -117,7 +117,9 @@ pub trait GazAlu:
     fn dec(f: &mut Flags, write_mask: u8, a: u32) -> Self {
         let r = a.wrapping_sub(1) & Self::mask();
 
-        let v = r == (Self::mask() >> 1) || r == Self::mask();
+        // MAME's 6x09 DEC sets V only when the result is $7F (the
+        // $80 -> $7F step), not for the $00 -> $FF wrap.
+        let v = r == (Self::mask() >> 1);
 
         f.write_with_mask(write_mask, a_or_b(v, Flags::V.bits(), 0));
 
@@ -128,7 +130,10 @@ pub trait GazAlu:
 
     fn inc(f: &mut Flags, write_mask: u8, a: u32) -> Self {
         let r = a.wrapping_add(1) & Self::mask();
-        let v = (r == 0) || r == Self::hi_bit_mask();
+
+        // MAME's 6x09 INC sets V only when the result is $80 (the
+        // $7F -> $80 step), not for the $FF -> $00 wrap.
+        let v = r == Self::hi_bit_mask();
 
         f.write_with_mask(write_mask, a_or_b(v, Flags::V.bits(), 0));
 
@@ -229,19 +234,26 @@ pub trait GazAlu:
     }
 
     fn neg(f: &mut Flags, write_mask: u8, a: u32) -> Self {
-        let r = (a ^ 0xffff).wrapping_add(1);
+        let r = a.wrapping_neg() & Self::mask();
 
         let mut fl = 0;
 
-        if test_negative::<Self>(a) {
+        // MAME's 6x09 NEG: V set only when the operand was exactly
+        // the sign bit ($80/$8000); C set unless the result is zero
+        // (verified against MAME 0.289 NEGA probe).
+        if a == Self::hi_bit_mask() {
             fl |= Flags::V.bits()
         }
 
         if test_negative::<Self>(r) {
-            fl |= (Flags::N | Flags::C).bits()
+            fl |= Flags::N.bits()
         }
 
         fl |= get_zero::<Self>(r);
+
+        if r != 0 {
+            fl |= Flags::C.bits()
+        }
 
         f.write_with_mask(write_mask, fl);
 

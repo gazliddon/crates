@@ -64,6 +64,14 @@ pub trait MemoryIO {
 
     fn store_byte(&mut self, _addr: usize, _val: u8) -> MemResult<()>;
 
+    /// Advance cycle-driven device state (raster beam, scanline
+    /// timers, ...) by `cycles` CPU cycles.  CPU cores call this at
+    /// the cycle positions of their memory accesses so that buses
+    /// with timing-sensitive reads (e.g. beam counters) see
+    /// cycle-accurate time rather than instruction-boundary time.
+    /// The default is a no-op; buses that care override it.
+    fn advance_cycles(&mut self, _cycles: u64) {}
+
     // Min implementation end
 
     fn get_name(&self) -> String {

@@ -282,6 +282,24 @@ impl Bus for Indexed {
         let addr = Self::fetch_effective_address(m)?;
         m.mem_mut().store_byte(addr.into(), v)
     }
+
+    fn read_mod_write<M: MemoryIO, R: RegisterFileTrait + StatusRegTrait, F>(
+        m: &mut Machine<M, R>,
+        f: F,
+    ) -> MemResult<(u8, u8)>
+    where
+        F: Fn(u8) -> u8,
+    {
+        // Indexed read-modify-write (INC/DEC/COM/NEG/shifts of ,X):
+        // resolve the EA once (the offset byte is consumed by the
+        // fetch), then load, transform and store back.
+        let addr = Self::fetch_effective_address(m)?;
+        let mem = m.mem_mut();
+        let old = mem.load_byte(addr as usize)?;
+        let new = f(old);
+        mem.store_byte(addr.into(), new)?;
+        Ok((old, new))
+    }
 }
 impl Bus for Inherent {
     fn get_name() -> String {

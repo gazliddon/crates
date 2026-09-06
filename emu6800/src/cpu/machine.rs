@@ -612,6 +612,48 @@ mod tests {
     }
 
     #[test]
+    fn cpx_n_v_reflect_upper_byte_only_and_c_is_preserved() {
+        // Real 6800 quirk: N/V come from the high-byte comparison only;
+        // Z from the full 16-bit equality; C untouched.
+        // X=0x0025 vs #0x006C: 16-bit result is negative, but the upper
+        // bytes are equal, so N=0 (not 1), V=0, Z=0.
+        let mut mem: MemBlock<BigEndian> = MemBlock::new("test", false, &(0..0x10000));
+        mem.store_byte(0, 0x8c).unwrap(); // CPX #imm
+        mem.store_byte(1, 0x00).unwrap();
+        mem.store_byte(2, 0x6c).unwrap();
+        let mut regs = RegisterFile::default();
+        regs.set_pc(0);
+        regs.set_x(0x0025);
+        regs.set_c(true);
+        let mut machine = Machine::new(mem, regs);
+
+        machine.step().unwrap();
+
+        assert!(!machine.regs.n());
+        assert!(!machine.regs.z());
+        assert!(!machine.regs.v());
+        assert!(machine.regs.c()); // carry preserved
+    }
+
+    #[test]
+    fn cpx_sets_n_from_upper_byte_and_z_from_equality() {
+        let mut mem: MemBlock<BigEndian> = MemBlock::new("test", false, &(0..0x10000));
+        mem.store_byte(0, 0x8c).unwrap(); // CPX #imm
+        mem.store_byte(1, 0x00).unwrap();
+        mem.store_byte(2, 0x6c).unwrap();
+        let mut regs = RegisterFile::default();
+        regs.set_pc(0);
+        regs.set_x(0x006c);
+        let mut machine = Machine::new(mem, regs);
+
+        machine.step().unwrap();
+
+        assert!(machine.regs.z()); // full equality
+        assert!(!machine.regs.n());
+        assert!(!machine.regs.v());
+    }
+
+    #[test]
     fn indexed_ldaa_uses_x_plus_offset() {
         let mut mem: MemBlock<BigEndian> = MemBlock::new("test", false, &(0..0x10000));
         mem.store_byte(0, 0xa6).unwrap(); // LDAA 0,X
@@ -692,5 +734,189 @@ mod tests {
         assert!(matches!(interrupt, StepResult::Irq(0x1234)));
         assert!(!machine.wai);
         assert_eq!(machine.regs.sp(), 0x00f9);
+    }
+
+    #[test]
+    fn negb_negates_b_and_sets_flags() {
+        // LDAB #$05; NEGB
+        let mut mem: MemBlock<BigEndian> = MemBlock::new("test", false, &(0..0x10000));
+        for (i, b) in [0xC6u8, 0x05, 0x50].iter().enumerate() {
+            mem.store_byte(i, *b).unwrap();
+        }
+        let mut regs = RegisterFile::default();
+        regs.set_pc(0);
+        let mut machine = Machine::new(mem, regs);
+        machine.step().unwrap(); // LDAB #5
+        machine.step().unwrap(); // NEGB
+        assert_eq!(machine.regs.b(), 0xFB);
+        assert!(machine.regs.n());
+        assert!(!machine.regs.z());
+        assert!(!machine.regs.v());
+        assert!(machine.regs.c());
+
+        // Negating 0x80 overflows (V) and still borrows (C).
+        machine.mem.store_byte(1, 0x80).unwrap();
+        machine.regs.set_pc(0);
+        machine.step().unwrap();
+        machine.step().unwrap();
+        assert_eq!(machine.regs.b(), 0x80);
+        assert!(machine.regs.v());
+        assert!(machine.regs.c());
+
+        // Negating zero: Z set, no borrow.
+        machine.mem.store_byte(1, 0x00).unwrap();
+        machine.regs.set_pc(0);
+        machine.step().unwrap();
+        machine.step().unwrap();
+        assert_eq!(machine.regs.b(), 0x00);
+        assert!(machine.regs.z());
+        assert!(!machine.regs.c());
+    }
+
+    #[test]
+    fn daa_adjusts_bcd_sum() {
+        // LDAA #$99; ADDA #$01; DAA  ->  A = $00, C = 1, Z = 1
+        let mut mem: MemBlock<BigEndian> = MemBlock::new("test", false, &(0..0x10000));
+        for (i, b) in [0x86u8, 0x99, 0x8B, 0x01, 0x19].iter().enumerate() {
+            mem.store_byte(i, *b).unwrap();
+        }
+        let mut regs = RegisterFile::default();
+        regs.set_pc(0);
+        let mut machine = Machine::new(mem, regs);
+        machine.step().unwrap(); // LDAA #$99
+        machine.step().unwrap(); // ADDA #$01 -> A=$9A (no half-carry)
+        assert!(!machine.regs.h());
+        machine.step().unwrap(); // DAA
+        assert_eq!(machine.regs.a(), 0x00);
+        assert!(machine.regs.c());
+        assert!(machine.regs.z());
+
+        // LDAA #$09; ADDA #$08; DAA -> A=$17, H set by the add, C=0.
+        for (i, b) in [0x86u8, 0x09, 0x8B, 0x08, 0x19].iter().enumerate() {
+            machine.mem.store_byte(i, *b).unwrap();
+        }
+        machine.regs.set_pc(0);
+        machine.step().unwrap(); // LDAA #$09
+        machine.step().unwrap(); // ADDA #$08 -> A=$11, H=1
+        assert!(machine.regs.h());
+        machine.step().unwrap(); // DAA
+        assert_eq!(machine.regs.a(), 0x17);
+        assert!(!machine.regs.c());
+        assert!(!machine.regs.z());
+    }
+
+    #[test]
+    fn inca_sets_v_only_for_7f_to_80() {
+        // LDAA #$FF; INCA -> A=$00: V must stay clear (6800 INC only
+        // flags the $7F -> $80 overflow, MAME m6800 SET_V8 semantics).
+        let mut mem: MemBlock<BigEndian> = MemBlock::new("test", false, &(0..0x10000));
+        for (i, b) in [0x86u8, 0xff, 0x4c].iter().enumerate() {
+            mem.store_byte(i, *b).unwrap();
+        }
+        let mut regs = RegisterFile::default();
+        regs.set_pc(0);
+        let mut machine = Machine::new(mem, regs);
+        machine.step().unwrap(); // LDAA #$FF
+        machine.step().unwrap(); // INCA
+        assert_eq!(machine.regs.a(), 0x00);
+        assert!(machine.regs.z());
+        assert!(!machine.regs.v());
+
+        // LDAA #$7F; INCA -> A=$80 with V set.
+        for (i, b) in [0x86u8, 0x7f, 0x4c].iter().enumerate() {
+            machine.mem.store_byte(i, *b).unwrap();
+        }
+        machine.regs.set_pc(0);
+        machine.step().unwrap();
+        machine.step().unwrap();
+        assert_eq!(machine.regs.a(), 0x80);
+        assert!(machine.regs.v());
+    }
+
+    #[test]
+    fn deca_sets_v_only_for_80_to_7f() {
+        // LDAA #$00; DECA -> A=$FF: V must stay clear (6800 DEC only
+        // flags the $80 -> $7F step).
+        let mut mem: MemBlock<BigEndian> = MemBlock::new("test", false, &(0..0x10000));
+        for (i, b) in [0x86u8, 0x00, 0x4a].iter().enumerate() {
+            mem.store_byte(i, *b).unwrap();
+        }
+        let mut regs = RegisterFile::default();
+        regs.set_pc(0);
+        let mut machine = Machine::new(mem, regs);
+        machine.step().unwrap(); // LDAA #$00
+        machine.step().unwrap(); // DECA
+        assert_eq!(machine.regs.a(), 0xff);
+        assert!(!machine.regs.v());
+
+        // LDAA #$80; DECA -> A=$7F with V set.
+        for (i, b) in [0x86u8, 0x80, 0x4a].iter().enumerate() {
+            machine.mem.store_byte(i, *b).unwrap();
+        }
+        machine.regs.set_pc(0);
+        machine.step().unwrap();
+        machine.step().unwrap();
+        assert_eq!(machine.regs.a(), 0x7f);
+        assert!(machine.regs.v());
+    }
+
+    #[test]
+    fn coma_sets_carry_and_clears_overflow() {
+        // LDAA #$3F; COMA -> A=$C0, N=1, C=1, V=0 (the sound board's
+        // volume-mask routine at $FC93 depends on C being set).
+        let mut mem: MemBlock<BigEndian> = MemBlock::new("test", false, &(0..0x10000));
+        for (i, b) in [0x86u8, 0x3f, 0x43].iter().enumerate() {
+            mem.store_byte(i, *b).unwrap();
+        }
+        let mut regs = RegisterFile::default();
+        regs.set_pc(0);
+        let mut machine = Machine::new(mem, regs);
+        machine.step().unwrap(); // LDAA #$3F
+        machine.step().unwrap(); // COMA
+        assert_eq!(machine.regs.a(), 0xc0);
+        assert!(machine.regs.n());
+        assert!(machine.regs.c());
+        assert!(!machine.regs.v());
+    }
+
+    #[test]
+    fn adda_overflow_flag_matches_m6800() {
+        // LDAA #$FC; ADDA #$28 -> A=$24, C=1, V=0, H=1 (the sound
+        // board's envelope math at $F885 depends on this).
+        let mut mem: MemBlock<BigEndian> = MemBlock::new("test", false, &(0..0x10000));
+        for (i, b) in [0x86u8, 0xfc, 0x8b, 0x28].iter().enumerate() {
+            mem.store_byte(i, *b).unwrap();
+        }
+        let mut regs = RegisterFile::default();
+        regs.set_pc(0);
+        let mut machine = Machine::new(mem, regs);
+        machine.step().unwrap(); // LDAA #$FC
+        machine.step().unwrap(); // ADDA #$28
+        assert_eq!(machine.regs.a(), 0x24);
+        assert!(machine.regs.c());
+        assert!(!machine.regs.v());
+        assert!(machine.regs.h());
+        assert!(!machine.regs.n());
+        assert!(!machine.regs.z());
+    }
+
+    #[test]
+    fn inc_indexed_is_a_read_modify_write() {
+        // INC $00,X (opcode 6C): the sound board's routines hit the
+        // indexed read-modify-write path (once unimplemented, it
+        // panicked the emu thread at $FA37).
+        let mut mem: MemBlock<BigEndian> = MemBlock::new("test", false, &(0..0x10000));
+        for (i, b) in [0x6Cu8, 0x00].iter().enumerate() {
+            mem.store_byte(i, *b).unwrap();
+        }
+        mem.store_byte(0x0040, 0x7f).unwrap();
+        let mut regs = RegisterFile::default();
+        regs.set_pc(0);
+        regs.set_x(0x0040);
+        let mut machine = Machine::new(mem, regs);
+        machine.step().unwrap();
+        assert_eq!(machine.mem.load_byte(0x0040).unwrap(), 0x80);
+        assert!(machine.regs.v());
+        assert!(!machine.regs.z());
     }
 }

@@ -386,7 +386,9 @@ mod tests {
             .unwrap()
             .get_opcode_data(AddrModeEnum::Extended)
             .unwrap();
-        assert!(staa.regs_written.contains(&crate::cpu_core::RegEnum::A));
+        // STAA stores to memory: the accumulator is read, not written.
+        assert!(!staa.regs_written.contains(&crate::cpu_core::RegEnum::A));
+        assert!(staa.memory_write);
     }
 
     #[test]
