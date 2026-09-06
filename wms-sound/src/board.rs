@@ -50,11 +50,7 @@ impl SoundBus {
 
     /// Like `with_diagnostics`, but loads the ROM at an explicit base
     /// (Stargate's board decodes 2KB at $F800; Robotron's 4KB at $F000).
-    pub fn with_diagnostics_at(
-        rom: &[u8],
-        base: usize,
-        capture_pia_accesses: bool,
-    ) -> Self {
+    pub fn with_diagnostics_at(rom: &[u8], base: usize, capture_pia_accesses: bool) -> Self {
         let mut memory = [0; 0x1_0000];
         let end = (base + rom.len()).min(memory.len());
         memory[base..end].copy_from_slice(&rom[..end - base]);

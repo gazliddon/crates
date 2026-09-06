@@ -506,7 +506,11 @@ impl AddressLines for Indexed {
         let (ea, index_mode) = Indexed::get_index_mode(mem, regs, ins)?;
 
         let ea = if index_mode.is_indirect() {
-            { let w = mem.load_word(ea.into())?; mem.advance_cycles(2); w }
+            {
+                let w = mem.load_word(ea.into())?;
+                mem.advance_cycles(2);
+                w
+            }
         } else {
             ea
         };

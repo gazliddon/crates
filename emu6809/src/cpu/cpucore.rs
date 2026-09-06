@@ -1713,7 +1713,10 @@ mod tests {
             };
             let mut pins = Pins::default();
             let mut cpu = Context::new(&mut mem, &mut regs, &mut pins).unwrap();
-            for _ in bytes.iter().filter(|b| **b == 0x86 || **b == 0x8b || **b == 0x19) {
+            for _ in bytes
+                .iter()
+                .filter(|b| **b == 0x86 || **b == 0x8b || **b == 0x19)
+            {
                 cpu.step().unwrap();
             }
             let cc = cpu.regs.flags.bits();
@@ -1726,7 +1729,7 @@ mod tests {
         assert_eq!(a, 0x10);
         assert_eq!(cc & 0x01, 0); // C clear
         assert_eq!(cc & 0x04, 0); // Z clear
-        // LDA #$99; ADDA #$01 -> A=$9A; DAA -> $00, C=1
+                                  // LDA #$99; ADDA #$01 -> A=$9A; DAA -> $00, C=1
         let (a, cc) = run(&[0x86, 0x99, 0x8b, 0x01, 0x19], 0);
         assert_eq!(a, 0x00);
         assert_eq!(cc & 0x01, 1); // C set
@@ -1873,7 +1876,11 @@ mod tests {
         cpu.step().unwrap();
         let cc = cpu.regs.flags.bits();
         drop(cpu);
-        assert_eq!(mem.load_byte(0x2000).unwrap(), 0x80, "TST must not write back");
+        assert_eq!(
+            mem.load_byte(0x2000).unwrap(),
+            0x80,
+            "TST must not write back"
+        );
         assert_eq!(cc & 0x08, 8, "N set for $80");
         assert_eq!(cc & 0x04, 0, "Z clear for $80");
         assert_eq!(cc & 0x02, 0, "V clear");
