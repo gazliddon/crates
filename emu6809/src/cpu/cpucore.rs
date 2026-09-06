@@ -257,11 +257,13 @@ impl<'a, M: MemoryIO> Context<'a, M> {
     ) -> CpuResult<u8> {
         let ea = self.ea::<A>()?;
         let b = self.mem.load_byte(ea.into())?;
+        self.mem.advance_cycles(1);
 
         let v = u32::from(b);
         let r = func(&mut self.regs.flags, write_mask, v);
 
         self.mem.store_byte(ea.into(), r)?;
+        self.mem.advance_cycles(1);
 
         Ok(r)
     }
@@ -356,6 +358,7 @@ impl<'a, M: MemoryIO> Context<'a, M> {
         let sp = self.get_stack(is_system);
         let sp = sp.wrapping_sub(1);
         self.mem.store_byte(sp.into(), v)?;
+        self.mem.advance_cycles(1);
         self.set_stack(sp, is_system);
         Ok(())
     }
@@ -364,6 +367,7 @@ impl<'a, M: MemoryIO> Context<'a, M> {
         let sp = self.get_stack(is_system);
         let sp = sp.wrapping_sub(2);
         self.mem.store_word(sp.into(), v)?;
+        self.mem.advance_cycles(2);
         self.set_stack(sp, is_system);
         Ok(())
     }
@@ -371,6 +375,7 @@ impl<'a, M: MemoryIO> Context<'a, M> {
     fn pop_byte(&mut self, is_system: bool) -> CpuResult<u8> {
         let sp = self.get_stack(is_system);
         let r = self.mem.load_byte(sp as usize)?;
+        self.mem.advance_cycles(1);
         self.set_stack(sp.wrapping_add(1), is_system);
         Ok(r)
     }
@@ -379,6 +384,7 @@ impl<'a, M: MemoryIO> Context<'a, M> {
         let sp = self.get_stack(is_system);
 
         let r = self.mem.load_word(sp as usize)?;
+        self.mem.advance_cycles(2);
 
         self.set_stack(sp.wrapping_add(2), is_system);
 
@@ -1305,6 +1311,7 @@ impl<'a, M: MemoryIO> Context<'a, M> {
         push8!(self.regs.flags.bits());
 
         let pc = self.mem.load_word(vec)?;
+        self.mem.advance_cycles(2);
         self.set_next_pc(pc as usize);
         Ok(())
     }
@@ -1417,6 +1424,7 @@ impl<'a, M: MemoryIO> Context<'a, M> {
             self.regs.flags.set(irq_flag, true);
             // Get the irq vector
             let pc = self.mem.load_word(vector)? as usize;
+            self.mem.advance_cycles(2);
             // set the PC
             self.set_next_pc(pc);
         }
@@ -1528,6 +1536,11 @@ impl<'a, M: MemoryIO> Context<'a, M> {
 
             let opcode = self.ins.instruction_info.opcode;
 
+            // The opcode fetch consumes the first cycle of the
+            // instruction; charge it so cycle-accurate buses see the
+            // instruction start.
+            self.mem.advance_cycles(1);
+
             op_table!(opcode, { self.unimplemented() })?;
         }
 
@@ -1540,6 +1553,7 @@ impl<'a, M: MemoryIO> Context<'a, M> {
 
     pub fn reset(&mut self) -> CpuResult<()> {
         let pc = self.mem.load_word(VEC_RESET)?;
+        self.mem.advance_cycles(2);
 
         log::info!("PC IS {:04x}", pc);
 
@@ -1679,6 +1693,190 @@ mod tests {
             cpu.step().unwrap();
             assert_eq!(cpu.cycles(), *expected, "pc=${pc:04X} bytes={:02X?}", bytes);
         }
+    }
+
+    /// DAA must decimal-adjust the low nibble too: the Stargate score
+    /// BCD increments depend on it (a low-nibble mask typo once left
+    /// scores binary — 0x0A instead of BCD 0x10).
+    #[test]
+    fn daa_adjusts_bcd_in_a() {
+        let run = |bytes: &[u8], initial_a: u8| -> (u8, u8) {
+            let mut mem: MemBlock<BigEndian> = MemBlock::new("daa", false, &(0..0x10000));
+            for (i, b) in bytes.iter().enumerate() {
+                mem.store_byte(0x8000 + i, *b).unwrap();
+            }
+            let mut regs = Regs {
+                pc: 0x8000,
+                a: initial_a,
+                s: 0x9000,
+                ..Default::default()
+            };
+            let mut pins = Pins::default();
+            let mut cpu = Context::new(&mut mem, &mut regs, &mut pins).unwrap();
+            for _ in bytes.iter().filter(|b| **b == 0x86 || **b == 0x8b || **b == 0x19) {
+                cpu.step().unwrap();
+            }
+            let cc = cpu.regs.flags.bits();
+            let a = cpu.regs.a;
+            drop(cpu);
+            (a, cc)
+        };
+        // LDA #$09; ADDA #$01 -> A=$0A (no half-carry); DAA -> $10, C=0
+        let (a, cc) = run(&[0x86, 0x09, 0x8b, 0x01, 0x19], 0);
+        assert_eq!(a, 0x10);
+        assert_eq!(cc & 0x01, 0); // C clear
+        assert_eq!(cc & 0x04, 0); // Z clear
+        // LDA #$99; ADDA #$01 -> A=$9A; DAA -> $00, C=1
+        let (a, cc) = run(&[0x86, 0x99, 0x8b, 0x01, 0x19], 0);
+        assert_eq!(a, 0x00);
+        assert_eq!(cc & 0x01, 1); // C set
+        assert_eq!(cc & 0x04, 4); // Z set
+    }
+
+    /// INC sets V only for the $7F -> $80 step, never for the
+    /// $FF -> $00 wrap (MAME 0.289 semantics; the Stargate terrain
+    /// scanner's INCA $FF -> $00 once diverged here).
+    #[test]
+    fn inca_sets_v_only_for_7f_to_80() {
+        let run = |initial: u8| -> u8 {
+            let mut mem: MemBlock<BigEndian> = MemBlock::new("inca", false, &(0..0x10000));
+            mem.store_byte(0x8000, 0x4c).unwrap(); // INCA
+            let mut regs = Regs {
+                pc: 0x8000,
+                a: initial,
+                s: 0x9000,
+                ..Default::default()
+            };
+            let mut pins = Pins::default();
+            let mut cpu = Context::new(&mut mem, &mut regs, &mut pins).unwrap();
+            cpu.step().unwrap();
+            let cc = cpu.regs.flags.bits();
+            drop(cpu);
+            cc
+        };
+        assert_eq!(run(0x7f) & 0x02, 2, "INCA $7F -> $80 must set V");
+        assert_eq!(run(0xff) & 0x02, 0, "INCA $FF -> $00 must not set V");
+        assert_eq!(run(0x00) & 0x02, 0);
+        assert_eq!(run(0x7e) & 0x02, 0);
+        assert_eq!(run(0xff) & 0x04, 4, "INCA $FF -> $00 must set Z");
+    }
+
+    /// DEC sets V only for the $80 -> $7F step, never for the
+    /// $00 -> $FF wrap.
+    #[test]
+    fn deca_sets_v_only_for_80_to_7f() {
+        let run = |initial: u8| -> u8 {
+            let mut mem: MemBlock<BigEndian> = MemBlock::new("deca", false, &(0..0x10000));
+            mem.store_byte(0x8000, 0x4a).unwrap(); // DECA
+            let mut regs = Regs {
+                pc: 0x8000,
+                a: initial,
+                s: 0x9000,
+                ..Default::default()
+            };
+            let mut pins = Pins::default();
+            let mut cpu = Context::new(&mut mem, &mut regs, &mut pins).unwrap();
+            cpu.step().unwrap();
+            let cc = cpu.regs.flags.bits();
+            drop(cpu);
+            cc
+        };
+        assert_eq!(run(0x80) & 0x02, 2, "DECA $80 -> $7F must set V");
+        assert_eq!(run(0x00) & 0x02, 0, "DECA $00 -> $FF must not set V");
+        assert_eq!(run(0x7f) & 0x02, 0);
+        assert_eq!(run(0x01) & 0x02, 0);
+    }
+
+    /// NEGA flag semantics verified against a MAME 0.289 debugger probe:
+    /// V only for the $80 operand, C whenever the result is non-zero.
+    #[test]
+    fn nega_sets_v_only_for_80_and_c_unless_zero() {
+        let run = |initial: u8| -> u8 {
+            let mut mem: MemBlock<BigEndian> = MemBlock::new("nega", false, &(0..0x10000));
+            mem.store_byte(0x8000, 0x40).unwrap(); // NEGA
+            let mut regs = Regs {
+                pc: 0x8000,
+                a: initial,
+                s: 0x9000,
+                ..Default::default()
+            };
+            let mut pins = Pins::default();
+            let mut cpu = Context::new(&mut mem, &mut regs, &mut pins).unwrap();
+            cpu.step().unwrap();
+            let cc = cpu.regs.flags.bits() & 0x0f;
+            drop(cpu);
+            cc
+        };
+        assert_eq!(run(0x00), 0x04, "NEGA $00: result 0, Z only");
+        assert_eq!(run(0x80), 0x0b, "NEGA $80: result $80, N+V+C");
+        assert_eq!(run(0x01), 0x09, "NEGA $01: result $FF, N+C");
+        assert_eq!(run(0xff), 0x01, "NEGA $FF: result $01, C only");
+    }
+
+    /// Indexed addressing with an A/B accumulator offset must
+    /// sign-extend the accumulator (MAME: `ireg() + (int8_t)acc`).
+    /// The Stargate terrain scanner (LEAX B,X at $D40D) steps back
+    /// across page boundaries with this idiom.
+    #[test]
+    fn indexed_accumulator_offsets_are_sign_extended() {
+        let mut mem: MemBlock<BigEndian> = MemBlock::new("bacc", false, &(0..0x10000));
+        mem.store_byte(0x8000, 0x30).unwrap(); // LEAX indexed
+        mem.store_byte(0x8001, 0x85).unwrap(); // B,X
+        let mut regs = Regs {
+            pc: 0x8000,
+            x: 0x3cb1,
+            b: 0xa5,
+            s: 0x9000,
+            ..Default::default()
+        };
+        let mut pins = Pins::default();
+        let mut cpu = Context::new(&mut mem, &mut regs, &mut pins).unwrap();
+        cpu.step().unwrap();
+        let x = cpu.regs.x;
+        drop(cpu);
+        assert_eq!(x, 0x3c56, "LEAX B,X with B=$A5 must step back $5B");
+
+        // Same for the A offset: A=$80 must step back $80, not forward.
+        mem.store_byte(0x8001, 0x86).unwrap(); // A,X
+        let mut regs = Regs {
+            pc: 0x8000,
+            x: 0x4000,
+            a: 0x80,
+            s: 0x9000,
+            ..Default::default()
+        };
+        let mut pins = Pins::default();
+        let mut cpu = Context::new(&mut mem, &mut regs, &mut pins).unwrap();
+        cpu.step().unwrap();
+        let x = cpu.regs.x;
+        drop(cpu);
+        assert_eq!(x, 0x3f80, "LEAX A,X with A=$80 must step back $80");
+    }
+
+    /// TST is a pure read: it must not write the byte back.  On the
+    /// banked window a write-back copies ROM into VRAM (the Stargate
+    /// terrain scanner's `TST ,Y+` at $7378 diverged this way).
+    #[test]
+    fn tst_reads_memory_without_writing_it_back() {
+        let mut mem: MemBlock<BigEndian> = MemBlock::new("tst", false, &(0..0x10000));
+        mem.store_byte(0x8000, 0x6d).unwrap(); // TST indexed
+        mem.store_byte(0x8001, 0x84).unwrap(); // ,X
+        mem.store_byte(0x2000, 0x80).unwrap();
+        let mut regs = Regs {
+            pc: 0x8000,
+            x: 0x2000,
+            s: 0x9000,
+            ..Default::default()
+        };
+        let mut pins = Pins::default();
+        let mut cpu = Context::new(&mut mem, &mut regs, &mut pins).unwrap();
+        cpu.step().unwrap();
+        let cc = cpu.regs.flags.bits();
+        drop(cpu);
+        assert_eq!(mem.load_byte(0x2000).unwrap(), 0x80, "TST must not write back");
+        assert_eq!(cc & 0x08, 8, "N set for $80");
+        assert_eq!(cc & 0x04, 0, "Z clear for $80");
+        assert_eq!(cc & 0x02, 0, "V clear");
     }
 
     /// IRQ entry charges MAME's flat 19 cycles (3 dummy + 12 push writes

@@ -612,6 +612,48 @@ mod tests {
     }
 
     #[test]
+    fn cpx_n_v_reflect_upper_byte_only_and_c_is_preserved() {
+        // Real 6800 quirk: N/V come from the high-byte comparison only;
+        // Z from the full 16-bit equality; C untouched.
+        // X=0x0025 vs #0x006C: 16-bit result is negative, but the upper
+        // bytes are equal, so N=0 (not 1), V=0, Z=0.
+        let mut mem: MemBlock<BigEndian> = MemBlock::new("test", false, &(0..0x10000));
+        mem.store_byte(0, 0x8c).unwrap(); // CPX #imm
+        mem.store_byte(1, 0x00).unwrap();
+        mem.store_byte(2, 0x6c).unwrap();
+        let mut regs = RegisterFile::default();
+        regs.set_pc(0);
+        regs.set_x(0x0025);
+        regs.set_c(true);
+        let mut machine = Machine::new(mem, regs);
+
+        machine.step().unwrap();
+
+        assert!(!machine.regs.n());
+        assert!(!machine.regs.z());
+        assert!(!machine.regs.v());
+        assert!(machine.regs.c()); // carry preserved
+    }
+
+    #[test]
+    fn cpx_sets_n_from_upper_byte_and_z_from_equality() {
+        let mut mem: MemBlock<BigEndian> = MemBlock::new("test", false, &(0..0x10000));
+        mem.store_byte(0, 0x8c).unwrap(); // CPX #imm
+        mem.store_byte(1, 0x00).unwrap();
+        mem.store_byte(2, 0x6c).unwrap();
+        let mut regs = RegisterFile::default();
+        regs.set_pc(0);
+        regs.set_x(0x006c);
+        let mut machine = Machine::new(mem, regs);
+
+        machine.step().unwrap();
+
+        assert!(machine.regs.z()); // full equality
+        assert!(!machine.regs.n());
+        assert!(!machine.regs.v());
+    }
+
+    #[test]
     fn indexed_ldaa_uses_x_plus_offset() {
         let mut mem: MemBlock<BigEndian> = MemBlock::new("test", false, &(0..0x10000));
         mem.store_byte(0, 0xa6).unwrap(); // LDAA 0,X

@@ -92,6 +92,7 @@ impl AddressLines for Direct {
     ) -> Result<u8, CpuErr> {
         let ea = Self::ea(mem, regs, ins)?;
         let b = mem.load_byte(ea.into())?;
+        mem.advance_cycles(1);
         Ok(b)
     }
 
@@ -102,6 +103,7 @@ impl AddressLines for Direct {
     ) -> Result<u16, CpuErr> {
         let ea = Self::ea(mem, regs, ins)?;
         let w = mem.load_word(ea.into())?;
+        mem.advance_cycles(2);
         Ok(w)
     }
 
@@ -113,6 +115,7 @@ impl AddressLines for Direct {
     ) -> Result<u16, CpuErr> {
         let ea = Self::ea(mem, regs, ins)?;
         mem.store_byte(ea.into(), val)?;
+        mem.advance_cycles(1);
         Ok(ea)
     }
 
@@ -124,6 +127,7 @@ impl AddressLines for Direct {
     ) -> Result<u16, CpuErr> {
         let ea = Self::ea(mem, regs, ins)?;
         mem.store_word(ea.into(), val)?;
+        mem.advance_cycles(2);
         Ok(ea)
     }
 
@@ -155,6 +159,7 @@ impl AddressLines for Extended {
     ) -> Result<u8, CpuErr> {
         let addr = Self::ea(mem, regs, ins)?;
         let b = mem.load_byte(addr.into())?;
+        mem.advance_cycles(1);
         Ok(b)
     }
 
@@ -165,6 +170,7 @@ impl AddressLines for Extended {
     ) -> Result<u16, CpuErr> {
         let addr = Self::ea(mem, regs, ins)?;
         let b = mem.load_word(addr.into())?;
+        mem.advance_cycles(2);
         Ok(b)
     }
 
@@ -176,6 +182,7 @@ impl AddressLines for Extended {
     ) -> Result<u16, CpuErr> {
         let addr = Self::ea(mem, regs, ins)?;
         mem.store_byte(addr.into(), val)?;
+        mem.advance_cycles(1);
         Ok(addr)
     }
 
@@ -187,6 +194,7 @@ impl AddressLines for Extended {
     ) -> Result<u16, CpuErr> {
         let addr = Self::ea(mem, regs, ins)?;
         mem.store_word(addr.into(), val)?;
+        mem.advance_cycles(2);
         Ok(addr)
     }
 
@@ -498,7 +506,7 @@ impl AddressLines for Indexed {
         let (ea, index_mode) = Indexed::get_index_mode(mem, regs, ins)?;
 
         let ea = if index_mode.is_indirect() {
-            mem.load_word(ea.into())?
+            { let w = mem.load_word(ea.into())?; mem.advance_cycles(2); w }
         } else {
             ea
         };
@@ -513,6 +521,7 @@ impl AddressLines for Indexed {
     ) -> Result<u8, CpuErr> {
         let ea = Self::ea(mem, regs, ins)?;
         let b = mem.load_byte(ea.into())?;
+        mem.advance_cycles(1);
         Ok(b)
     }
 
@@ -523,6 +532,7 @@ impl AddressLines for Indexed {
     ) -> Result<u16, CpuErr> {
         let ea = Self::ea(mem, regs, ins)?;
         let w = mem.load_word(ea.into())?;
+        mem.advance_cycles(2);
         Ok(w)
     }
 
@@ -534,6 +544,7 @@ impl AddressLines for Indexed {
     ) -> Result<u16, CpuErr> {
         let ea = Self::ea(mem, regs, ins)?;
         mem.store_byte(ea.into(), val)?;
+        mem.advance_cycles(1);
         Ok(ea)
     }
 
@@ -545,6 +556,7 @@ impl AddressLines for Indexed {
     ) -> Result<u16, CpuErr> {
         let ea = Self::ea(mem, regs, ins)?;
         mem.store_word(ea.into(), val)?;
+        mem.advance_cycles(2);
         Ok(ea)
     }
 }

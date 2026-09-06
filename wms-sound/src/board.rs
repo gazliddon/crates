@@ -21,6 +21,9 @@ pub struct SoundBus {
     pub pia_input_b: u8,
     pub dac: Dac8,
     pub cycle: u64,
+    /// Base address the ROM was loaded at (MAME maps it in the
+    /// $B000-$FFFF ROM window; Stargate uses $F800, Robotron $F000).
+    pub rom_base: usize,
     capture_pia_accesses: bool,
     pub pia_accesses: Vec<PiaAccess>,
 }
@@ -42,15 +45,26 @@ impl SoundBus {
     /// capture is useful for MAME comparison, but unnecessary in production
     /// emulation and can be disabled to avoid recording every transaction.
     pub fn with_diagnostics(rom: &[u8], capture_pia_accesses: bool) -> Self {
+        Self::with_diagnostics_at(rom, SOUND_ROM_BASE, capture_pia_accesses)
+    }
+
+    /// Like `with_diagnostics`, but loads the ROM at an explicit base
+    /// (Stargate's board decodes 2KB at $F800; Robotron's 4KB at $F000).
+    pub fn with_diagnostics_at(
+        rom: &[u8],
+        base: usize,
+        capture_pia_accesses: bool,
+    ) -> Self {
         let mut memory = [0; 0x1_0000];
-        let end = (SOUND_ROM_BASE + rom.len()).min(memory.len());
-        memory[SOUND_ROM_BASE..end].copy_from_slice(&rom[..end - SOUND_ROM_BASE]);
+        let end = (base + rom.len()).min(memory.len());
+        memory[base..end].copy_from_slice(&rom[..end - base]);
         Self {
             memory,
             pia: Pia6821::default(),
             pia_input_b: 0,
             dac: Dac8::default(),
             cycle: 0,
+            rom_base: base,
             capture_pia_accesses,
             pia_accesses: Vec::new(),
         }
@@ -128,7 +142,7 @@ impl MemoryIO for SoundBus {
     fn load_byte(&mut self, addr: usize) -> MemResult<u8> {
         self.read_io(addr)
             .or_else(|| {
-                if addr < 0x0100 || addr >= SOUND_ROM_BASE {
+                if addr < 0x0100 || addr >= self.rom_base {
                     self.inspect_byte(addr).ok()
                 } else {
                     Some(0xff) // unmapped bus reads float high on the board
@@ -140,10 +154,10 @@ impl MemoryIO for SoundBus {
         if self.write_io(addr, value) {
             return Ok(());
         }
-        if addr >= 0x0100 && addr < SOUND_ROM_BASE {
+        if addr >= 0x0100 && addr < self.rom_base {
             return Ok(()); // unmapped writes have no device selected
         }
-        if addr >= SOUND_ROM_BASE {
+        if addr >= self.rom_base {
             return Err(MemErrorTypes::IllegalWrite(addr));
         }
         self.memory[addr] = value;
@@ -189,6 +203,19 @@ impl WmsSoundBoard {
     /// Fast production constructor without PIA transaction recording.
     pub fn from_rom_fast(rom: &[u8]) -> Self {
         Self::from_rom_with_diagnostics(rom, false)
+    }
+
+    /// Construct a board with the ROM loaded at an explicit base address
+    /// (Robotron's 4KB ROM lives at $F000 rather than Stargate's $F800).
+    pub fn from_rom_at(rom: &[u8], base: usize) -> Self {
+        Self {
+            cpu: Machine::new(
+                SoundBus::with_diagnostics_at(rom, base, true),
+                RegisterFile::default(),
+            ),
+            cycles: 0,
+            pia_irq_line: false,
+        }
     }
     pub fn reset(&mut self) {
         self.cpu.reset();
@@ -261,17 +288,13 @@ impl WmsSoundBoard {
     pub fn send_pia_value(&mut self, pia_value: u8) {
         self.cpu.mem.pia_input_b = pia_value;
         let now = self.cycles;
-        if pia_value == 0xff {
-            // Idle: hold CB1 low without an edge, so no flag latches.
-            self.cpu.mem.pia.set_cb1(false);
-        } else {
-            // Full pulse: the 6821 latches on the active edge per CRB
-            // bit 1 (Stargate's sound ROM programs active-low, i.e.
-            // the falling edge), so drive both levels and let the
-            // device decide.
-            self.cpu.mem.pia.drive_cb1(true, now);
-            self.cpu.mem.pia.drive_cb1(false, now);
-        }
+        // MAME's williams `snd_cmd_w` drives CB1 to a *level*: high
+        // while a command is latched (any value but $FF), low for the
+        // idle ($FF) clear.  The 6821 latches its flag on the active
+        // edge per CRB bit 1 — Stargate's sound ROM programs the
+        // falling edge, so the IRQ fires on the idle write, not on the
+        // command itself.
+        self.cpu.mem.pia.drive_cb1(pia_value != 0xff, now);
         self.update_pia_irq_line();
     }
 
@@ -381,7 +404,9 @@ mod tests {
     #[test]
     fn host_command_asserts_sound_cpu_irq() {
         let mut board = WmsSoundBoard::from_rom(&[]);
-        board.cpu.mem.pia.write(3, 0x05);
+        // CRB bit 1 = 1 selects the low-to-high (rising) CB1 transition
+        // (MAME 6821pia semantics), so a non-$FF command latches the flag.
+        board.cpu.mem.pia.write(3, 0x07);
         board.send_command(0x19);
         assert_eq!(board.cpu.mem.pia_input_b, 0xd9);
         assert!(board.cpu.irq);

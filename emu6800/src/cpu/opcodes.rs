@@ -735,15 +735,20 @@ where
     pub fn cpx(&mut self) -> CpuResult<()> {
         let op = self.fetch_operand_16()?;
         let x = self.m.regs.x();
-        let new_x = x.wrapping_sub(op);
-
-        let n = new_x.is_neg();
-        let z = new_x == 0;
-        let v = new_x.is_neg() != x.is_neg();
+        // Real 6800 silicon (verified by Motorola M6800 Applications Manual
+        // p.1-19 and visual6502, see MAME commits 47eaa73ad6 / 0810a75c23):
+        // N and V reflect only the UPPER-BYTE comparison, Z reflects the full
+        // 16-bit equality, and C is left untouched.
+        let xh = (x >> 8) as u8;
+        let oph = (op >> 8) as u8;
+        let r = xh.wrapping_sub(oph);
+        let n = (r & 0x80) != 0;
+        let v = ((xh ^ oph ^ r ^ (r >> 1)) & 0x80) != 0;
+        let z = x == op;
 
         self.m.regs.set_n(n);
         self.m.regs.set_z(z);
-        self.m.regs.set_z(v);
+        self.m.regs.set_v(v);
 
         Ok(())
     }
@@ -843,13 +848,23 @@ where
     M: MemoryIO,
 {
     #[inline]
-    fn post_shift<X: Bus>(&mut self, c: bool, val: u8, new_val: u8) -> CpuResult<()> {
+    fn post_shift<X: Bus>(&mut self, c: bool, v: bool, new_val: u8) -> CpuResult<()> {
         X::store_byte(self.m, new_val)?;
-        let v = val.is_neg() != new_val.is_neg();
         self.m.regs.set_c(c);
         self.m.regs.set_nz_from_u8(new_val);
         self.m.regs.set_v(v);
         Ok(())
+    }
+
+    /// Flags-only half of `post_shift`, for the memory forms whose
+    /// store already happened inside `read_mod_write` (storing via
+    /// `X::store_byte` again would re-fetch the effective address and
+    /// double-advance the program counter).
+    #[inline]
+    fn post_shift_flags(&mut self, c: bool, v: bool, new_val: u8) {
+        self.m.regs.set_c(c);
+        self.m.regs.set_nz_from_u8(new_val);
+        self.m.regs.set_v(v);
     }
 
     pub fn do_asr<X: Bus>(&mut self) -> CpuResult<(u8, u8)> {
@@ -863,98 +878,109 @@ where
     #[inline]
     pub fn asr(&mut self) -> CpuResult<()> {
         let (val, new_val) = self.do_asr::<A>()?;
-        self.post_shift::<A>(val.bit(7), val, new_val)
+        // MAME: C=old bit0, N=old bit7, V = N XOR C
+        self.post_shift_flags(val.bit(0), val.bit(7) ^ val.bit(0), new_val);
+        Ok(())
     }
     #[inline]
     pub fn asra(&mut self) -> CpuResult<()> {
         let (val, new_val) = self.do_asr::<AccA>()?;
-        self.post_shift::<AccA>(val.bit(7), val, new_val)
+        self.post_shift::<AccA>(val.bit(0), val.bit(7) ^ val.bit(0), new_val)
     }
 
     #[inline]
     pub fn asrb(&mut self) -> CpuResult<()> {
         let (val, new_val) = self.do_asr::<AccB>()?;
-        self.post_shift::<AccB>(val.bit(7), val, new_val)
+        self.post_shift::<AccB>(val.bit(0), val.bit(7) ^ val.bit(0), new_val)
     }
 
     #[inline]
     pub fn asl(&mut self) -> CpuResult<()> {
-        let val = self.fetch_operand()?;
-        let new_val = val.wrapping_shl(1);
-        let c = val.is_neg();
-        self.post_shift::<A>(c, val, new_val)
+        let (val, new_val) = A::read_mod_write(self.m, |v| v.wrapping_shl(1))?;
+        // MAME SET_FLAGS8(t,t,t<<1): V = newN XOR oldN (bit6^bit7 of old)
+        self.post_shift_flags(val.is_neg(), val.is_neg() ^ new_val.is_neg(), new_val);
+        Ok(())
     }
 
     #[inline]
     pub fn asla(&mut self) -> CpuResult<()> {
         let (val, new_val) = AccA::read_mod_write(self.m, |v| v.wrapping_shl(1))?;
-        self.post_shift::<AccA>(val.is_neg(), val, new_val)
+        self.post_shift::<AccA>(val.is_neg(), val.is_neg() ^ new_val.is_neg(), new_val)
     }
 
     #[inline]
     pub fn aslb(&mut self) -> CpuResult<()> {
         let (val, new_val) = AccB::read_mod_write(self.m, |v| v.wrapping_shl(1))?;
-        self.post_shift::<AccB>(val.is_neg(), val, new_val)
+        self.post_shift::<AccB>(val.is_neg(), val.is_neg() ^ new_val.is_neg(), new_val)
     }
 
     #[inline]
     pub fn lsr(&mut self) -> CpuResult<()> {
-        let val = self.fetch_operand()?;
-        let new_val = val.wrapping_shr(1);
+        let (val, new_val) = A::read_mod_write(self.m, |v| v.wrapping_shr(1))?;
         let c = val.bit(0);
-        self.post_shift::<A>(c, val, new_val)
+        // MAME: N=0, V = N XOR C = C
+        self.post_shift_flags(c, c, new_val);
+        Ok(())
     }
 
     #[inline]
     pub fn lsra(&mut self) -> CpuResult<()> {
         let (val, new_val) = AccA::read_mod_write(self.m, |v| v.wrapping_shr(1))?;
-        self.post_shift::<AccA>(val.bit(0), val, new_val)
+        let c = val.bit(0);
+        self.post_shift::<AccA>(c, c, new_val)
     }
 
     #[inline]
     pub fn lsrb(&mut self) -> CpuResult<()> {
         let (val, new_val) = AccB::read_mod_write(self.m, |v| v.wrapping_shr(1))?;
-        self.post_shift::<AccB>(val.bit(0), val, new_val)
+        let c = val.bit(0);
+        self.post_shift::<AccB>(c, c, new_val)
     }
 
     #[inline]
     pub fn ror(&mut self) -> CpuResult<()> {
-        let val = self.fetch_operand()?;
-        let new_val = val.wrapping_shr(1) | if self.m.regs.c() { 1 << 7 } else { 0 };
-        self.post_shift::<A>(val.bit(0), val, new_val)
+        let cin = self.m.regs.c();
+        let (val, new_val) =
+            A::read_mod_write(self.m, |v| v.wrapping_shr(1) | if cin { 1 << 7 } else { 0 })?;
+        // MAME: C=old bit0, N=cin, V = cin XOR C
+        self.post_shift_flags(val.bit(0), cin ^ val.bit(0), new_val);
+        Ok(())
     }
 
     pub fn rora(&mut self) -> CpuResult<()> {
         let carry = self.m.regs.c();
         let (val, new_val) =
             AccA::read_mod_write(self.m, |v| v.wrapping_shr(1) | if carry { 0x80 } else { 0 })?;
-        self.post_shift::<AccA>(val.bit(0), val, new_val)
+        self.post_shift::<AccA>(val.bit(0), carry ^ val.bit(0), new_val)
     }
 
     pub fn rorb(&mut self) -> CpuResult<()> {
         let carry = self.m.regs.c();
         let (val, new_val) =
             AccB::read_mod_write(self.m, |v| v.wrapping_shr(1) | if carry { 0x80 } else { 0 })?;
-        self.post_shift::<AccB>(val.bit(0), val, new_val)
+        self.post_shift::<AccB>(val.bit(0), carry ^ val.bit(0), new_val)
     }
 
     #[inline]
     pub fn rol(&mut self) -> CpuResult<()> {
-        let val = self.fetch_operand()?;
-        let new_val = val.wrapping_shl(1) | if self.m.regs.c() { 1 } else { 0 };
-        self.post_shift::<A>(val.bit(1), val, new_val)
+        let cin = self.m.regs.c();
+        let (val, new_val) =
+            A::read_mod_write(self.m, |v| v.wrapping_shl(1) | if cin { 1 } else { 0 })?;
+        // MAME: C=old bit7, V = newN XOR oldN
+        self.post_shift_flags(val.is_neg(), val.is_neg() ^ new_val.is_neg(), new_val);
+        Ok(())
     }
     pub fn rola(&mut self) -> CpuResult<()> {
         let carry = self.m.regs.c();
         let (val, new_val) =
             AccA::read_mod_write(self.m, |v| v.wrapping_shl(1) | if carry { 1 } else { 0 })?;
-        self.post_shift::<AccA>(val.is_neg(), val, new_val)
+        self.post_shift::<AccA>(val.is_neg(), val.is_neg() ^ new_val.is_neg(), new_val)
     }
     pub fn rolb(&mut self) -> CpuResult<()> {
         let carry = self.m.regs.c();
         let (val, new_val) =
             AccB::read_mod_write(self.m, |v| v.wrapping_shl(1) | if carry { 1 } else { 0 })?;
-        self.post_shift::<AccB>(val.is_neg(), val, new_val)
+        self.post_shift::<AccB>(val.is_neg(), val.is_neg() ^ new_val.is_neg(), new_val)
     }
 }
 

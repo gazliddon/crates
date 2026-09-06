@@ -7,6 +7,8 @@ use crate::{DacEvent, WmsSoundBoard};
 pub struct HarnessConfig {
     pub cpu_hz: u32,
     pub sample_rate: u32,
+    /// Base address of the sound ROM (Stargate: $F800, Robotron: $F000).
+    pub rom_base: usize,
 }
 
 impl Default for HarnessConfig {
@@ -16,6 +18,7 @@ impl Default for HarnessConfig {
             // accurate pitch is required; this is a useful portable default.
             cpu_hz: 894_886,
             sample_rate: 44_100,
+            rom_base: 0xf800,
         }
     }
 }
@@ -24,6 +27,22 @@ pub struct SoundHarness {
     pub board: WmsSoundBoard,
     pub config: HarnessConfig,
     command_log: Vec<SoundCommandEvent>,
+    /// Held DAC level carried across render calls: the hardware DAC
+    /// keeps its last written value until the next write, so a chunk
+    /// boundary must not reset it to mid-scale.
+    dac_value: u8,
+    /// DAC events not yet consumed by a render call (events beyond the
+    /// chunk's cycle window carry into the next chunk).
+    pending_events: Vec<DacEvent>,
+    /// Absolute board-cycle position of the render cursor: chunks are
+    /// contiguous windows, so the first event after a silence is placed
+    /// at its exact cycle rather than at the next chunk boundary.
+    rendered_cycles: u64,
+    /// Command-latch writes queued with their target sound cycle; the
+    /// run loop delivers them at the next instruction boundary so the
+    /// PIA sees every CB1 edge (chunk-boundary delivery loses the
+    /// intermediate edges and can miss interrupts entirely).
+    pending_commands: Vec<(u64, u8)>,
 }
 
 /// A value presented by the main-board PIA to the sound CPU.
@@ -38,7 +57,12 @@ pub struct SoundCommandEvent {
 
 impl SoundHarness {
     pub fn from_rom(rom: &[u8], config: HarnessConfig) -> Self {
-        Self::from_board(WmsSoundBoard::from_rom(rom), config)
+        Self::from_rom_at(rom, config, config.rom_base)
+    }
+
+    /// Board with the ROM loaded at an explicit base address.
+    pub fn from_rom_at(rom: &[u8], config: HarnessConfig, base: usize) -> Self {
+        Self::from_board(WmsSoundBoard::from_rom_at(rom, base), config)
     }
 
     /// Construct a harness without PIA transaction capture for production
@@ -53,6 +77,10 @@ impl SoundHarness {
             board,
             config,
             command_log: Vec::new(),
+            dac_value: 0x80,
+            pending_events: Vec::new(),
+            rendered_cycles: 0,
+            pending_commands: Vec::new(),
         }
     }
 
@@ -67,6 +95,14 @@ impl SoundHarness {
     /// Inject a value exactly as a captured main-board PIA event.
     pub fn send_pia_value(&mut self, pia_value: u8) {
         self.board.send_pia_value(pia_value);
+    }
+
+    /// Queue a command-latch write for delivery when the sound CPU's
+    /// cycle counter reaches `at_cycle` (MAME's scheduler-synchronized
+    /// `snd_cmd_w` semantics).  Delivery happens just before the next
+    /// instruction at or past that cycle.
+    pub fn send_pia_value_at(&mut self, pia_value: u8, at_cycle: u64) {
+        self.pending_commands.push((at_cycle, pia_value));
     }
 
     pub fn take_command_log(&mut self) -> Vec<SoundCommandEvent> {
@@ -150,6 +186,15 @@ impl SoundHarness {
     fn run_cycles_with(&mut self, cycles: u64, strict: bool) -> emu6800::cpu::CpuResult<u64> {
         let target = self.board.cycles + cycles;
         while self.board.cycles < target {
+            while self
+                .pending_commands
+                .first()
+                .map(|(at, _)| *at <= self.board.cycles)
+                .unwrap_or(false)
+            {
+                let (_, value) = self.pending_commands.remove(0);
+                self.board.send_pia_value(value);
+            }
             if strict {
                 self.board.step_strict()?;
             } else {
@@ -164,24 +209,33 @@ impl SoundHarness {
     }
 
     pub fn render_audio(&mut self, duration_cycles: u64) -> Vec<f32> {
-        let events = self.take_dac_events();
+        let window_start = self.rendered_cycles;
+        self.rendered_cycles += duration_cycles;
+        let mut events = self.board.take_dac_events();
+        self.pending_events.append(&mut events);
         let total_samples = ((duration_cycles as u128 * self.config.sample_rate as u128)
             / self.config.cpu_hz as u128) as usize;
         let mut pcm = vec![0.0; total_samples];
-        let mut value = 0x80u8;
         let mut event_index = 0;
-        let base_cycle = events.first().map_or(0, |event| event.cycle);
         for (sample_index, sample) in pcm.iter_mut().enumerate() {
             let cycle = (sample_index as u128 * self.config.cpu_hz as u128
                 / self.config.sample_rate as u128) as u64;
-            while event_index < events.len()
-                && events[event_index].cycle.saturating_sub(base_cycle) <= cycle
+            let limit = window_start + cycle;
+            while event_index < self.pending_events.len()
+                && self.pending_events[event_index].cycle <= limit
             {
-                value = events[event_index].value;
+                self.dac_value = self.pending_events[event_index].value;
                 event_index += 1;
             }
-            *sample = (value as f32 - 128.0) / 128.0;
+            // The byte DAC maps 0..255 to -1..+1; MAME routes the
+            // board's DAC to the speaker with 0.25 gain (verified
+            // against a -wavwrite capture: ~0.248 of full scale), so
+            // match that or the square-wave tones clip hard.
+            *sample = (self.dac_value as f32 - 128.0) / 128.0 * 0.25;
         }
+        // Consumed events are drained; anything beyond this chunk's
+        // window stays pending for the next render call.
+        self.pending_events.drain(..event_index);
         pcm
     }
 
